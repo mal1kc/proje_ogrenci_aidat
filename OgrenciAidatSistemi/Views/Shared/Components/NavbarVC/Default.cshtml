@@ -1,0 +1,93 @@
+@{
+   var User = ViewBag.User;
+}
+@using OgrenciAidatSistemi.Configurations;
+<nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
+
+    <div class="container-fluid">
+        <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">@Constants.AppName</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
+                    aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+        <button class="navbar-toggler ms-auto" type="button" data-bs-toggle="collapse" data-bs-target="#collapseNavbar">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+@{
+  if (User != null)
+  {
+        <div class="navbar-collapse collapse" id="collapseNavbar">
+            <ul class="navbar-nav">
+             @{
+              if (User is SiteAdmin){
+                    <li class="nav-item">
+                        <a class="nav-link" asp-area="" asp-controller="SiteAdmin" asp-action="list">SiteAdmins</a>
+                    </li>
+              }
+             }
+            </ul>
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item">
+                </li>
+            </ul>
+        </div>
+
+    <div>
+          <div class="btn-group dropstart">
+          <button type="button" class="btn">
+            @if (User.GetType() == typeof(SiteAdmin)){
+            <a class="nav-link" asp-area=""
+                 asp-controller="SiteAdmin"
+                asp-action="AccountDetail">🐼 @User.FirstName</a>            }
+            else
+            {
+            <a class="nav-link" asp-area=""
+                asp-controller="SchoolAdmin"
+                asp-action="AccountDetail">😊 @User.FirstName</a>
+            }</button>
+
+          <button type="button" class="btn dropdown-toggle dropdown-toggle-split" data-bs-display="static"
+              data-bs-toggle="dropdown" aria-expanded="false">
+            </button>
+          <ul class="dropdown-menu dropdown-menu-start">
+              <li><a class="dropdown-item" href="#">AccountDetail</a></li>
+              <li><a class="dropdown-item" href="#">Another action</a></li>
+            <li>
+                <hr class="dropdown-divider">
+              </li>
+              <li><a class="dropdown-item" href="#">Something else here</a></li>
+            <li>
+                <hr class="dropdown-divider">
+              </li>
+              <li><a class="dropdown-item" href="/signout">SignOut</a></li>
+      </ul>
+    </div>
+    </div>
+  }
+
+  else
+  {
+     <div class="btn-group dropstart">
+       <button type="button" class="btn"><a class="nav-link" asp-area="" asp-controller="SiteAdmin"
+              asp-action="SignIn">SignIn</a></button>
+       <button type="button" class="btn dropdown-toggle dropdown-toggle-split" data-bs-display="static"
+            data-bs-toggle="dropdown" aria-expanded="false">
+          </button>
+       <ul class="dropdown-menu dropdown-menu-start">
+         <li>
+              <a class="dropdown-item" asp-area="" asp-controller="SiteAdmin" asp-action="SignIn">SignIn</a>
+            </li>
+         <li>
+              <a class="dropdown-item" asp-area="" asp-controller="SiteAdmin" asp-action="SignUp">SignUp</a>
+        </li>
+      </ul>
+    </div>
+  }
+}
+
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>

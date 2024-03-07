@@ -1,0 +1,34 @@
+@{
+    Layout = "/Views/Shared/SiteAdmin/_adminLayout.cshtml";
+    ViewData["Title"] = "Home Page";
+}
+
+
+<div class="text-left">
+    @if(@ViewBag.found_items){
+        <h1 class="display-4">admins</h1>
+        <table class="table table-striped-columns">
+        @foreach (var siteadmin in ViewBag.cs){
+            <tr style="font-size: 30;">
+                <tr>
+                <td style="font-size: 30;">
+                   @siteadmin.FirstName
+                </td>
+                <td style="font-size: 30;">
+                   @siteadmin.LastName
+                </td>
+                <td style="font-size: 30;">
+                   @siteadmin.EmailAddress
+                </td>
+                <td style="font-size: 30;">
+                   @siteadmin.PasswordHash
+                </td>
+                </tr>
+            </tr>
+        }
+        </table>
+    }
+    else{
+        <h1 class="display-4"> there is nothing </h1>
+    }
+</div>

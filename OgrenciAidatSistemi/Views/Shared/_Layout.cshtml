@@ -1,0 +1,65 @@
+@{
+}
+<!DOCTYPE html>
+<html lang="en">
+
+@using OgrenciAidatSistemi.Configurations;
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - @Constants.AppName</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    @* if local fonts are used, then the fonts folder must be copied to wwwroot folder
+    <link rel="stylesheet" href="~/lib/bootstrap-icons/font/bootstrap-icons.min.css" /> *@
+    <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.11.2/font/bootstrap-icons.min.css"
+        integrity="sha512-D1liES3uvDpPrgk7vXR/hR/sukGn7EtDWEyvpdLsyalQYq6v6YUsTUJmku7B4rcuQ21rf0UTksw2i/2Pdjbd3g=="
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/OgrenciAidatSistemi.styles.css" asp-append-version="true" />
+    @RenderSection("styles", required: false)
+</head>
+
+<body>
+    <header>
+        @await Component.InvokeAsync("NavbarVC")
+    </header>
+    <div class="container">
+        <main role="main" class="pb-3">
+            <div class="message">
+                @if (TempData["Message"] != null)
+                {
+                    <div class="alert alert-success alert-dismissible fade show" role="alert">
+                        @TempData["Message"]
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                }
+            </div>
+            @RenderBody()
+        </main>
+    </div>
+
+    <footer class="border-top footer text-muted">
+        <div class="container">
+            &copy; 2024 - @Constants.AppName - @Constants.AppVersion
+        </div>
+    </footer>
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @RenderSection("jslibs", required: false)
+    <script>
+        document.getElementById('Colorscheme_btnSwitch').addEventListener('click', () => {
+            if (document.documentElement.getAttribute('data-bs-theme') == 'dark') {
+                document.documentElement.setAttribute('data-bs-theme', 'light')
+            }
+            else {
+                document.documentElement.setAttribute('data-bs-theme', 'dark')
+            }
+        })
+    </script>
+    @RenderSection("scripts", required: false)
+</body>
+
+</html>
