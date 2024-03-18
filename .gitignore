@@ -5,3 +5,5 @@ result
 .idea/
 *_.db # sqlite.db
 *db # sqlite.db
+app*.db
+.cache/

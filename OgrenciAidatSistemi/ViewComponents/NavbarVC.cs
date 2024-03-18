@@ -39,7 +39,6 @@ namespace OgrenciAidatSistemi.ViewComponents
                 return claimRole switch
                 {
                     "SiteAdminR" => InvokeSiteAdmin(claimEmail),
-                    /* _ => InvokeCustomer(claimEmail), */
                     _ => InvokeSiteAdmin(claimEmail)
                 };
             }

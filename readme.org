@@ -1,0 +1,31 @@
+# ogrenci aidat sistemi projesi 2024
+# ** özellikler
+# admin paneli
+
+#+title: öğrenci aidat sistemi projesi - 2024
+
+
+* özellikler
+
+** admin paneli
+
+** okul admini yönetim paneli
+
+** okul çalışma yılı yönetimi
+
+** aidat dönemi yönetimi
+
+** öğrenci yönetimi
+
+** öğrenci bazlı ödeme plani yönetimi
+
+** excel export / import
+
+** dekont depolama
+
+** veli ödeme arayüzü
+
+* yapılacaklar - [0%]
+ - [ ] daha düzgün bir userservice yaz
+   - [ ] userservice i kullanıma sok
+ - [ ] admin dash board tasarla gimp vb bişeyle sade görsel ve fieldlar

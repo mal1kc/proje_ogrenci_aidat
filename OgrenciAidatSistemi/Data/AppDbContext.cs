@@ -5,7 +5,13 @@ namespace OgrenciAidatSistemi.Data
 {
     public class AppDbContext : DbContext
     {
+        public DbSet<User>? Users { get; set; }
         public DbSet<SiteAdmin>? SiteAdmins { get; set; }
+
+        public DbSet<SchoolAdmin>? SchoolAdmins { get; set; }
+        public DbSet<Student>? Students { get; set; }
+        public DbSet<School>? Schools { get; set; }
+
 
         // public DbSet<SchoolAdmin>? SchoolAdmins { get; set; }
 

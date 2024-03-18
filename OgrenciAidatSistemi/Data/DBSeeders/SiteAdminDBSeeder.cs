@@ -1,7 +1,8 @@
 using OgrenciAidatSistemi.Models;
 using Microsoft.EntityFrameworkCore;
 namespace OgrenciAidatSistemi.Data{
-    public class SiteAdminDBSeeder : DbSeeder<AppDbContext, SiteAdmin>
+
+    public class SiteAdminDBSeeder : DbSeeder<AppDbContext,SiteAdmin>
     {
 
         public SiteAdminDBSeeder(AppDbContext context,IConfiguration configuration) : base(context,configuration)
@@ -9,11 +10,11 @@ namespace OgrenciAidatSistemi.Data{
             _seedData =                new()
                 {
                     new(
-                        Username: "mal1kc",
-                        FirstName: "mal1kc",
-                        LastName: "",
-                        EmailAddress: "admin@example.com",
-                        PasswordHash: SiteAdmin.ComputeHash("Aadmin123")
+                        username: "mal1kc",
+                        firstName: "mal1kc",
+                        lastName: "",
+                        emailAddress: "admin@example.com",
+                        passwordHash: SiteAdmin.ComputeHash("Aadmin123")
                     )
                 };
            if (_verboselogging)
@@ -41,8 +42,8 @@ namespace OgrenciAidatSistemi.Data{
                 {
                     continue;
                 }
-                siteadmin.createdAt = DateTime.Now;
-                siteadmin.updatedAt = DateTime.Now;
+                siteadmin.CreatedAt = DateTime.Now;
+                siteadmin.UpdatedAt = DateTime.Now;
                 object value = await _context.SiteAdmins.AddAsync(siteadmin);
                 if (_verboselogging)
                 {

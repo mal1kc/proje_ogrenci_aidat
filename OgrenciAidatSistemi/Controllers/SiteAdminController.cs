@@ -67,7 +67,7 @@ namespace OgrenciAidatSistemi.Controllers
             {
                 new Claim(ClaimTypes.Email, admin.EmailAddress),
                 new Claim(ClaimTypes.Role, Configurations.Constants.userRoles.SiteAdmin),
-                new Claim(ClaimTypes.NameIdentifier, admin.Id.ToString()),
+                new Claim(ClaimTypes.NameIdentifier, admin.UserId.ToString()),
             };
             var claimsIdentity = new ClaimsIdentity(
                 claims,
@@ -115,13 +115,13 @@ namespace OgrenciAidatSistemi.Controllers
             {
                 "firstname_desc" => filteredSiteAdmins.OrderByDescending(admin => admin.FirstName),
                 "lastname_desc" => filteredSiteAdmins.OrderByDescending(admin => admin.LastName),
-                "updatedat_desc" => filteredSiteAdmins.OrderByDescending(admin => admin.updatedAt),
-                "createdat_desc" => filteredSiteAdmins.OrderByDescending(admin => admin.createdAt),
+                "updatedat_desc" => filteredSiteAdmins.OrderByDescending(admin => admin.UpdatedAt),
+                "createdat_desc" => filteredSiteAdmins.OrderByDescending(admin => admin.CreatedAt),
                 "firstname" => filteredSiteAdmins.OrderBy(admin => admin.FirstName),
                 "lastname" => filteredSiteAdmins.OrderBy(admin => admin.LastName),
-                "updatedat" => filteredSiteAdmins.OrderBy(admin => admin.updatedAt),
-                "createdat" => filteredSiteAdmins.OrderBy(admin => admin.createdAt),
-                _ => filteredSiteAdmins.OrderByDescending(admin => admin.updatedAt)
+                "updatedat" => filteredSiteAdmins.OrderBy(admin => admin.UpdatedAt),
+                "createdat" => filteredSiteAdmins.OrderBy(admin => admin.CreatedAt),
+                _ => filteredSiteAdmins.OrderByDescending(admin => admin.UpdatedAt)
             };
 
             var paginatedSiteAdmins = filteredSiteAdmins

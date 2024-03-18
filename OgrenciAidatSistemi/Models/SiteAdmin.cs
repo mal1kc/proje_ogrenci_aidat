@@ -4,27 +4,21 @@ using OgrenciAidatSistemi.Data;
 namespace OgrenciAidatSistemi.Models
 {
 
-    public class SiteAdmin : User, IBaseDbModel
+public class SiteAdmin : User
+{
+    public int SiteAdminId { get; set; }
+        public override DateTime createdAt { get; set; }
+        public override DateTime updatedAt { get; set; }
+
+    public SiteAdmin(string username, string firstName, string? lastName, string emailAddress, string passwordHash)
     {
-        public int Id { get; set; }
+        Username = username;
+        FirstName = firstName;
+        LastName = lastName;
+        EmailAddress = emailAddress;
+        PasswordHash = passwordHash;
+    }
 
-        public DateTime createdAt { get; set; }
-        public DateTime updatedAt { get; set; }
-
-        public SiteAdmin(
-            string Username,
-            string FirstName,
-            string? LastName,
-            string EmailAddress,
-            string PasswordHash
-        )
-        {
-            this.Username = Username;
-            this.FirstName = FirstName;
-            this.LastName = LastName;
-            this.EmailAddress = EmailAddress;
-            this.PasswordHash = PasswordHash;
-        }
 
         //@TODO: find a way to remove this constructor
         /// <summary>
@@ -49,10 +43,10 @@ namespace OgrenciAidatSistemi.Models
             {
                 SiteAdmin siteAdmin = new(
                                 Username,
-                                FirstName: FirstName,
-                                LastName: LastName,
-                                EmailAddress: EmailAddress,
-                                PasswordHash: SiteAdmin.ComputeHash(Password)
+                                firstName: FirstName,
+                                lastName: LastName,
+                                emailAddress: EmailAdress,
+                                passwordHash: SiteAdmin.ComputeHash(Password)
                             );
                 return siteAdmin;
             }

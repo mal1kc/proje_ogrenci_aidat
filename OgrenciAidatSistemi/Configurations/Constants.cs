@@ -26,9 +26,9 @@ namespace OgrenciAidatSistemi.Configurations
         // TODO : this should be used as const like enum but as str
         public static class userRoles
         {
-            public const String
- SiteAdmin = "SiteAdminR";
+            public const String SiteAdmin = "SiteAdminR";
             public const String SchoolAdmin = "SchoolAdminR";
+            public const String Student = "StudentR";
         }
     }
 

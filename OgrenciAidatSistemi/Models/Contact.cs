@@ -20,4 +20,5 @@ namespace OgrenciAidatSistemi.Models
 
     }
 
+
 }

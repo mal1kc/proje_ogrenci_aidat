@@ -3,17 +3,15 @@ using OgrenciAidatSistemi.Data;
 
 namespace OgrenciAidatSistemi.Models
 {
-    public class SchoolAdmin : User, IBaseDbModel
-    {
-        public int Id { get; set; }
-        public School School { get; set; }
+    public class SchoolAdmin : User
+{
+    public int SchoolId { get; set; }
+    public School School { get; set; }
 
-        public int SchoolId { get; set; }
+        public override DateTime createdAt { get; set; }
+        public override DateTime updatedAt { get; set; }
+}
 
-        public DateTime createdAt { get; set; }
-        public DateTime updatedAt { get; set; }
-
-    }
 
     public class SchoolAdminView : UserView
     {
