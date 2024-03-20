@@ -12,10 +12,14 @@ namespace OgrenciAidatSistemi.Data
         public DbSet<Student>? Students { get; set; }
         public DbSet<School>? Schools { get; set; }
 
+        public DbSet<Payment>? Payments { get; set; }
+        public DbSet<PaymentPeriode>? PaymentPeriods { get; set; }
 
-        // public DbSet<SchoolAdmin>? SchoolAdmins { get; set; }
-
-        // TODO: add other models here
+        public DbSet<CashPayment>? CashPayments { get; set; }
+        public DbSet<CreditCardPayment>? CreditCardPayments { get; set; }
+        public DbSet<CheckPayment>? CheckPayments { get; set; }
+        public DbSet<DebitCardPayment>? DebitCardPayments { get; set; }
+        public DbSet<BankTransferPayment>? BankTransferPayments { get; set; }
 
         // TODO: needs to be change in devlopment and production use
 
@@ -24,6 +28,23 @@ namespace OgrenciAidatSistemi.Data
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+
+            modelBuilder.Entity<CashPayment>().HasBaseType<Payment>();
+            modelBuilder.Entity<CreditCardPayment>().HasBaseType<Payment>();
+            modelBuilder.Entity<CheckPayment>().HasBaseType<Payment>();
+            modelBuilder.Entity<DebitCardPayment>().HasBaseType<Payment>();
+            modelBuilder.Entity<BankTransferPayment>().HasBaseType<Payment>();
+
+            // Add configurations for other derived types if applicable
+
+            // Configure discriminator column (if needed)
+            modelBuilder.Entity<Payment>().HasDiscriminator<string>("PaymentType")
+                                   .HasValue<CashPayment>("Cash")
+                                   .HasValue<CreditCardPayment>("CreditCard");
+
+
+
+
             // example
             //     modelBuilder.Entity<Product>()
             //     .HasMany(e => e.Tags)

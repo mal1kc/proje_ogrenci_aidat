@@ -13,17 +13,19 @@ namespace OgrenciAidatSistemi.Models
     public abstract class Payment : IBaseDbModel
     {
         public int Id { get; set; }
+        public DateTime createdAt { get; set; }
+        public DateTime updatedAt { get; set; }
+
         public Student Student { get; set; }
         public int StudentId { get; set; }
+
         public DateTime PaymentDate { get; set; }
         public PaymentMethod PaymentMethod { get; set; }
 
-        public PaymentPeriode PaymentPeriode { get; set; }
+        public PaymentPeriode? PaymentPeriode { get; set; }
         public int PaymentPeriodId { get; set; }
 
         public decimal Amount { get; set; }
-        public DateTime createdAt { get; set; }
-        public DateTime updatedAt { get; set; }
     }
 
     public class PaymentView : IBaseDbModelView
@@ -37,8 +39,12 @@ namespace OgrenciAidatSistemi.Models
         public DateTime updatedAt { get; set; }
     }
 
-    public class PaymentPeriode
+    public class PaymentPeriode : IBaseDbModel
     {
+        public int Id { get ; set ; }
+        public DateTime createdAt { get ; set ; }
+        public DateTime updatedAt { get ; set ; }
+
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }
         public decimal Amount { get; set; }
@@ -97,6 +103,13 @@ namespace OgrenciAidatSistemi.Models
     {
         public string CashierName { get; set; }
         public FilePath Receipt { get; set; }
+    }
+
+    public class BankTransferPayment : Payment
+    {
+        public string BankName { get; set; }
+        public string AccountNumber { get; set; }
+        public string BranchCode { get; set; }
     }
 
 

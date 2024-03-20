@@ -26,6 +26,7 @@ void RegisterServices(IServiceCollection services, IConfiguration configuration)
     });
     _ = services.AddControllers();
     _ = services.AddEndpointsApiExplorer();
+    _ = services.AddHttpContextAccessor();
 }
 
 async Task ConfigureAppAsync(WebApplication app)

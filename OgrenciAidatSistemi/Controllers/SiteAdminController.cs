@@ -1,15 +1,11 @@
-using System;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.VisualBasic;
-using OgrenciAidatSistemi.Configurations;
+
 using OgrenciAidatSistemi.Data;
 using OgrenciAidatSistemi.Models;
-
 namespace OgrenciAidatSistemi.Controllers
 {
     // TODO: add policies https://learn.microsoft.com/en-us/aspnet/core/security/authorization/claims?view=aspnetcore-8.0
