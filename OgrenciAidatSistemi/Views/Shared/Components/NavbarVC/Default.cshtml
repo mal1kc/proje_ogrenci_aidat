@@ -60,7 +60,19 @@
             <li>
                 <hr class="dropdown-divider">
               </li>
-              <li><a class="dropdown-item" href="/signout">SignOut</a></li>
+            <li>
+            @if (User.GetType() == typeof(SiteAdmin)){
+            <a class="dropdown-item" asp-area=""
+                 asp-controller="SiteAdmin"
+                asp-action="SignOut">SignOut</a>            }
+            else
+            {
+            <a class="dropdown-item" asp-area=""
+                asp-controller="SchoolAdmin"
+                asp-action="SignOut">SignOut</a>
+            }</li>
+
+              <!-- <li><a class="dropdown-item" href="/signout">SignOut</a></li> -->
       </ul>
     </div>
     </div>

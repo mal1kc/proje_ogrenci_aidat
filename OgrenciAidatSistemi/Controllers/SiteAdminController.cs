@@ -1,11 +1,9 @@
-using System.Security.Claims;
-using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-
 using OgrenciAidatSistemi.Data;
 using OgrenciAidatSistemi.Models;
+using OgrenciAidatSistemi.Services;
+
 namespace OgrenciAidatSistemi.Controllers
 {
     // TODO: add policies https://learn.microsoft.com/en-us/aspnet/core/security/authorization/claims?view=aspnetcore-8.0
@@ -16,10 +14,13 @@ namespace OgrenciAidatSistemi.Controllers
 
         private readonly ControllerHelper<SiteAdmin> _controllerHelper = new();
 
+        private readonly UserService _userService;
+
         public SiteAdminController(ILogger<SiteAdminController> logger, AppDbContext appDbContext)
         {
             _logger = logger;
             _appDbContext = appDbContext;
+            _userService = new UserService(appDbContext, new HttpContextAccessor());
         }
 
         // AKA : Admin Dashboard
@@ -45,6 +46,11 @@ namespace OgrenciAidatSistemi.Controllers
             }
 
             var givenPasswordHash = SiteAdmin.ComputeHash(adminView.Password);
+            if (_appDbContext.SiteAdmins == null)
+            {
+                _logger.LogError("SiteAdmins table is null");
+                _appDbContext.SiteAdmins = _appDbContext.Set<SiteAdmin>();
+            }
             SiteAdmin? admin = _appDbContext
                 .SiteAdmins.Where(_admin =>
                     _admin.Username == adminView.Username
@@ -59,28 +65,25 @@ namespace OgrenciAidatSistemi.Controllers
             }
 
             _logger.LogDebug("SiteAdmin found, signing in {0}", admin.Username);
-            var claims = new List<Claim>
+
+            try
             {
-                new Claim(ClaimTypes.Email, admin.EmailAddress),
-                new Claim(ClaimTypes.Role, Configurations.Constants.userRoles.SiteAdmin),
-                new Claim(ClaimTypes.NameIdentifier, admin.UserId.ToString()),
-            };
-            var claimsIdentity = new ClaimsIdentity(
-                claims,
-                CookieAuthenticationDefaults.AuthenticationScheme
-            );
-            // var authProperties = new AuthenticationProperties();
-            await HttpContext.SignInAsync(
-                CookieAuthenticationDefaults.AuthenticationScheme,
-                new ClaimsPrincipal(claimsIdentity)
-            );
+                await _userService.SignInUser(admin);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(
+                    "Error while signing in SiteAdmin {0}: {1}",
+                    admin.Username,
+                    ex.Message
+                );
+                TempData["CantSignIn"] = true;
+                return RedirectToAction("SignIn");
+            }
             return RedirectToAction("Index", "Home");
         }
 
-        [
-            Authorize(Roles = Configurations.Constants.userRoles.SiteAdmin),
-            DebugOnly
-        ]
+        [Authorize(Roles = Configurations.Constants.userRoles.SiteAdmin), DebugOnly]
         public IActionResult List(
             int pageIndex = 1,
             int pageSize = 10,
@@ -88,6 +91,12 @@ namespace OgrenciAidatSistemi.Controllers
             string currentFilter = ""
         )
         {
+            if (_appDbContext.SiteAdmins == null)
+            {
+                _logger.LogError("SiteAdmins table is null");
+                _appDbContext.SiteAdmins = _appDbContext.Set<SiteAdmin>();
+            }
+
             var filteredSiteAdmins = _appDbContext.SiteAdmins.AsQueryable();
             if (currentFilter is not "" and not null)
             {

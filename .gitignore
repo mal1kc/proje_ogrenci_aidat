@@ -7,3 +7,5 @@ result
 *db # sqlite.db
 app*.db
 .cache/
+*.log
+app*.db*

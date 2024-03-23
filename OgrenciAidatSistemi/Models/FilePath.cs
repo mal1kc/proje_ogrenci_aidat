@@ -1,6 +1,7 @@
 namespace OgrenciAidatSistemi.Models
 {
-    public class FilePath:IBaseDbModel{
+    public class FilePath : IBaseDbModel
+    {
         public int Id { get; set; }
 
         public string Path { get; set; }
@@ -10,8 +11,8 @@ namespace OgrenciAidatSistemi.Models
         public long Size { get; set; }
         public string Description { get; set; }
 
-        public DateTime createdAt { get ; set ; }
-        public DateTime updatedAt { get ; set ; }
+        public DateTime CreatedAt { get; set; }
+        public DateTime UpdatedAt { get; set; }
 
         FilePath()
         {

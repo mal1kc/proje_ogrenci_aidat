@@ -1,17 +1,35 @@
-using OgrenciAidatSistemi.Configurations;
 using OgrenciAidatSistemi.Data;
 
 namespace OgrenciAidatSistemi.Models
 {
     public class SchoolAdmin : User
-{
-    public int SchoolId { get; set; }
-    public School School { get; set; }
+    {
+        public int SchoolId { get; set; }
+        public School _School { get; set; }
 
-        public override DateTime createdAt { get; set; }
-        public override DateTime updatedAt { get; set; }
-}
+        public override DateTime CreatedAt { get; set; }
+        public override DateTime UpdatedAt { get; set; }
 
+        public SchoolAdmin(
+            string username,
+            string firstName,
+            string? lastName,
+            string emailAddress,
+            string passwordHash
+        )
+        {
+            Username = username;
+            FirstName = firstName;
+            LastName = lastName;
+            EmailAddress = emailAddress;
+            PasswordHash = passwordHash;
+        }
+
+        // <summary>
+        // This constructor is only for DBSeeder
+        // </summary>
+        public SchoolAdmin() { }
+    }
 
     public class SchoolAdminView : UserView
     {

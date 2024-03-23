@@ -1,13 +1,13 @@
-using OgrenciAidatSistemi.Configurations;
-using OgrenciAidatSistemi.Models;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
+using OgrenciAidatSistemi.Configurations;
+using OgrenciAidatSistemi.Models;
 
-namespace OgrenciAidatSistemi.Data{
-
+namespace OgrenciAidatSistemi.Data
+{
     public interface IDbSeeder<TContext>
         where TContext : DbContext
     {
@@ -16,66 +16,63 @@ namespace OgrenciAidatSistemi.Data{
         Task AfterSeedAsync();
     }
 
-
     public abstract class DbSeeder<TContext, TEntity> : IDbSeeder<TContext>
         where TContext : DbContext
         where TEntity : IBaseDbModel
-{
-    public readonly IConfiguration Configuration;
-    protected readonly TContext _context;
-    public List<TEntity> _seedData;
-    protected bool _verboselogging;
-
-
-    protected DbSeeder(TContext context, IConfiguration configuration)
     {
-        _context = context;
-        Configuration = configuration;
+        public readonly IConfiguration Configuration;
+        protected readonly TContext _context;
+        public List<TEntity> _seedData;
+        protected bool _verboselogging;
 
-        // Read the value from configuration or default to true
-        _verboselogging = Configuration.GetValue<bool>("SeedData:VerboseLogging", defaultValue: true);
-    }
-
-
-    public async Task SeedAsync()
-    {
-        if (!_context.Database.CanConnect())
+        protected DbSeeder(TContext context, IConfiguration configuration)
         {
-            throw new InvalidOperationException("Database connection is not available.");
-        }
-        _ = await _context.Database.EnsureCreatedAsync();
+            _context = context;
+            Configuration = configuration;
 
-        await SeedDataAsync();
-    }
-
-    public async Task SeedRandomAsync()
-    {
-        if (!_context.Database.CanConnect())
-        {
-            throw new InvalidOperationException("Database connection is not available.");
+            // Read the value from configuration or default to true
+            _verboselogging = Configuration.GetValue<bool>(
+                "SeedData:VerboseLogging",
+                defaultValue: true
+            );
         }
 
-        _ = await _context.Database.EnsureCreatedAsync();
-
-        await SeedRandomDataAsync();
-    }
-
-    public async Task AfterSeedAsync()
-    {
-        if (!_context.Database.CanConnect())
+        public async Task SeedAsync()
         {
-            throw new InvalidOperationException("Database connection is not available.");
+            if (!_context.Database.CanConnect())
+            {
+                throw new InvalidOperationException("Database connection is not available.");
+            }
+            _ = await _context.Database.EnsureCreatedAsync();
+
+            await SeedDataAsync();
         }
 
+        public async Task SeedRandomAsync()
+        {
+            if (!_context.Database.CanConnect())
+            {
+                throw new InvalidOperationException("Database connection is not available.");
+            }
 
-        _ = await _context.Database.EnsureCreatedAsync();
-        await AfterSeedDataAsync();
+            _ = await _context.Database.EnsureCreatedAsync();
+
+            await SeedRandomDataAsync();
+        }
+
+        public async Task AfterSeedAsync()
+        {
+            if (!_context.Database.CanConnect())
+            {
+                throw new InvalidOperationException("Database connection is not available.");
+            }
+
+            _ = await _context.Database.EnsureCreatedAsync();
+            await AfterSeedDataAsync();
+        }
+
+        protected abstract Task SeedDataAsync();
+        protected abstract Task SeedRandomDataAsync();
+        protected abstract Task AfterSeedDataAsync();
     }
-
-
-    protected abstract Task SeedDataAsync();
-    protected abstract Task SeedRandomDataAsync();
-    protected abstract Task AfterSeedDataAsync();
-}
-
 }

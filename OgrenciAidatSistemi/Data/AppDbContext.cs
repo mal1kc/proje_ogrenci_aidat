@@ -28,7 +28,6 @@ namespace OgrenciAidatSistemi.Data
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-
             modelBuilder.Entity<CashPayment>().HasBaseType<Payment>();
             modelBuilder.Entity<CreditCardPayment>().HasBaseType<Payment>();
             modelBuilder.Entity<CheckPayment>().HasBaseType<Payment>();
@@ -38,12 +37,11 @@ namespace OgrenciAidatSistemi.Data
             // Add configurations for other derived types if applicable
 
             // Configure discriminator column (if needed)
-            modelBuilder.Entity<Payment>().HasDiscriminator<string>("PaymentType")
-                                   .HasValue<CashPayment>("Cash")
-                                   .HasValue<CreditCardPayment>("CreditCard");
-
-
-
+            modelBuilder
+                .Entity<Payment>()
+                .HasDiscriminator<string>("PaymentType")
+                .HasValue<CashPayment>("Cash")
+                .HasValue<CreditCardPayment>("CreditCard");
 
             // example
             //     modelBuilder.Entity<Product>()

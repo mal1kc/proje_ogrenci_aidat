@@ -1,10 +1,8 @@
 public interface IBaseDbModel
 {
     public int Id { get; set; }
-    public DateTime createdAt { get; set; }
-    public DateTime updatedAt { get; set; }
+    public DateTime CreatedAt { get; set; }
+    public DateTime UpdatedAt { get; set; }
 }
 
-public interface IBaseDbModelView : IBaseDbModel
-{
-}
+public interface IBaseDbModelView : IBaseDbModel { }

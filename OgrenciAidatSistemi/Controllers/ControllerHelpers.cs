@@ -5,8 +5,6 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace OgrenciAidatSistemi.Controllers
 {
-    public class ControllerHelper<TEntity> where TEntity : class
-
-    {
-    }
+    public class ControllerHelper<TEntity>
+        where TEntity : class { }
 }

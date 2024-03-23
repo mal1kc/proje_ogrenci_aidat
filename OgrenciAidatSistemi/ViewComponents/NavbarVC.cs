@@ -1,7 +1,7 @@
 using System.Security.Claims;
+using Microsoft.AspNetCore.Mvc;
 using OgrenciAidatSistemi.Data;
 using OgrenciAidatSistemi.Models;
-using Microsoft.AspNetCore.Mvc;
 
 namespace OgrenciAidatSistemi.ViewComponents
 {
@@ -21,9 +21,7 @@ namespace OgrenciAidatSistemi.ViewComponents
             if (HttpContext.User.Claims.Any())
             {
                 String? claimEmail = HttpContext
-                    .User
-                    .Claims
-                    .FirstOrDefault(claim => claim.Type == ClaimTypes.Email)
+                    .User.Claims.FirstOrDefault(claim => claim.Type == ClaimTypes.Email)
                     ?.Value;
 
                 if (claimEmail == null)
@@ -31,9 +29,7 @@ namespace OgrenciAidatSistemi.ViewComponents
                     return View(null);
                 }
                 String? claimRole = HttpContext
-                    .User
-                    .Claims
-                    .FirstOrDefault(claim => claim.Type == ClaimTypes.Role)
+                    .User.Claims.FirstOrDefault(claim => claim.Type == ClaimTypes.Role)
                     ?.Value;
 
                 return claimRole switch
@@ -46,12 +42,10 @@ namespace OgrenciAidatSistemi.ViewComponents
             return View(null);
         }
 
-
         public IViewComponentResult InvokeSiteAdmin(String claimEmail)
         {
             SiteAdmin? admin = _appDbContext
-                .SiteAdmins
-                .Where(_admin => _admin.EmailAddress == claimEmail)
+                .SiteAdmins.Where(_admin => _admin.EmailAddress == claimEmail)
                 .FirstOrDefault();
             ViewBag.User = admin;
             return View();

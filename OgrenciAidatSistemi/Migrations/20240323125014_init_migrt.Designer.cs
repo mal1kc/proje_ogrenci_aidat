@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using OgrenciAidatSistemi.Data;
 
@@ -10,9 +11,11 @@ using OgrenciAidatSistemi.Data;
 namespace OgrenciAidatSistemi.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240323125014_init_migrt")]
+    partial class init_migrt
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "8.0.2");
@@ -141,10 +144,6 @@ namespace OgrenciAidatSistemi.Migrations
                         .HasColumnType("INTEGER");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.Property<DateTime>("UpdatedAt")
@@ -409,13 +408,13 @@ namespace OgrenciAidatSistemi.Migrations
 
             modelBuilder.Entity("OgrenciAidatSistemi.Models.SchoolAdmin", b =>
                 {
-                    b.HasOne("OgrenciAidatSistemi.Models.School", "_School")
-                        .WithMany("SchoolAdmins")
+                    b.HasOne("OgrenciAidatSistemi.Models.School", "School")
+                        .WithMany()
                         .HasForeignKey("SchoolId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("_School");
+                    b.Navigation("School");
                 });
 
             modelBuilder.Entity("OgrenciAidatSistemi.Models.Student", b =>
@@ -436,8 +435,6 @@ namespace OgrenciAidatSistemi.Migrations
 
             modelBuilder.Entity("OgrenciAidatSistemi.Models.School", b =>
                 {
-                    b.Navigation("SchoolAdmins");
-
                     b.Navigation("Students");
                 });
 #pragma warning restore 612, 618

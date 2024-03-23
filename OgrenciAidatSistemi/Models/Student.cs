@@ -9,8 +9,8 @@ namespace OgrenciAidatSistemi.Models
         public School School { get; set; }
         public int GradLevel { get; set; }
         public bool IsGraduated { get; set; }
-        public override DateTime createdAt { get; set; }
-        public override DateTime updatedAt { get; set; }
+        public override DateTime CreatedAt { get; set; }
+        public override DateTime UpdatedAt { get; set; }
     }
 
     public class StudentView : UserView

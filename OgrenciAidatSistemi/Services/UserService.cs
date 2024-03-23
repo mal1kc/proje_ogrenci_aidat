@@ -2,7 +2,6 @@ using System.Security.Claims;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
-
 using OgrenciAidatSistemi.Data;
 using OgrenciAidatSistemi.Models;
 
@@ -12,17 +11,22 @@ namespace OgrenciAidatSistemi.Services
     {
         private readonly AppDbContext _dbContext;
         private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly ILogger<UserService> _logger;
 
         private HttpContext? HttpContext => _httpContextAccessor.HttpContext;
 
-        public UserService(AppDbContext dbContext)
+        public UserService(AppDbContext dbContext, IHttpContextAccessor httpContextAccessor)
         {
             _dbContext = dbContext;
+            _httpContextAccessor = httpContextAccessor;
+            _logger = new Logger<UserService>(new LoggerFactory());
         }
 
         public async Task<User?> GetUserById(int userId)
         {
             if (userId == 0)
+                return null;
+            if (_dbContext.Users == null)
                 return null;
             return await _dbContext.Users.FindAsync(userId);
         }
@@ -31,12 +35,16 @@ namespace OgrenciAidatSistemi.Services
         {
             if (string.IsNullOrEmpty(username))
                 return null;
+            if (_dbContext.Users == null)
+                return null;
             return await _dbContext.Users.FirstOrDefaultAsync(u => u.Username == username);
         }
 
         public async Task<User?> GetUserByEmail(string email)
         {
             if (string.IsNullOrEmpty(email))
+                return null;
+            if (_dbContext.Users == null)
                 return null;
             return await _dbContext.Users.FirstOrDefaultAsync(u => u.EmailAddress == email);
         }
@@ -47,6 +55,9 @@ namespace OgrenciAidatSistemi.Services
             {
                 // You may want to hash the password before storing it
                 user.PasswordHash = User.ComputeHash(user.PasswordHash);
+                user.CreatedAt = DateTime.UtcNow;
+                if (_dbContext.Users == null)
+                    _dbContext.Users = _dbContext.Set<User>();
 
                 _dbContext.Users.Add(user);
                 await _dbContext.SaveChangesAsync();
@@ -55,6 +66,8 @@ namespace OgrenciAidatSistemi.Services
             catch (Exception ex)
             {
                 // Log or handle the exception
+
+                _logger.LogError("Error while creating user: {0}", ex.Message);
                 return false;
             }
         }
@@ -65,6 +78,8 @@ namespace OgrenciAidatSistemi.Services
             {
                 // Update the user's updatedAt timestamp
                 user.UpdatedAt = DateTime.UtcNow;
+                if (_dbContext.Users == null)
+                    return false;
 
                 _dbContext.Users.Update(user);
                 await _dbContext.SaveChangesAsync();
@@ -72,7 +87,7 @@ namespace OgrenciAidatSistemi.Services
             }
             catch (Exception ex)
             {
-                // Log or handle the exception
+                _logger.LogError("Error while updating user: {0}", ex.Message);
                 return false;
             }
         }
@@ -86,6 +101,8 @@ namespace OgrenciAidatSistemi.Services
             {
                 user = updateExpression(user);
                 user.UpdatedAt = DateTime.UtcNow;
+                if (_dbContext.Users == null)
+                    return false;
 
                 _dbContext.Users.Update(user);
                 await _dbContext.SaveChangesAsync();
@@ -93,6 +110,7 @@ namespace OgrenciAidatSistemi.Services
             }
             catch (Exception ex)
             {
+                _logger.LogError("Error while updating user: {0}", ex.Message);
                 // Log or handle the exception
                 return false;
             }
@@ -102,6 +120,8 @@ namespace OgrenciAidatSistemi.Services
         {
             try
             {
+                if (_dbContext.Users == null)
+                    return false;
                 var user = await _dbContext.Users.FindAsync(userId);
                 if (user != null)
                 {
@@ -113,7 +133,7 @@ namespace OgrenciAidatSistemi.Services
             }
             catch (Exception ex)
             {
-                // Log or handle the exception
+                _logger.LogError("Error while deleting user: {0}", ex.Message);
                 return false;
             }
         }
@@ -138,6 +158,8 @@ namespace OgrenciAidatSistemi.Services
                 claims,
                 CookieAuthenticationDefaults.AuthenticationScheme
             );
+            if (HttpContext == null)
+                return;
             await HttpContext.SignInAsync(
                 CookieAuthenticationDefaults.AuthenticationScheme,
                 new ClaimsPrincipal(claimsIdentity)
@@ -161,12 +183,14 @@ namespace OgrenciAidatSistemi.Services
             return await GetUserById(int.Parse(userId));
         }
 
-        public async Task<bool> IsUserSignedIn()
+        public bool IsUserSignedIn()
         {
-            return HttpContext?.User.Identity?.IsAuthenticated ?? false;
+            if (HttpContext == null)
+                return false;
+            if (HttpContext.User.Identity == null)
+                return false;
+
+            return HttpContext.User.Identity.IsAuthenticated;
         }
-
-
-
     }
 }

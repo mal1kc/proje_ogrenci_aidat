@@ -1,10 +1,7 @@
 using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.AspNetCore.Builder;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
+using NReco.Logging.File;
 using OgrenciAidatSistemi.Configurations;
 using OgrenciAidatSistemi.Data;
-using OgrenciAidatSistemi.Models;
 
 void RegisterServices(IServiceCollection services, IConfiguration configuration)
 {
@@ -27,6 +24,13 @@ void RegisterServices(IServiceCollection services, IConfiguration configuration)
     _ = services.AddControllers();
     _ = services.AddEndpointsApiExplorer();
     _ = services.AddHttpContextAccessor();
+    _ = services.AddLogging();
+
+    _ = services.AddLogging(loggingBuilder =>
+    {
+        var loggingSection = configuration.GetSection("Logging");
+        loggingBuilder.AddFile(loggingSection);
+    });
 }
 
 async Task ConfigureAppAsync(WebApplication app)
@@ -50,23 +54,25 @@ async Task ConfigureAppAsync(WebApplication app)
     {
         _ = app.UseExceptionHandler("/Home/Error");
     }
+    if (ctx == null)
+    {
+        throw new Exception("AppDbContext is null");
+    }
 
-    if (configuration.GetSection("SeedData").GetValue<bool>("SeedDB",true) == true)
+    if (configuration.GetSection("SeedData").GetValue<bool>("SeedDB", true) == true)
     {
         Console.WriteLine("Seeding Database");
 
-        // IDbSeeder<AppDbContext, SiteAdmin> siteAdminDbSeeder = new SiteAdminDBSeeder(context: ctx);
-
-        List<IDbSeeder<AppDbContext>> DBseeders = new()
-        {
-            new SiteAdminDBSeeder(context: ctx, configuration: configuration)
-        };
-        if (configuration.GetSection("SeedData").GetValue<bool>("VerboseLogging", false))
+        List<IDbSeeder<AppDbContext>> DBseeders =
+            new()
             {
-
-        Console.WriteLine("we have " + DBseeders.Count + " seeders");
-            }
-
+                new SiteAdminDBSeeder(context: ctx, configuration: configuration),
+                new SchoolAdminDBSeeder(context: ctx, configuration: configuration)
+            };
+        if (configuration.GetSection("SeedData").GetValue<bool>("VerboseLogging", false))
+        {
+            Console.WriteLine("we have " + DBseeders.Count + " seeders");
+        }
 
         foreach (var seeder in DBseeders)
         {
@@ -77,8 +83,6 @@ async Task ConfigureAppAsync(WebApplication app)
             await seeder.SeedAsync();
             await seeder.AfterSeedAsync();
         }
-
-
 
         Console.WriteLine("Database Seeded");
 
@@ -94,7 +98,6 @@ async Task ConfigureAppAsync(WebApplication app)
     _ = app.UseAuthorization();
     _ = app.MapControllerRoute(name: "default", pattern: "{controller=Home}/{action=Index}/{id?}");
     _ = app.UseCors(builder => builder.AllowAnyOrigin());
-
 }
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
@@ -102,11 +105,10 @@ WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 // builder.Environment.ContentRootPath = Directory.GetCurrentDirectory() + "wwwroot";
 builder.Configuration.AddJsonFile("appsettings.json", optional: false, reloadOnChange: false);
 
-
 builder.Services.AddControllersWithViews();
 
 RegisterServices(builder.Services, builder.Configuration);
 WebApplication app = builder.Build();
-ConfigureAppAsync(app);
+await ConfigureAppAsync(app);
 
 app.Run();

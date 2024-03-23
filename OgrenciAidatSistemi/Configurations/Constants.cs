@@ -1,7 +1,5 @@
 namespace OgrenciAidatSistemi.Configurations
 {
-
-
     public static class Constants
     {
         // TODO : read all constants (settings) from json or toml file
@@ -11,8 +9,8 @@ namespace OgrenciAidatSistemi.Configurations
         public const short MaxUserNameLength = 124;
         public const short MinUserNameLength = 5;
 
-
-        public const String EmailRegEx = @"\A(?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?)\Z";
+        public const String EmailRegEx =
+            @"\A(?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?)\Z";
 
         // this should be read from .env file
         public const String AdminPasswordSalt =
@@ -31,5 +29,4 @@ namespace OgrenciAidatSistemi.Configurations
             public const String Student = "StudentR";
         }
     }
-
 }

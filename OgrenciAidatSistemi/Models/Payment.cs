@@ -1,6 +1,5 @@
 namespace OgrenciAidatSistemi.Models
 {
-
     public enum PaymentMethod
     {
         Cash,
@@ -13,8 +12,8 @@ namespace OgrenciAidatSistemi.Models
     public abstract class Payment : IBaseDbModel
     {
         public int Id { get; set; }
-        public DateTime createdAt { get; set; }
-        public DateTime updatedAt { get; set; }
+        public DateTime CreatedAt { get; set; }
+        public DateTime UpdatedAt { get; set; }
 
         public Student Student { get; set; }
         public int StudentId { get; set; }
@@ -35,15 +34,15 @@ namespace OgrenciAidatSistemi.Models
         public StudentView Student { get; set; }
         public DateTime PaymentDate { get; set; }
         public decimal Amount { get; set; }
-        public DateTime createdAt { get; set; }
-        public DateTime updatedAt { get; set; }
+        public DateTime CreatedAt { get; set; }
+        public DateTime UpdatedAt { get; set; }
     }
 
     public class PaymentPeriode : IBaseDbModel
     {
-        public int Id { get ; set ; }
-        public DateTime createdAt { get ; set ; }
-        public DateTime updatedAt { get ; set ; }
+        public int Id { get; set; }
+        public DateTime CreatedAt { get; set; }
+        public DateTime UpdatedAt { get; set; }
 
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }
@@ -74,7 +73,6 @@ namespace OgrenciAidatSistemi.Models
         public string AccountNumber { get; set; }
         public string BranchCode { get; set; }
     }
-
 
     public class CreditCardPayment : Payment
     {
@@ -111,7 +109,4 @@ namespace OgrenciAidatSistemi.Models
         public string AccountNumber { get; set; }
         public string BranchCode { get; set; }
     }
-
-
-
 }

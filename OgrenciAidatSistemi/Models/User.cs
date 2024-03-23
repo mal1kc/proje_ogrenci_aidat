@@ -7,13 +7,14 @@ using OgrenciAidatSistemi.Data;
 
 namespace OgrenciAidatSistemi.Models
 {
-
     public enum UserRole
     {
         [Description(Constants.userRoles.SchoolAdmin)]
         SiteAdmin,
+
         [Description(Constants.userRoles.SiteAdmin)]
         SchoolAdmin,
+
         [Description(Constants.userRoles.Student)]
         Student
     }
@@ -22,12 +23,13 @@ namespace OgrenciAidatSistemi.Models
 
     public abstract class UserView
     {
-    public int UserId { get; set; }
-    public string Username { get; set; }
-    public string EmailAdress { get; set; }
-    public UserRole Role { get; set; }
-    public string FirstName { get; set; }
-    public string? LastName { get; set; }        public String Password { get; set; }
+        public int UserId { get; set; }
+        public string Username { get; set; }
+        public string EmailAdress { get; set; }
+        public UserRole Role { get; set; }
+        public string FirstName { get; set; }
+        public string? LastName { get; set; }
+        public String Password { get; set; }
         public String? PasswordVerify { get; set; }
 
         public bool PasswordsMatch()
@@ -54,11 +56,11 @@ namespace OgrenciAidatSistemi.Models
 
         public bool CheckNamesLenght()
         {
-            List<bool> nameTruths = new List<bool> {
-                    FirstName?.Length < Constants.MaxUserNameLength,
-
-                    Username.Length < Constants.MaxUserNameLength
-                        && Username.Length > Constants.MinUserNameLength
+            List<bool> nameTruths = new List<bool>
+            {
+                FirstName?.Length < Constants.MaxUserNameLength,
+                Username.Length < Constants.MaxUserNameLength
+                    && Username.Length > Constants.MinUserNameLength
             };
             if (LastName != null)
                 nameTruths.Add(LastName.Length < Constants.MaxUserNameLength);
@@ -66,11 +68,7 @@ namespace OgrenciAidatSistemi.Models
         }
 
         public bool CheckEmailAddressRegex() =>
-            Regex.IsMatch(
-                EmailAdress,
-                Constants.EmailRegEx,
-                RegexOptions.IgnoreCase
-            );
+            Regex.IsMatch(EmailAdress, Constants.EmailRegEx, RegexOptions.IgnoreCase);
     }
 
     public enum UserViewValidationResult
@@ -82,7 +80,7 @@ namespace OgrenciAidatSistemi.Models
         UserExists,
     }
 
-    public abstract class User:IBaseDbModel
+    public abstract class User : IBaseDbModel
     {
         public bool CheckPassword(string password)
         {
@@ -107,17 +105,19 @@ namespace OgrenciAidatSistemi.Models
             return builder.ToString();
         }
 
-  public int UserId { get; set; }
-    public string Username { get; set; }
-    public string PasswordHash { get; set; }
-    public string EmailAddress { get; set; }
-    public UserRole Role { get; set; }
-    public string FirstName { get; set; }
-    public string? LastName { get; set; }
-    public DateTime CreatedAt { get; set; }
-    public DateTime UpdatedAt { get; set; }
-        public int Id { get => UserId; set => UserId = value; }
-        public abstract DateTime createdAt { get; set; }
-        public abstract DateTime updatedAt { get; set; }
+        public int UserId { get; set; }
+        public string Username { get; set; }
+        public string PasswordHash { get; set; }
+        public string EmailAddress { get; set; }
+        public UserRole Role { get; set; }
+        public string FirstName { get; set; }
+        public string? LastName { get; set; }
+        public abstract DateTime CreatedAt { get; set; }
+        public abstract DateTime UpdatedAt { get; set; }
+        public int Id
+        {
+            get => UserId;
+            set => UserId = value;
+        }
     }
 }

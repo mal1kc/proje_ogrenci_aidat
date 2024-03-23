@@ -11,8 +11,8 @@ using OgrenciAidatSistemi.Data;
 namespace OgrenciAidatSistemi.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20240320144547_init_migrt")]
-    partial class init_migrt
+    [Migration("20240323142240_init_mgrt")]
+    partial class init_mgrt
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -28,6 +28,9 @@ namespace OgrenciAidatSistemi.Migrations
 
                     b.Property<string>("ContentType")
                         .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("CreatedAt")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Description")
@@ -49,10 +52,7 @@ namespace OgrenciAidatSistemi.Migrations
                     b.Property<long>("Size")
                         .HasColumnType("INTEGER");
 
-                    b.Property<DateTime>("createdAt")
-                        .HasColumnType("TEXT");
-
-                    b.Property<DateTime>("updatedAt")
+                    b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");
@@ -67,6 +67,9 @@ namespace OgrenciAidatSistemi.Migrations
                         .HasColumnType("INTEGER");
 
                     b.Property<decimal>("Amount")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("CreatedAt")
                         .HasColumnType("TEXT");
 
                     b.Property<DateTime>("PaymentDate")
@@ -89,10 +92,7 @@ namespace OgrenciAidatSistemi.Migrations
                     b.Property<int>("StudentId")
                         .HasColumnType("INTEGER");
 
-                    b.Property<DateTime>("createdAt")
-                        .HasColumnType("TEXT");
-
-                    b.Property<DateTime>("updatedAt")
+                    b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");
@@ -117,6 +117,9 @@ namespace OgrenciAidatSistemi.Migrations
                     b.Property<decimal>("Amount")
                         .HasColumnType("TEXT");
 
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("TEXT");
+
                     b.Property<DateTime>("EndDate")
                         .HasColumnType("TEXT");
 
@@ -126,10 +129,7 @@ namespace OgrenciAidatSistemi.Migrations
                     b.Property<DateTime>("StartDate")
                         .HasColumnType("TEXT");
 
-                    b.Property<DateTime>("createdAt")
-                        .HasColumnType("TEXT");
-
-                    b.Property<DateTime>("updatedAt")
+                    b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");
@@ -143,10 +143,14 @@ namespace OgrenciAidatSistemi.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.Property<DateTime>("createdAt")
+                    b.Property<DateTime>("CreatedAt")
                         .HasColumnType("TEXT");
 
-                    b.Property<DateTime>("updatedAt")
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");
@@ -194,12 +198,6 @@ namespace OgrenciAidatSistemi.Migrations
 
                     b.Property<string>("Username")
                         .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<DateTime>("createdAt")
-                        .HasColumnType("TEXT");
-
-                    b.Property<DateTime>("updatedAt")
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");
@@ -414,13 +412,13 @@ namespace OgrenciAidatSistemi.Migrations
 
             modelBuilder.Entity("OgrenciAidatSistemi.Models.SchoolAdmin", b =>
                 {
-                    b.HasOne("OgrenciAidatSistemi.Models.School", "School")
-                        .WithMany()
+                    b.HasOne("OgrenciAidatSistemi.Models.School", "_School")
+                        .WithMany("SchoolAdmins")
                         .HasForeignKey("SchoolId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("School");
+                    b.Navigation("_School");
                 });
 
             modelBuilder.Entity("OgrenciAidatSistemi.Models.Student", b =>
@@ -441,6 +439,8 @@ namespace OgrenciAidatSistemi.Migrations
 
             modelBuilder.Entity("OgrenciAidatSistemi.Models.School", b =>
                 {
+                    b.Navigation("SchoolAdmins");
+
                     b.Navigation("Students");
                 });
 #pragma warning restore 612, 618
