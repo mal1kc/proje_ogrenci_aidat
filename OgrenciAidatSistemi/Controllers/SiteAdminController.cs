@@ -154,5 +154,7 @@ namespace OgrenciAidatSistemi.Controllers
             }
             return names;
         }
+
+
     }
 }
