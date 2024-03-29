@@ -43,10 +43,7 @@ namespace OgrenciAidatSistemi.Models
                 return UserRole.Student;
             return UserRole.Student;
         }
-
     }
-
-
 
 #pragma warning disable CS8618 // non-nullable field is uninitialized.
 
@@ -81,9 +78,9 @@ namespace OgrenciAidatSistemi.Models
 
             bool? usernm_exits = CheckUsernameExists(dbctx);
             if (usernm_exits == null)
-                return UserViewValidationResult.EmailAddressNotMatchRegex;
-            else if (usernm_exits == false)
-                return UserViewValidationResult.EmailAddressNotMatchRegex;
+                return UserViewValidationResult.UserExists;
+            else if (usernm_exits == true)
+                return UserViewValidationResult.UserExists;
 
             return UserViewValidationResult.FieldsAreValid;
         }

@@ -41,7 +41,6 @@ namespace OgrenciAidatSistemi.Helpers
 
             if (string.IsNullOrEmpty(searchField))
             {
-
                 var result = new List<T>();
                 foreach (var field in _searchConfig.AllowedFieldsForSearch)
                 {
@@ -59,7 +58,6 @@ namespace OgrenciAidatSistemi.Helpers
                     return result.DistinctBy(x => ((IBaseDbModel)x).Id);
                 }
                 return result.Distinct();
-
             }
 
             if (typeof(T).GetProperty(searchField) == null)

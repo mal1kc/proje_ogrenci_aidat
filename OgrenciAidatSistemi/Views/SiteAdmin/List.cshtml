@@ -29,19 +29,22 @@
     <thead>
         <tr>
             <th>
-                @Html.DisplayNameFor(model => model.FirstName)
+                <a asp-action="List" asp-route-sortOrder="@ViewData["NameSortParam"]">First Name</a>
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.LastName)
+                <a asp-action="List" asp-route-sortOrder="@ViewData["NameSortParam"]">Last Name</a>
+            </th>
+            @{
+                // TODO : add email sorting
+                }
+            <th>
+                <a asp-action="List" asp-route-sortOrder="@ViewData["NameSortParam"]">Email Address</a>
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.EmailAddress)
+                <a asp-action="List" asp-route-sortOrder="@ViewData["DateSortParam"]">Created At</a>
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.CreatedAt)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.UpdatedAt)
+                <a asp-action="List" asp-route-sortOrder="@ViewData["DateSortParam"]">Updated At</a>
             </th>
             <!-- Add more columns as needed -->
             <th></th>
@@ -63,9 +66,8 @@
                 <td>
                     @Html.DisplayFor(modelItem => item.CreatedAt)
                 </td>
-
                 <td>
-                    @Html.DisplayFor(modelIteö => item.UpdatedAt)
+                    @Html.DisplayFor(modelItem => item.UpdatedAt)
                 </td>
                 <!-- Add more columns as needed -->
                 <td>

@@ -65,7 +65,7 @@ namespace OgrenciAidatSistemi.Models
 
         public override bool? CheckUsernameExists(AppDbContext dbctx)
         {
-            return dbctx.SiteAdmins?.Any(admin => admin.Username == Username);
+            return dbctx.SiteAdmins.Any(admin => admin.Username == Username);
         }
     }
 

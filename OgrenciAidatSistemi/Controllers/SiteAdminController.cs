@@ -70,7 +70,7 @@ namespace OgrenciAidatSistemi.Controllers
 
             try
             {
-                await _userService.SignInUser(admin,UserRole.SiteAdmin);
+                await _userService.SignInUser(admin, UserRole.SiteAdmin);
             }
             catch (Exception ex)
             {
@@ -85,12 +85,8 @@ namespace OgrenciAidatSistemi.Controllers
             return RedirectToAction("Index", "Home");
         }
 
-
         // path: /siteadmin/list
-        [HttpGet,
-    Authorize(Roles = Configurations.Constants.userRoles.SiteAdmin),
-         DebugOnly
-        ]
+        [HttpGet, Authorize(Roles = Configurations.Constants.userRoles.SiteAdmin), DebugOnly]
         public IActionResult List(
             string? searchString = null,
             string? searchField = null,
@@ -122,9 +118,10 @@ namespace OgrenciAidatSistemi.Controllers
 
             Func<IQueryable<SiteAdmin>, IOrderedQueryable<SiteAdmin>> sortFunc = null;
 
+            Console.WriteLine("before sorting");
             if (!string.IsNullOrEmpty(sortOrder))
             {
-                string sortOrderBase = sortOrder.EndsWith("_desc")
+                string sortOrderBase = sortOrder.ToLower().EndsWith("_desc")
                     ? sortOrder.Substring(0, sortOrder.Length - 5)
                     : sortOrder;
 
@@ -136,10 +133,10 @@ namespace OgrenciAidatSistemi.Controllers
 
                 switch (sortOrderBase)
                 {
-                    case "Name":
+                    case "name":
                         sortFunc = q => q.OrderBy(e => e.FirstName).ThenBy(e => e.LastName);
                         break;
-                    case "Date":
+                    case "date":
                         sortFunc = q => q.OrderBy(e => e.CreatedAt);
                         break;
                     // Add more sorting options for other fields as needed
@@ -148,68 +145,96 @@ namespace OgrenciAidatSistemi.Controllers
                         break;
                 }
 
+                // Apply descending order if needed
                 if (sortOrder.EndsWith("_desc"))
                 {
-                    sortFunc = q => sortFunc(q).OrderByDescending(e => e);
+                    var sortedQuery = sortFunc(filteredSiteAdmins.AsQueryable());
+                    sortFunc = q => sortedQuery.OrderByDescending(e => e);
                 }
             }
 
+            Console.WriteLine("After determine Sorting Func {0} with {1}", sortFunc, sortOrder);
+            // call the sort function
             var sortedSiteAdmins =
                 sortFunc != null ? sortFunc(filteredSiteAdmins.AsQueryable()) : filteredSiteAdmins;
+            Console.WriteLine("After Sorting");
 
             var paginatedSiteAdmins = sortedSiteAdmins
                 .Skip((pageIndex - 1) * pageSize)
-                .Take(pageSize).ToList();
+                .Take(pageSize)
+                .ToList();
 
             ViewData["CurrentPageIndex"] = pageIndex;
-            ViewData["TotalPages"] = (int)Math.Ceiling(filteredSiteAdmins.Count() / (double)pageSize);
+            ViewData["TotalPages"] = (int)
+                Math.Ceiling(filteredSiteAdmins.Count() / (double)pageSize);
             ViewData["TotalItems"] = filteredSiteAdmins.Count();
             ViewData["PageSize"] = pageSize;
 
             return View(paginatedSiteAdmins);
         }
 
-        // var filteredSiteAdmins = _appDbContext.SiteAdmins.AsQueryable();
-        // if (currentFilter is not "" and not null)
-        // {
-        //     filteredSiteAdmins = _appDbContext.SiteAdmins.Where(admin =>
-        //         admin.FirstName.Contains(currentFilter) || string.IsNullOrEmpty(admin.LastName)
-        //             ? true
-        //             : admin.LastName.Contains(currentFilter)
-        //     );
-        // }
-        // else
-        // {
-        //     currentFilter = "";
-        //     filteredSiteAdmins = _appDbContext.SiteAdmins;
-        // }
+        // Create a new SiteAdmin
+        // GET: /siteadmin/create
 
-        // // create iterable of SiteAdmins with pagination and filtering, sorting
+        [HttpGet, Authorize(Roles = Configurations.Constants.userRoles.SiteAdmin), DebugOnly]
+        public IActionResult Create()
+        {
+            return View();
+        }
 
+        // POST: /siteadmin/create
+        // To protect from overposting attacks, enable the specific properties you want to bind to, for
 
-        // // switch case for sorting order
-        // var sortedSiteAdmins = sortOrder switch
-        // {
-        //     "firstname_desc" => filteredSiteAdmins.OrderByDescending(admin => admin.FirstName),
-        //     "lastname_desc" => filteredSiteAdmins.OrderByDescending(admin => admin.LastName),
-        //     "updatedat_desc" => filteredSiteAdmins.OrderByDescending(admin => admin.UpdatedAt),
-        //     "createdat_desc" => filteredSiteAdmins.OrderByDescending(admin => admin.CreatedAt),
-        //     "firstname" => filteredSiteAdmins.OrderBy(admin => admin.FirstName),
-        //     "lastname" => filteredSiteAdmins.OrderBy(admin => admin.LastName),
-        //     "updatedat" => filteredSiteAdmins.OrderBy(admin => admin.UpdatedAt),
-        //     "createdat" => filteredSiteAdmins.OrderBy(admin => admin.CreatedAt),
-        //     _ => filteredSiteAdmins.OrderByDescending(admin => admin.UpdatedAt)
-        // };
+        [
+            HttpPost,
+            Authorize(Roles = Configurations.Constants.userRoles.SiteAdmin),
+            DebugOnly,
+            ValidateAntiForgeryToken
+        ]
+        public async Task<IActionResult> Create(
+            [Bind("Username,Password,PasswordVerify,FirstName,LastName,EmailAddress")]
+                SiteAdminView siteAdmin
+        )
+        {
+            if (ModelState.IsValid)
+            {
+                UserViewValidationResult validationResult = siteAdmin.ValidateFields(_appDbContext);
+                switch (validationResult)
+                {
+                    case UserViewValidationResult.PasswordsNotMatch:
+                        ModelState.AddModelError("PasswordVerify", "Passwords do not match");
+                        break;
+                    case UserViewValidationResult.InvalidName:
+                        ModelState.AddModelError("FirstName", "Name is too short or too long");
+                        break;
+                    case UserViewValidationResult.EmailAddressNotMatchRegex:
+                        ModelState.AddModelError("EmailAddress", "Invalid Email Address");
+                        break;
+                    case UserViewValidationResult.UserExists:
+                        ModelState.AddModelError("Username", "Username already exists");
+                        break;
+                    default:
+                        break;
+                }
+                if (validationResult != UserViewValidationResult.FieldsAreValid)
+                    return View(siteAdmin);
 
-        // var paginatedSiteAdmins = filteredSiteAdmins
-        //     .Skip((pageIndex - 1) * pageSize)
-        //     .Take(pageSize);
-
-        // ViewData["CurrentSort"] = sortOrder;
-        // ViewData["CurrentFilter"] = currentFilter;
-
-        // return View(paginatedSiteAdmins);
-        //       }
+                SiteAdmin newSiteAdmin = new SiteAdmin
+                {
+                    Username = siteAdmin.Username,
+                    PasswordHash = SiteAdmin.ComputeHash(siteAdmin.Password),
+                    EmailAddress = siteAdmin.EmailAddress,
+                    FirstName = siteAdmin.FirstName,
+                    LastName = siteAdmin.LastName,
+                    CreatedAt = DateTime.Now,
+                    UpdatedAt = DateTime.Now
+                };
+                _appDbContext.SiteAdmins.Add(newSiteAdmin);
+                await _appDbContext.SaveChangesAsync();
+                return RedirectToAction("List");
+            }
+            return View(siteAdmin);
+        }
 
         [DebugOnly]
         public string[] GenerateRandomNames()
