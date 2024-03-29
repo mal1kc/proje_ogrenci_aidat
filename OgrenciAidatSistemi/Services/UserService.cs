@@ -151,7 +151,27 @@ namespace OgrenciAidatSistemi.Services
             var claims = new List<Claim>
             {
                 new Claim(ClaimTypes.Email, user.EmailAddress),
-                new Claim(ClaimTypes.Role, user.Role.ToString()),
+                new Claim(ClaimTypes.Role, UserRoleExtensions.GetRoleString(user.Role)),
+                new Claim(ClaimTypes.NameIdentifier, user.UserId.ToString()),
+            };
+            var claimsIdentity = new ClaimsIdentity(
+                claims,
+                CookieAuthenticationDefaults.AuthenticationScheme
+            );
+            if (HttpContext == null)
+                return;
+            await HttpContext.SignInAsync(
+                CookieAuthenticationDefaults.AuthenticationScheme,
+                new ClaimsPrincipal(claimsIdentity)
+            );
+        }
+
+        public async Task SignInUser(User user, UserRole role)
+        {
+            var claims = new List<Claim>
+            {
+                new Claim(ClaimTypes.Email, user.EmailAddress),
+                new Claim(ClaimTypes.Role, UserRoleExtensions.GetRoleString(role)),
                 new Claim(ClaimTypes.NameIdentifier, user.UserId.ToString()),
             };
             var claimsIdentity = new ClaimsIdentity(

@@ -15,15 +15,14 @@ namespace OgrenciAidatSistemi.Migrations
                 table: "Schools",
                 type: "TEXT",
                 nullable: false,
-                defaultValue: "");
+                defaultValue: ""
+            );
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropColumn(
-                name: "Name",
-                table: "Schools");
+            migrationBuilder.DropColumn(name: "Name", table: "Schools");
         }
     }
 }

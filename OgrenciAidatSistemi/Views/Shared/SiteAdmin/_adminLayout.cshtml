@@ -32,16 +32,16 @@
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
-    <script>
-        document.getElementById('Colorscheme_btnSwitch').addEventListener('click',()=>{
-    if (document.documentElement.getAttribute('data-bs-theme') == 'dark') {
-        document.documentElement.setAttribute('data-bs-theme','light')
-    }
-    else {
-        document.documentElement.setAttribute('data-bs-theme','dark')
-    }
-})
-    </script>
+ <!--    <script> -->
+<!--         document.getElementById('Colorscheme_btnSwitch').addEventListener('click',()=>{ -->
+<!--     if (document.documentElement.getAttribute('data-bs-theme') == 'dark') { -->
+<!--         document.documentElement.setAttribute('data-bs-theme','light') -->
+<!--     } -->
+<!--     else { -->
+<!--         document.documentElement.setAttribute('data-bs-theme','dark') -->
+<!--     } -->
+<!-- }) -->
+<!--     </script> -->
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

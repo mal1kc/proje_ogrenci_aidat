@@ -36,7 +36,7 @@ namespace OgrenciAidatSistemi.Models
         public int Id { get; set; }
         public SchoolView School { get; set; }
 
-        public override bool CheckUsernameExists(AppDbContext dbctx)
+        public override bool? CheckUsernameExists(AppDbContext dbctx)
         {
             throw new NotImplementedException();
         }

@@ -1,10 +1,5 @@
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
-using OgrenciAidatSistemi.Configurations;
-using OgrenciAidatSistemi.Models;
+using OgrenciAidatSistemi.Models.Interfaces;
 
 namespace OgrenciAidatSistemi.Data
 {

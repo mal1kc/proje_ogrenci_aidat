@@ -1,3 +1,5 @@
+using OgrenciAidatSistemi.Models.Interfaces;
+
 namespace OgrenciAidatSistemi.Models
 {
     public class FilePath : IBaseDbModel

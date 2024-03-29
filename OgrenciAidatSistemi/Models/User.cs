@@ -4,6 +4,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using OgrenciAidatSistemi.Configurations;
 using OgrenciAidatSistemi.Data;
+using OgrenciAidatSistemi.Models.Interfaces;
 
 namespace OgrenciAidatSistemi.Models
 {
@@ -19,18 +20,45 @@ namespace OgrenciAidatSistemi.Models
         Student
     }
 
+    public static class UserRoleExtensions
+    {
+        public static string GetRoleString(this UserRole role)
+        {
+            if (role == UserRole.SiteAdmin)
+                return Constants.userRoles.SiteAdmin;
+            if (role == UserRole.SchoolAdmin)
+                return Constants.userRoles.SchoolAdmin;
+            if (role == UserRole.Student)
+                return Constants.userRoles.Student;
+            return Constants.userRoles.Student;
+        }
+
+        public static UserRole GetRoleFromString(string role)
+        {
+            if (role == Constants.userRoles.SiteAdmin)
+                return UserRole.SiteAdmin;
+            if (role == Constants.userRoles.SchoolAdmin)
+                return UserRole.SchoolAdmin;
+            if (role == Constants.userRoles.Student)
+                return UserRole.Student;
+            return UserRole.Student;
+        }
+    }
+
 #pragma warning disable CS8618 // non-nullable field is uninitialized.
 
-    public abstract class UserView
+    public abstract class UserView : IBaseDbModelView
     {
-        public int UserId { get; set; }
+        public int Id { get; set; }
         public string Username { get; set; }
-        public string EmailAdress { get; set; }
+        public string EmailAddress { get; set; }
         public UserRole Role { get; set; }
         public string FirstName { get; set; }
         public string? LastName { get; set; }
         public String Password { get; set; }
         public String? PasswordVerify { get; set; }
+        public DateTime CreatedAt { get; set; }
+        public DateTime UpdatedAt { get; set; }
 
         public bool PasswordsMatch()
         {
@@ -47,12 +75,17 @@ namespace OgrenciAidatSistemi.Models
                 return UserViewValidationResult.InvalidName;
             if (!CheckEmailAddressRegex())
                 return UserViewValidationResult.EmailAddressNotMatchRegex;
-            if (!CheckUsernameExists(dbctx))
+
+            bool? usernm_exits = CheckUsernameExists(dbctx);
+            if (usernm_exits == null)
                 return UserViewValidationResult.UserExists;
+            else if (usernm_exits == true)
+                return UserViewValidationResult.UserExists;
+
             return UserViewValidationResult.FieldsAreValid;
         }
 
-        public abstract bool CheckUsernameExists(AppDbContext dbctx);
+        public abstract bool? CheckUsernameExists(AppDbContext dbctx);
 
         public bool CheckNamesLenght()
         {
@@ -68,7 +101,7 @@ namespace OgrenciAidatSistemi.Models
         }
 
         public bool CheckEmailAddressRegex() =>
-            Regex.IsMatch(EmailAdress, Constants.EmailRegEx, RegexOptions.IgnoreCase);
+            Regex.IsMatch(EmailAddress, Constants.EmailRegEx, RegexOptions.IgnoreCase);
     }
 
     public enum UserViewValidationResult

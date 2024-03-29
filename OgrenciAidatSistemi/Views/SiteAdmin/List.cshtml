@@ -1,6 +1,112 @@
-@model SiteAdminView
+@model IEnumerable<SiteAdmin>
 
 @{
-    ViewData["Title"] = "Index";
+    ViewData["Title"] = "List of Site Admins";
 }
-<!-- Listing of SiteAdminView models -->
+
+<h1>List of Site Admins</h1>
+
+<p>
+    <a asp-action="Create">Create New</a>
+</p>
+
+<form asp-action="List" method="get">
+    <p>
+        Search: <input type="text" name="searchString" value="@ViewData["CurrentSearchString"]" />
+        in
+        <select name="searchField">
+            <option value="">All</option>
+            <option value="FirstName">First Name</option>
+            <option value="LastName">Last Name</option>
+            <option value="EmailAddress">Email Adress</option>
+            <!-- Add more search fields as needed -->
+        </select>
+        <input type="submit" value="Search" />
+    </p>
+</form>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                <a asp-action="List" asp-route-sortOrder="@ViewData["NameSortParam"]">First Name</a>
+            </th>
+            <th>
+                <a asp-action="List" asp-route-sortOrder="@ViewData["NameSortParam"]">Last Name</a>
+            </th>
+            @{
+                // TODO : add email sorting
+                }
+            <th>
+                <a asp-action="List" asp-route-sortOrder="@ViewData["NameSortParam"]">Email Address</a>
+            </th>
+            <th>
+                <a asp-action="List" asp-route-sortOrder="@ViewData["DateSortParam"]">Created At</a>
+            </th>
+            <th>
+                <a asp-action="List" asp-route-sortOrder="@ViewData["DateSortParam"]">Updated At</a>
+            </th>
+            <!-- Add more columns as needed -->
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.FirstName)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.LastName)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.EmailAddress)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.CreatedAt)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.UpdatedAt)
+                </td>
+                <!-- Add more columns as needed -->
+                <td>
+                    <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
+                    <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
+                    <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<nav aria-label="Page navigation">
+    <ul class="pagination">
+        @if (ViewData["CurrentPageIndex"] != null)
+        {
+            int currentPageIndex = (int)ViewData["CurrentPageIndex"];
+            int totalPages = (int)ViewData["TotalPages"];
+
+            <li class="page-item @(currentPageIndex <= 1 ? "disabled" : "")">
+                <a class="page-link" asp-action="List" asp-route-pageIndex="1">First</a>
+            </li>
+            <li class="page-item @(currentPageIndex <= 1 ? "disabled" : "")">
+                <a class="page-link" asp-action="List" asp-route-pageIndex="@(currentPageIndex - 1)">Previous</a>
+            </li>
+
+            @for (int i = 1; i <= totalPages; i++)
+            {
+                <li class="page-item @(i == currentPageIndex ? "active" : "")">
+                    <a class="page-link" asp-action="List" asp-route-pageIndex="@i">@i</a>
+                </li>
+            }
+
+            <li class="page-item @(currentPageIndex >= totalPages ? "disabled" : "")">
+                <a class="page-link" asp-action="List" asp-route-pageIndex="@(currentPageIndex + 1)">Next</a>
+            </li>
+            <li class="page-item @(currentPageIndex >= totalPages ? "disabled" : "")">
+                <a class="page-link" asp-action="List" asp-route-pageIndex="@totalPages">Last</a>
+            </li>
+        }
+    </ul>
+</nav>
