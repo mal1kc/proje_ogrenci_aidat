@@ -1,5 +1,6 @@
 using System.Text.RegularExpressions;
 using OgrenciAidatSistemi.Configurations;
+using OgrenciAidatSistemi.Models.Interfaces;
 
 namespace OgrenciAidatSistemi.Models
 {

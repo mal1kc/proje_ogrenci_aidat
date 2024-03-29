@@ -20,7 +20,7 @@ namespace OgrenciAidatSistemi.Models
         public int GradLevel { get; set; }
         public bool IsGraduated { get; set; }
 
-        public override bool CheckUsernameExists(AppDbContext dbctx)
+        public override bool? CheckUsernameExists(AppDbContext dbctx)
         {
             throw new NotImplementedException();
         }

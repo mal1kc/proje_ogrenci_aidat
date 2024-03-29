@@ -4,8 +4,8 @@ using OgrenciAidatSistemi.Data;
 using OgrenciAidatSistemi.Models;
 using OgrenciAidatSistemi.Services;
 
-namespace OgrenciAidatSistemi.Controllers{
-
+namespace OgrenciAidatSistemi.Controllers
+{
     public class UserCommonController : Controller
     {
         private readonly ILogger<UserCommonController> _logger;
@@ -42,6 +42,5 @@ namespace OgrenciAidatSistemi.Controllers{
             _logger.LogInformation("SignOutUser() -> redirecting to home page");
             return RedirectToAction("Index", "Home");
         }
-
     }
 }

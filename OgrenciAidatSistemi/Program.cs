@@ -14,7 +14,15 @@ internal class Program
                 .AddCookie(options =>
                 {
                     options.Cookie.Name = Constants.AuthenticationCookieName;
-                    options.LoginPath = Constants.AuthenticationLoginPath;
+                    options.AccessDeniedPath = Constants.AuthenticationAccessDeniedPath;
+                    options.Events = new CookieAuthenticationEvents
+                    {
+                        OnRedirectToAccessDenied = context =>
+                        {
+                            context.Response.Redirect(Constants.AuthenticationAccessDeniedPath);
+                            return Task.CompletedTask;
+                        }
+                    };
                 });
             _ = services.AddHttpContextAccessor();
             _ = services.AddDbContext<AppDbContext>();
@@ -43,7 +51,9 @@ internal class Program
 
             IConfiguration configuration = app.Configuration;
 
-            AppDbContext? ctx = app.Services.CreateScope().ServiceProvider.GetService<AppDbContext>();
+            AppDbContext? ctx = app
+                .Services.CreateScope()
+                .ServiceProvider.GetService<AppDbContext>();
             _ = ctx?.Database.EnsureCreated();
 
             if (!app.Environment.IsDevelopment())
@@ -70,8 +80,8 @@ internal class Program
                 List<IDbSeeder<AppDbContext>> DBseeders =
                     new()
                     {
-                new SiteAdminDBSeeder(context: ctx, configuration: configuration),
-                new SchoolAdminDBSeeder(context: ctx, configuration: configuration)
+                        new SiteAdminDBSeeder(context: ctx, configuration: configuration),
+                        new SchoolAdminDBSeeder(context: ctx, configuration: configuration)
                     };
                 if (configuration.GetSection("SeedData").GetValue("VerboseLogging", false))
                 {
@@ -100,14 +110,21 @@ internal class Program
             _ = app.UseSession();
             _ = app.UseAuthentication();
             _ = app.UseAuthorization();
-            _ = app.MapControllerRoute(name: "default", pattern: "{controller=Home}/{action=Index}/{id?}");
+            _ = app.MapControllerRoute(
+                name: "default",
+                pattern: "{controller=Home}/{action=Index}/{id?}"
+            );
             _ = app.UseCors(builder => builder.AllowAnyOrigin());
         }
 
         WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
         // builder.Environment.ContentRootPath = Directory.GetCurrentDirectory() + "wwwroot";
-        builder.Configuration.AddJsonFile("appsettings.json", optional: false, reloadOnChange: false);
+        builder.Configuration.AddJsonFile(
+            "appsettings.json",
+            optional: false,
+            reloadOnChange: false
+        );
 
         builder.Services.AddControllersWithViews();
 

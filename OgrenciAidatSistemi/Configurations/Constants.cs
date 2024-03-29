@@ -28,5 +28,7 @@ namespace OgrenciAidatSistemi.Configurations
             public const String SchoolAdmin = "SchoolAdminR";
             public const String Student = "StudentR";
         }
+
+        public const String AuthenticationAccessDeniedPath = "/Error/Error403";
     }
 }
