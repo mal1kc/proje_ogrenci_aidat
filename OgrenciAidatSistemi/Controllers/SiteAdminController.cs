@@ -8,7 +8,6 @@ using OgrenciAidatSistemi.Services;
 
 namespace OgrenciAidatSistemi.Controllers
 {
-    // TODO: add policies https://learn.microsoft.com/en-us/aspnet/core/security/authorization/claims?view=aspnetcore-8.0
     public class SiteAdminController : Controller
     {
         private readonly ILogger<SiteAdminController> _logger;
@@ -86,7 +85,7 @@ namespace OgrenciAidatSistemi.Controllers
         }
 
         // path: /siteadmin/list
-        [HttpGet, Authorize(Roles = Configurations.Constants.userRoles.SiteAdmin), DebugOnly]
+        [HttpGet, Authorize(Roles = Configurations.Constants.userRoles.SiteAdmin)]
         public IActionResult List(
             string? searchString = null,
             string? searchField = null,
@@ -106,19 +105,17 @@ namespace OgrenciAidatSistemi.Controllers
             ViewData["NameSortParam"] = string.IsNullOrEmpty(sortOrder) ? "name_desc" : "";
             ViewData["DateSortParam"] = sortOrder == "Date" ? "date_desc" : "Date";
 
-            var modelSearch = new ModelSearch<SiteAdmin>(
+            var modelSearch = new ModelSearchQueryable<SiteAdmin>(
                 _appDbContext.SiteAdmins.AsQueryable(),
                 new ModelSearchConfig(
                     SiteAdminSearchConfig.AllowedFieldsForSearch,
                     SiteAdminSearchConfig.AllowedFieldsForSort
                 )
             );
-
             var filteredSiteAdmins = modelSearch.Search(searchString, searchField);
 
             Func<IQueryable<SiteAdmin>, IOrderedQueryable<SiteAdmin>> sortFunc = null;
 
-            Console.WriteLine("before sorting");
             if (!string.IsNullOrEmpty(sortOrder))
             {
                 string sortOrderBase = sortOrder.ToLower().EndsWith("_desc")
@@ -162,7 +159,7 @@ namespace OgrenciAidatSistemi.Controllers
             var paginatedSiteAdmins = sortedSiteAdmins
                 .Skip((pageIndex - 1) * pageSize)
                 .Take(pageSize)
-                .ToList();
+                .AsQueryable();
 
             ViewData["CurrentPageIndex"] = pageIndex;
             ViewData["TotalPages"] = (int)
@@ -170,13 +167,39 @@ namespace OgrenciAidatSistemi.Controllers
             ViewData["TotalItems"] = filteredSiteAdmins.Count();
             ViewData["PageSize"] = pageSize;
 
-            return View(paginatedSiteAdmins);
+            Console.WriteLine(
+                "ids of paginatedsiteadmins: {0}",
+                string.Join(", ", paginatedSiteAdmins.Select(e => e.Id))
+            );
+
+            // create collecttion from paginatedsiteadmins with ids
+
+            var paginatedSiteAdmins_withIds = _appDbContext
+                .SiteAdmins.Join(
+                    _appDbContext.Users,
+                    sa => sa.Id, // Foreign key property in SiteAdmin
+                    ot => ot.Id, // Primary key property in OtherTable
+                    (sa, ot) =>
+                        new SiteAdmin
+                        {
+                            Id = ot.Id,
+                            FirstName = sa.FirstName,
+                            LastName = sa.LastName,
+                            Username = sa.Username,
+                            EmailAddress = sa.EmailAddress,
+                            PasswordHash = sa.PasswordHash,
+                            CreatedAt = sa.CreatedAt,
+                            UpdatedAt = sa.UpdatedAt
+                        }
+                )
+                .ToList();
+            return View(paginatedSiteAdmins_withIds);
         }
 
         // Create a new SiteAdmin
         // GET: /siteadmin/create
 
-        [HttpGet, Authorize(Roles = Configurations.Constants.userRoles.SiteAdmin), DebugOnly]
+        [HttpGet, Authorize(Roles = Configurations.Constants.userRoles.SiteAdmin)]
         public IActionResult Create()
         {
             return View();
@@ -188,7 +211,6 @@ namespace OgrenciAidatSistemi.Controllers
         [
             HttpPost,
             Authorize(Roles = Configurations.Constants.userRoles.SiteAdmin),
-            DebugOnly,
             ValidateAntiForgeryToken
         ]
         public async Task<IActionResult> Create(
@@ -236,20 +258,84 @@ namespace OgrenciAidatSistemi.Controllers
             return View(siteAdmin);
         }
 
-        [DebugOnly]
-        public string[] GenerateRandomNames()
-        {
-            // generate random sized array of strings
-            // string lengh between 5 and 21
+        // GET: /SiteAdmin/Delete/5
+        // Delete a SiteAdmin
+        // This is a confirmation page for deleting a SiteAdmin
 
-            Random random = new Random();
-            int arraySize = random.Next(5, 21);
-            string[] names = new string[arraySize];
-            for (int i = 0; i < arraySize; i++)
+        [Authorize(Roles = Configurations.Constants.userRoles.SiteAdmin)]
+        [DebugOnly]
+        // [DisabledAction]
+        public async Task<IActionResult> Delete(int? id)
+        {
+            if (id == null)
             {
-                names[i] = Path.GetRandomFileName().Replace(".", "");
+                return NotFound();
             }
-            return names;
+
+            var siteAdmin = _appDbContext.SiteAdmins.Where(e => e.Id == id).FirstOrDefault();
+
+            if (siteAdmin == null)
+            {
+                return NotFound();
+            }
+
+            // check if the user is logged in
+            // if the user is logged in, prevent deletion
+
+            var loggedInUserId = _userService.GetSignedInUserId();
+            Console.WriteLine("Logged in user id: {0}", loggedInUserId);
+
+            if (loggedInUserId == id)
+            {
+                ViewData["Message"] = "You cannot delete the account you are logged in with";
+                return RedirectToAction("List");
+            }
+
+            return View(siteAdmin);
+        }
+
+        // POST: /SiteAdmin/DeleteConfirmed/5
+        // Delete a SiteAdmin
+        //
+        //
+        // // This is a hard delete, meaning the record will be removed from the database
+        // and cannot be recovered
+        // by default, this action is disabled
+        // to enable this action, remove the [DisabledAction] attribute
+
+        // in enable is not possible to delete logged in SiteAdmin
+        // if you want to delete a SiteAdmin, you must first sign in with another SiteAdmin account
+        // and then delete the account you want to delete
+        // this is a security measure to prevent accidental deletion of all SiteAdmin accounts
+
+
+        [HttpPost, ActionName("DeleteConfirmed")]
+        [ValidateAntiForgeryToken]
+        [Authorize(Roles = Configurations.Constants.userRoles.SiteAdmin)]
+        [DebugOnly]
+        // [DisabledAction]
+
+        public async Task<IActionResult> DeleteConfirmed(int? id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+            /* var siteAdmin = _appDbContext.SiteAdmins.Where(e => e.Id == id).FirstOrDefault(); */
+            /**/
+
+            var siteAdminUser = _appDbContext.Users.Where(e => e.Id == id).FirstOrDefault();
+
+            if (siteAdminUser == null)
+            {
+                return NotFound();
+            }
+
+
+            bool isDeleted = await _userService.DeleteUser(siteAdminUser.Id);
+            if (!isDeleted)
+                ViewData["Message"] = "Error while deleting the user";
+            return RedirectToAction("List");
         }
     }
 }

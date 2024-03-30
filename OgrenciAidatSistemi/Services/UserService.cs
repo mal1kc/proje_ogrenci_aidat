@@ -123,8 +123,16 @@ namespace OgrenciAidatSistemi.Services
                 if (_dbContext.Users == null)
                     return false;
                 var user = await _dbContext.Users.FindAsync(userId);
+
+                // check if the user is signed in if so, don't delete the user and return false
                 if (user != null)
                 {
+                    if (HttpContext != null)
+                    {
+                        var currentUserId = HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                        if (currentUserId != null && int.Parse(currentUserId) == userId)
+                            return false;
+                    }
                     _dbContext.Users.Remove(user);
                     await _dbContext.SaveChangesAsync();
                     return true;
@@ -152,7 +160,7 @@ namespace OgrenciAidatSistemi.Services
             {
                 new Claim(ClaimTypes.Email, user.EmailAddress),
                 new Claim(ClaimTypes.Role, UserRoleExtensions.GetRoleString(user.Role)),
-                new Claim(ClaimTypes.NameIdentifier, user.UserId.ToString()),
+                new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
             };
             var claimsIdentity = new ClaimsIdentity(
                 claims,
@@ -172,7 +180,7 @@ namespace OgrenciAidatSistemi.Services
             {
                 new Claim(ClaimTypes.Email, user.EmailAddress),
                 new Claim(ClaimTypes.Role, UserRoleExtensions.GetRoleString(role)),
-                new Claim(ClaimTypes.NameIdentifier, user.UserId.ToString()),
+                new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
             };
             var claimsIdentity = new ClaimsIdentity(
                 claims,
@@ -211,6 +219,16 @@ namespace OgrenciAidatSistemi.Services
                 return false;
 
             return HttpContext.User.Identity.IsAuthenticated;
+        }
+
+        public int GetSignedInUserId()
+        {
+            if (HttpContext == null)
+                return 0;
+            var userId = HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (userId == null)
+                return 0;
+            return int.Parse(userId);
         }
     }
 }

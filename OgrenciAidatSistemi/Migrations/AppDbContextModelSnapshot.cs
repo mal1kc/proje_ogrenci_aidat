@@ -190,9 +190,6 @@ namespace OgrenciAidatSistemi.Migrations
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("TEXT");
 
-                    b.Property<int>("UserId")
-                        .HasColumnType("INTEGER");
-
                     b.Property<string>("Username")
                         .IsRequired()
                         .HasColumnType("TEXT");
@@ -351,9 +348,6 @@ namespace OgrenciAidatSistemi.Migrations
             modelBuilder.Entity("OgrenciAidatSistemi.Models.SiteAdmin", b =>
                 {
                     b.HasBaseType("OgrenciAidatSistemi.Models.User");
-
-                    b.Property<int>("SiteAdminId")
-                        .HasColumnType("INTEGER");
 
                     b.HasDiscriminator().HasValue("SiteAdmin");
                 });

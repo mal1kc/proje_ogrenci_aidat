@@ -29,25 +29,23 @@
     <thead>
         <tr>
             <th>
-                <a asp-action="List" asp-route-sortOrder="@ViewData["NameSortParam"]">First Name</a>
+                <a asp-action="List" asp-route-sortOrder="@ViewData["NameSortParam"]" asp-route-searchString="@ViewData["CurrentSearchString"]" >First Name</a>
             </th>
             <th>
-                <a asp-action="List" asp-route-sortOrder="@ViewData["NameSortParam"]">Last Name</a>
+                <a asp-action="List" asp-route-sortOrder="@ViewData["NameSortParam"]"  asp-route-searchString="@ViewData["CurrentSearchString"]" >Last Name</a>
             </th>
-            @{
-                // TODO : add email sorting
-                }
+            @* TODO : add email sorting *@
             <th>
-                <a asp-action="List" asp-route-sortOrder="@ViewData["NameSortParam"]">Email Address</a>
+                <a asp-action="List" asp-route-sortOrder="@ViewData["NameSortParam"]" asp-route-searchString="@ViewData["CurrentSearchString"]" >Email Address</a>
             </th>
             <th>
-                <a asp-action="List" asp-route-sortOrder="@ViewData["DateSortParam"]">Created At</a>
+                <a asp-action="List" asp-route-sortOrder="@ViewData["DateSortParam"]" asp-route-searchString="@ViewData["CurrentSearchString"]" >Created At</a>
             </th>
             <th>
-                <a asp-action="List" asp-route-sortOrder="@ViewData["DateSortParam"]">Updated At</a>
+                <a asp-action="List" asp-route-sortOrder="@ViewData["DateSortParam"]" asp-route-searchString="@ViewData["CurrentSearchString"]" >Updated At</a>
             </th>
             <!-- Add more columns as needed -->
-            <th></th>
+            <th></th> <!-- column for buttons edit | details | delete -->
         </tr>
     </thead>
     <tbody>
@@ -70,11 +68,17 @@
                     @Html.DisplayFor(modelItem => item.UpdatedAt)
                 </td>
                 <!-- Add more columns as needed -->
+
                 <td>
-                    <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
-                    <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
-                    <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
+                    Id of item @item.Id this should be non zero
+
+                    <a href="@Url.Action("Edit", new { id = item.Id})">Edit</a>
+                    |
+                    <a href="@Url.Action("Details", new { id = item.Id})">Details</a>
+                    |
+                    <a href="@Url.Action("Delete", new { id = item.Id })">Delete</a>
                 </td>
+
             </tr>
         }
     </tbody>

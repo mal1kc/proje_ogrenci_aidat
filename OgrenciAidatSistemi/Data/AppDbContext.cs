@@ -43,31 +43,7 @@ namespace OgrenciAidatSistemi.Data
                 .HasValue<CashPayment>("Cash")
                 .HasValue<CreditCardPayment>("CreditCard");
 
-            // example
-            //     modelBuilder.Entity<Product>()
-            //     .HasMany(e => e.Tags)
-            //     .WithMany(e => e.products)
-            //     .UsingEntity("ProductTag",
-            //         l => l.HasOne(typeof(Tag))
-            //             .WithMany()
-            //             .HasForeignKey("TagId")
-            //             .HasPrincipalKey(nameof(Tag.Id)),
-            //         r => r.HasOne(typeof(Product))
-            //             .WithMany()
-            //             .HasForeignKey("ProductId")
-            //             .HasPrincipalKey(nameof(Product.Id)),
-            //         jo =>
-            //         {
-            //             jo.HasKey("ProductId", "TagId");
-            //         }
-            //     );
-
-            // example
-            // modelBuilder.Entity<Product>()
-            // .HasOne(p => p.Category)
-            // .WithMany(pc => pc.products)
-            // .HasForeignKey(p => p.CategoryId)
-            // .HasPrincipalKey(pc => pc.Id);
+            base.OnModelCreating(modelBuilder);
         }
     }
 }

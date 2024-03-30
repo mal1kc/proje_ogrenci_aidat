@@ -138,7 +138,7 @@ namespace OgrenciAidatSistemi.Models
             return builder.ToString();
         }
 
-        public int UserId { get; set; }
+        public int Id { get; set; }
         public string Username { get; set; }
         public string PasswordHash { get; set; }
         public string EmailAddress { get; set; }
@@ -147,10 +147,6 @@ namespace OgrenciAidatSistemi.Models
         public string? LastName { get; set; }
         public abstract DateTime CreatedAt { get; set; }
         public abstract DateTime UpdatedAt { get; set; }
-        public int Id
-        {
-            get => UserId;
-            set => UserId = value;
-        }
+
     }
 }

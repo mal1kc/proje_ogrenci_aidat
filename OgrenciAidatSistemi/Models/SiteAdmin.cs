@@ -6,7 +6,6 @@ namespace OgrenciAidatSistemi.Models
 {
     public class SiteAdmin : User, ISearchableModel
     {
-        public int SiteAdminId { get; set; }
         public override DateTime CreatedAt { get; set; }
         public override DateTime UpdatedAt { get; set; }
 
