@@ -11,8 +11,6 @@ namespace OgrenciAidatSistemi.Controllers
         private readonly ILogger<UserCommonController> _logger;
         private readonly AppDbContext _appDbContext;
 
-        private readonly ControllerHelper<User> _controllerHelper = new();
-
         private readonly UserService _userService;
 
         public UserCommonController(ILogger<UserCommonController> logger, AppDbContext appDbContext)

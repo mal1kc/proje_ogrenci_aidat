@@ -1,14 +1,22 @@
 using OgrenciAidatSistemi.Data;
+using OgrenciAidatSistemi.Models.Interfaces;
 
 namespace OgrenciAidatSistemi.Models
 {
-    public class SchoolAdmin : User
+    public class SchoolAdmin : User, ISearchableModel
     {
         public int SchoolId { get; set; }
         public School _School { get; set; }
 
         public override DateTime CreatedAt { get; set; }
         public override DateTime UpdatedAt { get; set; }
+
+        [System.Text.Json.Serialization.JsonIgnore]
+        public ModelSearchConfig SearchConfig =>
+            new ModelSearchConfig(
+                SchoolAdminSearchConfig.AllowedFieldsForSearch,
+                SchoolAdminSearchConfig.AllowedFieldsForSort
+            );
 
         public SchoolAdmin(
             string username,
@@ -41,4 +49,25 @@ namespace OgrenciAidatSistemi.Models
             throw new NotImplementedException();
         }
     }
+
+    public static class SchoolAdminSearchConfig
+    {
+        public static readonly string[] AllowedFieldsForSearch = new string[]
+        {
+            "username",
+            "firstName",
+            "lastName",
+            "emailAddress"
+        };
+        public static readonly string[] AllowedFieldsForSort = new string[]
+        {
+            "CreatedAt",
+            "UpdatedAt",
+        }
+        .Concat(AllowedFieldsForSearch)
+            .ToArray();
+
+    }
+
+
 }

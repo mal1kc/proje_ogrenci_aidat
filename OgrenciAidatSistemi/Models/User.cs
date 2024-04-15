@@ -67,7 +67,7 @@ namespace OgrenciAidatSistemi.Models
             return false;
         }
 
-        public UserViewValidationResult ValidateFields(AppDbContext dbctx)
+        public UserViewValidationResult ValidateFieldsSignUp(AppDbContext dbctx)
         {
             if (!PasswordsMatch())
                 return UserViewValidationResult.PasswordsNotMatch;
@@ -83,6 +83,27 @@ namespace OgrenciAidatSistemi.Models
                 return UserViewValidationResult.UserExists;
 
             return UserViewValidationResult.FieldsAreValid;
+        }
+
+        public UserViewValidationResult ValidateFieldsSignIn()
+        {
+            if (!CheckEmailAddressRegex())
+                return UserViewValidationResult.EmailAddressNotMatchRegex;
+            if (!CheckUserName())
+                return UserViewValidationResult.InvalidName;
+            if (string.IsNullOrEmpty(Password))
+                return UserViewValidationResult.PasswordEmpty;
+            return UserViewValidationResult.FieldsAreValid;
+        }
+
+        public bool CheckUserName()
+        {
+            // XOR
+            return string.IsNullOrEmpty(Username)
+                ^ (
+                    Username.Length < Constants.MaxUserNameLength
+                    && Username.Length > Constants.MinUserNameLength
+                );
         }
 
         public abstract bool? CheckUsernameExists(AppDbContext dbctx);
@@ -111,6 +132,8 @@ namespace OgrenciAidatSistemi.Models
         InvalidName,
         EmailAddressNotMatchRegex,
         UserExists,
+        PasswordEmpty,
+        InvalidUsername
     }
 
     public abstract class User : IBaseDbModel
@@ -147,6 +170,5 @@ namespace OgrenciAidatSistemi.Models
         public string? LastName { get; set; }
         public abstract DateTime CreatedAt { get; set; }
         public abstract DateTime UpdatedAt { get; set; }
-
     }
 }

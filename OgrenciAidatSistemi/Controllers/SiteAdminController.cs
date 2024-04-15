@@ -13,8 +13,6 @@ namespace OgrenciAidatSistemi.Controllers
         private readonly ILogger<SiteAdminController> _logger;
         private readonly AppDbContext _appDbContext;
 
-        private readonly ControllerHelper<SiteAdmin> _controllerHelper = new();
-
         private readonly UserService _userService;
 
         public SiteAdminController(ILogger<SiteAdminController> logger, AppDbContext appDbContext)
@@ -34,6 +32,10 @@ namespace OgrenciAidatSistemi.Controllers
         [HttpGet(Configurations.Constants.AdminAuthenticationLoginPath)]
         public ActionResult SignIn()
         {
+            if (_userService.IsUserSignedIn())
+            {
+                return RedirectToAction("Index", "Home");
+            }
             return View();
         }
 
@@ -105,7 +107,7 @@ namespace OgrenciAidatSistemi.Controllers
             ViewData["NameSortParam"] = string.IsNullOrEmpty(sortOrder) ? "name_desc" : "";
             ViewData["DateSortParam"] = sortOrder == "Date" ? "date_desc" : "Date";
 
-            var modelSearch = new ModelSearchQueryable<SiteAdmin>(
+            var modelSearch = new QueryableModelHelper<SiteAdmin>(
                 _appDbContext.SiteAdmins.AsQueryable(),
                 new ModelSearchConfig(
                     SiteAdminSearchConfig.AllowedFieldsForSearch,
@@ -124,8 +126,8 @@ namespace OgrenciAidatSistemi.Controllers
 
                 if (!string.IsNullOrEmpty(searchField))
                 {
-                    if (!SiteAdminSearchConfig.AllowedFieldsForSort.Contains(sortOrderBase))
-                        throw new ArgumentException($"Field '{sortOrderBase}' cannot be sorted.");
+                    if (!SiteAdminSearchConfig.AllowedFieldsForSearch.Contains(searchField))
+                        throw new ArgumentException("Invalid search field");
                 }
 
                 switch (sortOrderBase)
@@ -171,6 +173,8 @@ namespace OgrenciAidatSistemi.Controllers
                 "ids of paginatedsiteadmins: {0}",
                 string.Join(", ", paginatedSiteAdmins.Select(e => e.Id))
             );
+
+            return View(paginatedSiteAdmins);
 
             // create collecttion from paginatedsiteadmins with ids
 
@@ -220,7 +224,9 @@ namespace OgrenciAidatSistemi.Controllers
         {
             if (ModelState.IsValid)
             {
-                UserViewValidationResult validationResult = siteAdmin.ValidateFields(_appDbContext);
+                UserViewValidationResult validationResult = siteAdmin.ValidateFieldsSignUp(
+                    _appDbContext
+                );
                 switch (validationResult)
                 {
                     case UserViewValidationResult.PasswordsNotMatch:
@@ -330,7 +336,6 @@ namespace OgrenciAidatSistemi.Controllers
             {
                 return NotFound();
             }
-
 
             bool isDeleted = await _userService.DeleteUser(siteAdminUser.Id);
             if (!isDeleted)

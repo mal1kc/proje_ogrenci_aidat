@@ -32,7 +32,6 @@ namespace OgrenciAidatSistemi.Models
             PasswordHash = passwordHash;
         }
 
-        //@TODO: find a way to remove this constructor
         /// <summary>
         /// This constructor is only for DBSeeder
         /// </summary>

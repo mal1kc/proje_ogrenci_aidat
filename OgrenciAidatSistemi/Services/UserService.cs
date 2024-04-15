@@ -72,6 +72,11 @@ namespace OgrenciAidatSistemi.Services
             }
         }
 
+        public string HashPassword(string password)
+        {
+            return User.ComputeHash(password);
+        }
+
         public async Task<bool> UpdateUser(User user)
         {
             try
@@ -129,7 +134,9 @@ namespace OgrenciAidatSistemi.Services
                 {
                     if (HttpContext != null)
                     {
-                        var currentUserId = HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                        var currentUserId = HttpContext
+                            .User.FindFirst(ClaimTypes.NameIdentifier)
+                            ?.Value;
                         if (currentUserId != null && int.Parse(currentUserId) == userId)
                             return false;
                     }
