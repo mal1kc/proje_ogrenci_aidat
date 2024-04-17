@@ -61,9 +61,22 @@ namespace OgrenciAidatSistemi.Models
             }
         }
 
-        public override bool? CheckUsernameExists(AppDbContext dbctx)
+        public override bool CheckUsernameExists(AppDbContext dbctx)
         {
+            if (dbctx.SiteAdmins == null)
+            {
+                throw new System.Exception("SiteAdmins table is null");
+            }
             return dbctx.SiteAdmins.Any(admin => admin.Username == Username);
+        }
+
+        public override bool CheckEmailAddressExists(AppDbContext dbctx)
+        {
+            if (dbctx.SiteAdmins == null)
+            {
+                throw new System.Exception("SiteAdmins table is null");
+            }
+            return dbctx.SiteAdmins.Any(admin => admin.EmailAddress == EmailAddress);
         }
     }
 

@@ -60,7 +60,7 @@ namespace OgrenciAidatSistemi.Models
         public DateTime CreatedAt { get; set; }
         public DateTime UpdatedAt { get; set; }
 
-        public bool PasswordsMatch()
+        public bool CheckPasswordsMatch()
         {
             if (Password == PasswordVerify)
                 return true;
@@ -69,17 +69,14 @@ namespace OgrenciAidatSistemi.Models
 
         public UserViewValidationResult ValidateFieldsSignUp(AppDbContext dbctx)
         {
-            if (!PasswordsMatch())
+            if (!CheckPasswordsMatch())
                 return UserViewValidationResult.PasswordsNotMatch;
             if (!CheckNamesLenght())
                 return UserViewValidationResult.InvalidName;
             if (!CheckEmailAddressRegex())
                 return UserViewValidationResult.EmailAddressNotMatchRegex;
 
-            bool? usernm_exits = CheckUsernameExists(dbctx);
-            if (usernm_exits == null)
-                return UserViewValidationResult.UserExists;
-            else if (usernm_exits == true)
+            if (CheckUsernameExists(dbctx))
                 return UserViewValidationResult.UserExists;
 
             return UserViewValidationResult.FieldsAreValid;
@@ -96,6 +93,38 @@ namespace OgrenciAidatSistemi.Models
             return UserViewValidationResult.FieldsAreValid;
         }
 
+        public UserViewValidationResult ValidateFieldsCreate(AppDbContext dbctx)
+        {
+            var baseFieldsValidation = ValidateFieldsSignIn();
+            if (baseFieldsValidation != UserViewValidationResult.FieldsAreValid)
+                return baseFieldsValidation;
+            if (string.IsNullOrEmpty(Password))
+                return UserViewValidationResult.PasswordEmpty;
+            if (!CheckPasswordsMatch())
+                return UserViewValidationResult.PasswordsNotMatch;
+            if (!CheckNamesLenght())
+                return UserViewValidationResult.InvalidName;
+            if (!CheckUserName())
+                return UserViewValidationResult.InvalidUsername;
+            if (CheckUsernameExists(dbctx))
+                return UserViewValidationResult.UserExists;
+            if (CheckEmailAddressExists(dbctx))
+                return UserViewValidationResult.EmailAddressExists;
+
+            return UserViewValidationResult.FieldsAreValid;
+        }
+
+        public UserViewValidationResult ValidateFieldsUpdate(AppDbContext dbctx)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public UserViewValidationResult ValidateFieldsDelete(AppDbContext dbctx)
+        {
+            throw new System.NotImplementedException();
+        }
+
+
         public bool CheckUserName()
         {
             // XOR
@@ -106,20 +135,23 @@ namespace OgrenciAidatSistemi.Models
                 );
         }
 
-        public abstract bool? CheckUsernameExists(AppDbContext dbctx);
-
         public bool CheckNamesLenght()
         {
             List<bool> nameTruths = new List<bool>
             {
-                FirstName?.Length < Constants.MaxUserNameLength,
-                Username.Length < Constants.MaxUserNameLength
-                    && Username.Length > Constants.MinUserNameLength
+            FirstName.Length < Constants.MaxUserNameLength,
+            Username.Length < Constants.MaxUserNameLength
+                && Username.Length > Constants.MinUserNameLength
             };
             if (LastName != null)
                 nameTruths.Add(LastName.Length < Constants.MaxUserNameLength);
             return nameTruths.All((value) => value);
         }
+
+        public abstract bool CheckUsernameExists(AppDbContext dbctx);
+        public abstract bool CheckEmailAddressExists(AppDbContext dbctx);
+
+
 
         public bool CheckEmailAddressRegex() =>
             Regex.IsMatch(EmailAddress, Constants.EmailRegEx, RegexOptions.IgnoreCase);
@@ -132,6 +164,7 @@ namespace OgrenciAidatSistemi.Models
         InvalidName,
         EmailAddressNotMatchRegex,
         UserExists,
+        EmailAddressExists,
         PasswordEmpty,
         InvalidUsername
     }

@@ -144,48 +144,150 @@ namespace OgrenciAidatSistemi.Controllers
                 pageIndex,
                 pageSize
             ));
+        }
 
-            /* ViewData["CurrentSortOrder"] = sortOrder; */
-            /* ViewData["CurrentSearchString"] = searchString; */
-            /* ViewData["NameSortParam"] = string.IsNullOrEmpty(sortOrder) ? "name_desc" : ""; */
-            /* ViewData["DateSortParam"] = sortOrder == "Date" ? "date_desc" : "Date"; */
-            /**/
-            /* var modelSearch = new QueryableModelHelper<SchoolAdmin>( */
-            /*         _dbContext.SchoolAdmins.AsQueryable(), */
-            /*         new ModelSearchConfig( */
-            /*             SchoolAdminSearchConfig.AllowedFieldsForSearch, */
-            /*             SchoolAdminSearchConfig.AllowedFieldsForSort */
-            /*         ) */
-            /*         ); */
-            /**/
-            /* IQueryable<SchoolAdmin> modelOpResult = modelSearch.SearchAndSort( */
-            /*     searchString, */
-            /*     searchField, */
-            /*     sortOrder */
-            /* ); */
-            /**/
-            /* Console.WriteLine("modelOpResult: {0}", modelOpResult.Count()); */
-            /**/
-            /* var paginatedModel = modelOpResult */
-            /* .Skip((pageIndex - 1) * pageSize) */
-            /* .Take(pageSize) */
-            /*     .AsQueryable(); */
-            /**/
-            /* var countOfmodelopResult = modelOpResult.Count(); */
-            /**/
-            /**/
-            /* ViewData["CurrentPageIndex"] = pageIndex; */
-            /* ViewData["TotalPages"] = (int) */
-            /*     Math.Ceiling(countOfmodelopResult / (double)pageSize); */
-            /* ViewData["TotalItems"] = countOfmodelopResult; */
-            /* ViewData["PageSize"] = pageSize; */
-            /**/
-            /* Console.WriteLine( */
-            /*     "ids of paginateSchAdmins: {0}", */
-            /*     string.Join(", ", paginatedModel.Select(e => e.Id)) */
-            /* ); */
-            /**/
-            /* return View(paginatedModel); */
+        [Authorize(Roles = Configurations.Constants.userRoles.SiteAdmin)]
+        public IActionResult Create()
+        {
+            ViewBag.Schools = _dbContext.Schools;
+            return View();
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [Authorize(Roles = Configurations.Constants.userRoles.SiteAdmin)]
+        public async Task<IActionResult> Create(
+            [Bind("Username", "EmailAddress", "Password", "PasswordVerify",
+                "SchoolId", "FirstName", "LastName"
+                )] SchoolAdminView scAdminView
+        )
+        {
+            ViewBag.Schools = _dbContext.Schools;
+            UserViewValidationResult validationResult = scAdminView.ValidateFieldsCreate(_dbContext);
+            // check is school exists in db
+            if (validationResult != UserViewValidationResult.FieldsAreValid)
+            {
+                TempData["CantCreate"] = true;
+                switch (validationResult)
+                {
+                    case UserViewValidationResult.EmailAddressNotMatchRegex:
+                        ModelState.AddModelError("EmailAddress", "invalid email syntax");
+                        break;
+                    case UserViewValidationResult.PasswordsNotMatch:
+                        ModelState.AddModelError("Password", "Passwords do not match");
+                        break;
+                    case UserViewValidationResult.PasswordEmpty:
+                        ModelState.AddModelError("Password", "Password is empty");
+                        break;
+                    case UserViewValidationResult.UserExists:
+                        ModelState.AddModelError("Username", "User already exists");
+                        break;
+                    case UserViewValidationResult.InvalidName:
+                    case UserViewValidationResult.InvalidUsername:
+                        ModelState.AddModelError("Username", "Invalid username");
+                        break;
+                    case UserViewValidationResult.EmailAddressExists:
+                        ModelState.AddModelError("EmailAddress", "Email already exists");
+                        break;
+                }
+                return View(scAdminView);
+            }
+            var school = _dbContext.Schools?.Where(s => s.Id == scAdminView.SchoolId).FirstOrDefault();
+
+            if (school == null)
+            {
+                TempData["CantCreate"] = true;
+                ModelState.AddModelError("School", "School is required");
+                return View(scAdminView);
+            }
+
+            // check if user exists
+            _logger.LogDebug("Creating user {0}", scAdminView.Username);
+            try
+            {
+                var newSchAdmin = new SchoolAdmin
+                {
+                    Username = scAdminView.Username,
+                    EmailAddress = scAdminView.EmailAddress,
+                    FirstName = scAdminView.FirstName,
+                    LastName = scAdminView.LastName,
+                    PasswordHash = _userService.HashPassword(scAdminView.Password),
+                    _School = school,
+                    CreatedAt = DateTime.Now,
+                    UpdatedAt = DateTime.Now
+                };
+                _logger.LogDebug("User {0} created", scAdminView.Username);
+                _logger.LogDebug("saving user {0} to db", scAdminView.Username);
+                if (_dbContext.SchoolAdmins == null)
+                {
+                    _dbContext.SchoolAdmins = _dbContext.Set<SchoolAdmin>();
+                }
+                _dbContext.SchoolAdmins.Add(newSchAdmin);
+                await _dbContext.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(
+                    "Error while creating user {0}: {1}",
+                    scAdminView.Username,
+                    ex.Message
+                );
+                if (ex.InnerException != null)
+                    _logger.LogError("inner exception: {0}", ex.InnerException.Message);
+                if (ex.InnerException?.InnerException != null)
+                    _logger.LogError("inner inner exception: {0}", ex.InnerException.InnerException.Message);
+                TempData["CantCreate"] = true;
+                return RedirectToAction("Create");
+            }
+            // Succes state remove schools from viewbag
+            ViewBag.Schools = null;
+            return RedirectToAction("List");
+        }
+
+        [Authorize(Roles = Configurations.Constants.userRoles.SiteAdmin)]
+        public async Task<IActionResult> Delete(int? id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            var siteAdmin = _dbContext.SchoolAdmins.Where(e => e.Id == id).FirstOrDefault();
+
+            if (siteAdmin == null)
+            {
+                return NotFound();
+            }
+
+            // check if the user is logged in
+            // if the user is logged in, prevent deletion
+
+            var loggedInUserId = _userService.GetSignedInUserId();
+            Console.WriteLine("Logged in user id: {0}", loggedInUserId);
+
+            if (loggedInUserId == id)
+            {
+                ViewData["Message"] = "You cannot delete the account you are logged in with";
+                return RedirectToAction("List");
+            }
+
+            return View(siteAdmin);
+        }
+
+        [HttpPost, ActionName("DeleteConfirmed")]
+        [ValidateAntiForgeryToken]
+        [Authorize(Roles = Configurations.Constants.userRoles.SiteAdmin)]
+
+        public async Task<IActionResult> DeleteConfirmed(int? id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+            bool isUserDeleted = await _userService.DeleteUser((int)id);
+            if (!isUserDeleted)
+                ViewData["Message"] = "Error while deleting user";
+            return RedirectToAction("List");
         }
     }
 }

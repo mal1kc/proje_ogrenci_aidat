@@ -330,14 +330,14 @@ namespace OgrenciAidatSistemi.Controllers
             /* var siteAdmin = _appDbContext.SiteAdmins.Where(e => e.Id == id).FirstOrDefault(); */
             /**/
 
-            var siteAdminUser = _appDbContext.Users.Where(e => e.Id == id).FirstOrDefault();
+            var dbUser = _appDbContext.Users.Where(e => e.Id == id).FirstOrDefault();
 
-            if (siteAdminUser == null)
+            if (dbUser == null)
             {
                 return NotFound();
             }
 
-            bool isDeleted = await _userService.DeleteUser(siteAdminUser.Id);
+            bool isDeleted = await _userService.DeleteUser(dbUser.Id);
             if (!isDeleted)
                 ViewData["Message"] = "Error while deleting the user";
             return RedirectToAction("List");
