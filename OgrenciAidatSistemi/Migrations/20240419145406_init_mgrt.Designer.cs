@@ -11,8 +11,8 @@ using OgrenciAidatSistemi.Data;
 namespace OgrenciAidatSistemi.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20240323125014_init_migrt")]
-    partial class init_migrt
+    [Migration("20240419145406_init_mgrt")]
+    partial class init_mgrt
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -146,6 +146,10 @@ namespace OgrenciAidatSistemi.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("TEXT");
 
@@ -161,11 +165,6 @@ namespace OgrenciAidatSistemi.Migrations
                         .HasColumnType("INTEGER");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("Discriminator")
-                        .IsRequired()
-                        .HasMaxLength(13)
                         .HasColumnType("TEXT");
 
                     b.Property<string>("EmailAddress")
@@ -189,18 +188,19 @@ namespace OgrenciAidatSistemi.Migrations
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("TEXT");
 
-                    b.Property<int>("UserId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("Username")
+                    b.Property<string>("UserType")
                         .IsRequired()
+                        .HasMaxLength(13)
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");
 
+                    b.HasIndex("EmailAddress")
+                        .IsUnique();
+
                     b.ToTable("Users");
 
-                    b.HasDiscriminator<string>("Discriminator").HasValue("User");
+                    b.HasDiscriminator<string>("UserType").HasValue("User");
 
                     b.UseTphMappingStrategy();
                 });
@@ -351,8 +351,9 @@ namespace OgrenciAidatSistemi.Migrations
                 {
                     b.HasBaseType("OgrenciAidatSistemi.Models.User");
 
-                    b.Property<int>("SiteAdminId")
-                        .HasColumnType("INTEGER");
+                    b.Property<string>("Username")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
 
                     b.HasDiscriminator().HasValue("SiteAdmin");
                 });
@@ -409,7 +410,7 @@ namespace OgrenciAidatSistemi.Migrations
             modelBuilder.Entity("OgrenciAidatSistemi.Models.SchoolAdmin", b =>
                 {
                     b.HasOne("OgrenciAidatSistemi.Models.School", "School")
-                        .WithMany()
+                        .WithMany("SchoolAdmins")
                         .HasForeignKey("SchoolId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -435,6 +436,8 @@ namespace OgrenciAidatSistemi.Migrations
 
             modelBuilder.Entity("OgrenciAidatSistemi.Models.School", b =>
                 {
+                    b.Navigation("SchoolAdmins");
+
                     b.Navigation("Students");
                 });
 #pragma warning restore 612, 618

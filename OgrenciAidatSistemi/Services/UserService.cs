@@ -31,13 +31,15 @@ namespace OgrenciAidatSistemi.Services
             return await _dbContext.Users.FindAsync(userId);
         }
 
-        public async Task<User?> GetUserByUsername(string username)
+        public async Task<SiteAdmin?> GetSAdminByUsername(string username)
         {
             if (string.IsNullOrEmpty(username))
                 return null;
             if (_dbContext.Users == null)
                 return null;
-            return await _dbContext.Users.FirstOrDefaultAsync(u => u.Username == username);
+            return await _dbContext.SiteAdmins.FirstOrDefaultAsync(u =>
+                u.Username == username && u.Role == UserRole.SiteAdmin
+            );
         }
 
         public async Task<User?> GetUserByEmail(string email)

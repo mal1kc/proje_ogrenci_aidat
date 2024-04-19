@@ -50,7 +50,6 @@ namespace OgrenciAidatSistemi.Models
     public abstract class UserView : IBaseDbModelView
     {
         public int Id { get; set; }
-        public string Username { get; set; }
         public string EmailAddress { get; set; }
         public UserRole Role { get; set; }
         public string FirstName { get; set; }
@@ -76,7 +75,7 @@ namespace OgrenciAidatSistemi.Models
             if (!CheckEmailAddressRegex())
                 return UserViewValidationResult.EmailAddressNotMatchRegex;
 
-            if (CheckUsernameExists(dbctx))
+            if (CheckUserExists(dbctx))
                 return UserViewValidationResult.UserExists;
 
             return UserViewValidationResult.FieldsAreValid;
@@ -86,7 +85,7 @@ namespace OgrenciAidatSistemi.Models
         {
             if (!CheckEmailAddressRegex())
                 return UserViewValidationResult.EmailAddressNotMatchRegex;
-            if (!CheckUserName())
+            if (!CheckNamesLenght())
                 return UserViewValidationResult.InvalidName;
             if (string.IsNullOrEmpty(Password))
                 return UserViewValidationResult.PasswordEmpty;
@@ -104,9 +103,7 @@ namespace OgrenciAidatSistemi.Models
                 return UserViewValidationResult.PasswordsNotMatch;
             if (!CheckNamesLenght())
                 return UserViewValidationResult.InvalidName;
-            if (!CheckUserName())
-                return UserViewValidationResult.InvalidUsername;
-            if (CheckUsernameExists(dbctx))
+            if (CheckUserExists(dbctx))
                 return UserViewValidationResult.UserExists;
             if (CheckEmailAddressExists(dbctx))
                 return UserViewValidationResult.EmailAddressExists;
@@ -124,34 +121,30 @@ namespace OgrenciAidatSistemi.Models
             throw new System.NotImplementedException();
         }
 
-
-        public bool CheckUserName()
-        {
-            // XOR
-            return string.IsNullOrEmpty(Username)
-                ^ (
-                    Username.Length < Constants.MaxUserNameLength
-                    && Username.Length > Constants.MinUserNameLength
-                );
-        }
+        /* public bool CheckUserName() */
+        /* { */
+        /*     // XOR */
+        /*     return string.IsNullOrEmpty(Username) */
+        /*         ^ ( */
+        /*             Username.Length < Constants.MaxUserNameLength */
+        /*             && Username.Length > Constants.MinUserNameLength */
+        /*         ); */
+        /* } */
 
         public bool CheckNamesLenght()
         {
             List<bool> nameTruths = new List<bool>
             {
-            FirstName.Length < Constants.MaxUserNameLength,
-            Username.Length < Constants.MaxUserNameLength
-                && Username.Length > Constants.MinUserNameLength
+                FirstName.Length < Constants.MaxUserNameLength,
+                /* CheckUserName(), */
             };
             if (LastName != null)
                 nameTruths.Add(LastName.Length < Constants.MaxUserNameLength);
             return nameTruths.All((value) => value);
         }
 
-        public abstract bool CheckUsernameExists(AppDbContext dbctx);
+        public abstract bool CheckUserExists(AppDbContext dbctx);
         public abstract bool CheckEmailAddressExists(AppDbContext dbctx);
-
-
 
         public bool CheckEmailAddressRegex() =>
             Regex.IsMatch(EmailAddress, Constants.EmailRegEx, RegexOptions.IgnoreCase);
@@ -165,8 +158,7 @@ namespace OgrenciAidatSistemi.Models
         EmailAddressNotMatchRegex,
         UserExists,
         EmailAddressExists,
-        PasswordEmpty,
-        InvalidUsername
+        PasswordEmpty
     }
 
     public abstract class User : IBaseDbModel
@@ -195,9 +187,8 @@ namespace OgrenciAidatSistemi.Models
         }
 
         public int Id { get; set; }
-        public string Username { get; set; }
-        public string PasswordHash { get; set; }
-        public string EmailAddress { get; set; }
+        public required string PasswordHash { get; set; }
+        public required string EmailAddress { get; set; }
         public UserRole Role { get; set; }
         public string FirstName { get; set; }
         public string? LastName { get; set; }

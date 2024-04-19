@@ -8,28 +8,28 @@ using OgrenciAidatSistemi.Services;
 
 namespace OgrenciAidatSistemi.Controllers
 {
-    public class SchoolAdminController : Controller
+    public class StudentController : Controller
     {
-        private readonly ILogger<SchoolAdminController> _logger;
+        private readonly ILogger<StudentController> _logger;
 
         private readonly AppDbContext _dbContext;
 
         private readonly UserService _userService;
 
-        public SchoolAdminController(ILogger<SchoolAdminController> logger, AppDbContext dbContext)
+        public StudentController(ILogger<StudentController> logger, AppDbContext dbContext)
         {
             _logger = logger;
             _dbContext = dbContext;
             _userService = new UserService(dbContext, new HttpContextAccessor());
         }
 
-        [Authorize(Roles = Configurations.Constants.userRoles.SchoolAdmin)]
+        [Authorize(Roles = Configurations.Constants.userRoles.Student)]
         public IActionResult Index()
         {
             return View();
         }
 
-        [Authorize(Roles = Configurations.Constants.userRoles.SchoolAdmin)]
+        [Authorize(Roles = Configurations.Constants.userRoles.Student)]
         public IActionResult SignIn()
         {
             if (_userService.IsUserSignedIn())
@@ -42,7 +42,7 @@ namespace OgrenciAidatSistemi.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> SignIn(
-            [Bind("EmailAddress", "Password")] SchoolAdminView scAdminView
+            [Bind("EmailAddress", "Password")] StudentView scAdminView
         )
         {
             // some idoitic validation
@@ -63,10 +63,9 @@ namespace OgrenciAidatSistemi.Controllers
                 return View(scAdminView);
             }
 
-            // check if user exists
             var passwordHash = _userService.HashPassword(scAdminView.Password);
             var schAdmin = _dbContext
-                .SchoolAdmins.Where(u =>
+                .Students.Where(u =>
                     u.EmailAddress == scAdminView.EmailAddress && u.PasswordHash == passwordHash
                 )
                 .FirstOrDefault();
@@ -115,19 +114,21 @@ namespace OgrenciAidatSistemi.Controllers
             // 1. viewdata keys ; sortorder, searchstring, currentfield
             // TODO improve QueryableModelHelper do sortig and searching in one method with given config
             // ++ improve logics for searching and sorting
-            if (_dbContext.SchoolAdmins == null)
+            if (_dbContext.Students == null)
             {
-                _logger.LogError("SchoolAdmins table is null");
-                _dbContext.SchoolAdmins = _dbContext.Set<SchoolAdmin>();
+                _logger.LogError("Students table is null");
+                _dbContext.Students = _dbContext.Set<Student>();
             }
 
-            var modelList = new QueryableModelHelper<SchoolAdmin>(
-                _dbContext.SchoolAdmins.AsQueryable(),
+            var modelList = new QueryableModelHelper<Student>(
+                _dbContext.Students.AsQueryable(),
                 new ModelSearchConfig(
-                    SchoolAdminSearchConfig.AllowedFieldsForSearch,
-                    SchoolAdminSearchConfig.AllowedFieldsForSort
+                    StudentSearchConfig.AllowedFieldsForSearch,
+                    StudentSearchConfig.AllowedFieldsForSort
                 )
             );
+
+            ViewData["SchoolSortParam"] = string.IsNullOrEmpty(sortOrder) ? "school_desc" : "";
 
             return View(
                 modelList.List(ViewData, searchString, searchField, sortOrder, pageIndex, pageSize)
@@ -153,11 +154,11 @@ namespace OgrenciAidatSistemi.Controllers
                 "FirstName",
                 "LastName"
             )]
-                SchoolAdminView scAdminView
+                StudentView studentView
         )
         {
             ViewBag.Schools = _dbContext.Schools;
-            UserViewValidationResult validationResult = scAdminView.ValidateFieldsCreate(
+            UserViewValidationResult validationResult = studentView.ValidateFieldsCreate(
                 _dbContext
             );
             // check is school exists in db
@@ -185,46 +186,47 @@ namespace OgrenciAidatSistemi.Controllers
                         ModelState.AddModelError("EmailAddress", "Email already exists");
                         break;
                 }
-                return View(scAdminView);
+                return View(studentView);
             }
             var school = _dbContext
-                .Schools?.Where(s => s.Id == scAdminView.SchoolId)
+                .Schools?.Where(s => s.Id == studentView.SchoolId)
                 .FirstOrDefault();
 
             if (school == null)
             {
                 TempData["CantCreate"] = true;
                 ModelState.AddModelError("School", "School is required");
-                return View(scAdminView);
+                return View(studentView);
             }
 
             // check if user exists
-            _logger.LogDebug("Creating user {0}", scAdminView.EmailAddress);
+            _logger.LogDebug("Creating user {0}", studentView.EmailAddress);
             try
             {
-                var newSchAdmin = new SchoolAdmin
+                var newSchAdmin = new Student
                 {
-                    EmailAddress = scAdminView.EmailAddress,
-                    FirstName = scAdminView.FirstName,
-                    LastName = scAdminView.LastName,
-                    PasswordHash = _userService.HashPassword(scAdminView.Password),
+                    EmailAddress = studentView.EmailAddress,
+                    FirstName = studentView.FirstName,
+                    LastName = studentView.LastName,
+                    PasswordHash = _userService.HashPassword(studentView.Password),
                     School = school,
                     CreatedAt = DateTime.Now,
                     UpdatedAt = DateTime.Now
                 };
-                _logger.LogDebug("User {0} created", scAdminView.EmailAddress);
-                if (_dbContext.SchoolAdmins == null)
+                _logger.LogDebug("User {0} created", studentView.EmailAddress);
+                _logger.LogDebug("saving user {0} to db", studentView.EmailAddress);
+                if (_dbContext.Students == null)
                 {
-                    _dbContext.SchoolAdmins = _dbContext.Set<SchoolAdmin>();
+                    _dbContext.Students = _dbContext.Set<Student>();
                 }
-                _dbContext.SchoolAdmins.Add(newSchAdmin);
+                _dbContext.Students.Add(newSchAdmin);
                 await _dbContext.SaveChangesAsync();
             }
             catch (Exception ex)
             {
                 _logger.LogError(
                     "Error while creating user {0}: {1}",
-                    scAdminView.EmailAddress,
+                    studentView.EmailAddress,
                     ex.Message
                 );
                 if (ex.InnerException != null)
@@ -250,7 +252,7 @@ namespace OgrenciAidatSistemi.Controllers
                 return NotFound();
             }
 
-            var siteAdmin = _dbContext.SchoolAdmins.Where(e => e.Id == id).FirstOrDefault();
+            var siteAdmin = _dbContext.Students.Where(e => e.Id == id).FirstOrDefault();
 
             if (siteAdmin == null)
             {

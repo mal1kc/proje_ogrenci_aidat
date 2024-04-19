@@ -5,6 +5,7 @@ namespace OgrenciAidatSistemi.Data
 {
     public class AppDbContext : DbContext
     {
+        // TODO make users table for only refrence in other tables
         public DbSet<User>? Users { get; set; }
         public DbSet<SiteAdmin>? SiteAdmins { get; set; }
 
@@ -42,6 +43,18 @@ namespace OgrenciAidatSistemi.Data
                 .HasDiscriminator<string>("PaymentType")
                 .HasValue<CashPayment>("Cash")
                 .HasValue<CreditCardPayment>("CreditCard");
+
+            // Student and SchoolAdmin are User but they differ from SiteAdmin
+            // SA has username they don't
+
+            modelBuilder
+                .Entity<User>()
+                .HasDiscriminator<string>("UserType")
+                .HasValue<Student>("Student")
+                .HasValue<SchoolAdmin>("SchoolAdmin")
+                .HasValue<SiteAdmin>("SiteAdmin");
+
+            modelBuilder.Entity<User>().HasIndex(u => u.EmailAddress).IsUnique();
 
             base.OnModelCreating(modelBuilder);
         }

@@ -2,7 +2,6 @@ using System.Linq.Expressions;
 using System.Reflection;
 // import for ViewDataDictionary
 using Microsoft.AspNetCore.Mvc.ViewFeatures;
-
 using OgrenciAidatSistemi.Models.Interfaces;
 
 namespace OgrenciAidatSistemi.Helpers
@@ -12,7 +11,6 @@ namespace OgrenciAidatSistemi.Helpers
         ASC,
         DESC
     }
-
 
     public class QueryableModelHelper<T>
         where T : ISearchableModel
@@ -33,12 +31,11 @@ namespace OgrenciAidatSistemi.Helpers
             if (string.IsNullOrEmpty(searchString))
                 return _sourceQueryable;
 
-            IQueryable<T> resultQueryable = _sourceQueryable;
+            var resultQueryable = _sourceQueryable;
 
             if (string.IsNullOrEmpty(searchField))
             {
                 searchString = searchString.ToLower(); // Convert search string to lowercase
-
                 var parameter = Expression.Parameter(typeof(T), "x");
                 var predicate = GetCombinedContainsExpression(parameter, searchString);
 
@@ -64,7 +61,6 @@ namespace OgrenciAidatSistemi.Helpers
         )
         {
             var properties = typeof(T).GetProperties();
-
             Expression combinedExpression = null;
 
             foreach (var property in properties)
@@ -77,30 +73,16 @@ namespace OgrenciAidatSistemi.Helpers
                         searchString
                     );
 
-                    if (combinedExpression == null)
-                    {
-                        combinedExpression = containsExpression.Body;
-                    }
-                    else
-                    {
-                        combinedExpression = Expression.OrElse(
-                            combinedExpression,
-                            containsExpression.Body
-                        );
-                    }
+                    combinedExpression = combinedExpression == null
+                        ? containsExpression.Body
+                        : Expression.OrElse(combinedExpression, containsExpression.Body);
                 }
             }
 
-            if (combinedExpression == null)
-            {
-                // No string properties found, return a default true expression
-                return Expression.Lambda<Func<T, bool>>(Expression.Constant(true), parameter);
-            }
-
-            return Expression.Lambda<Func<T, bool>>(combinedExpression, parameter);
+            return combinedExpression == null
+                ? Expression.Lambda<Func<T, bool>>(Expression.Constant(true), parameter)
+                : Expression.Lambda<Func<T, bool>>(combinedExpression, parameter);
         }
-
-        // FieldContains with expression trees
 
         private Expression<Func<T, bool>> FieldContainsExpression(
             ParameterExpression parameter,
@@ -110,55 +92,46 @@ namespace OgrenciAidatSistemi.Helpers
         {
             MemberExpression property = Expression.Property(parameter, fieldName);
             ConstantExpression search = Expression.Constant(searchString);
-
-            // Call Contains method to check if the property contains the search string
-            MethodInfo containsMethod = typeof(string).GetMethod(
-                "Contains",
-                new[] { typeof(string) }
-            );
-            MethodCallExpression containsExpression = Expression.Call(
-                property,
-                containsMethod,
-                search
-            );
-
+            MethodInfo containsMethod = typeof(string).GetMethod("Contains", new[] { typeof(string) });
+            MethodCallExpression containsExpression = Expression.Call(property, containsMethod, search);
             return Expression.Lambda<Func<T, bool>>(containsExpression, parameter);
         }
 
-        public IQueryable<T> Sort(string FieldName, SortOrderEnum sortOrder)
-        {
-            IQueryable<T> operationQueryable;
-            if (_resultedQueryable == null)
-                operationQueryable = _sourceQueryable;
-            else
-                operationQueryable = _resultedQueryable;
 
-            if (string.IsNullOrEmpty(FieldName))
-                return operationQueryable;
-            if (!_searchConfig.AllowedFieldsForSort.Contains(FieldName))
-                return operationQueryable;
+        public IQueryable<T> Sort(string fieldName, SortOrderEnum sortOrder)
+        {
+            if (string.IsNullOrEmpty(fieldName) || !_searchConfig.AllowedFieldsForSort.Contains(fieldName))
+                return _resultedQueryable;
 
             var parameter = Expression.Parameter(typeof(T), "x");
-            var property = Expression.Property(parameter, FieldName);
-            var lambda = Expression.Lambda<Func<T, object>>(property, parameter);
-            if (sortOrder == SortOrderEnum.DESC)
-                operationQueryable = operationQueryable.OrderByDescending(lambda);
-            else
-                operationQueryable = operationQueryable.OrderBy(lambda);
-            return operationQueryable;
+            var property = Expression.Property(parameter, fieldName);
+
+            // Convert property type to object
+            var conversion = Expression.Convert(property, typeof(object));
+            var lambda = Expression.Lambda<Func<T, object>>(conversion, parameter);
+
+            _resultedQueryable = sortOrder == SortOrderEnum.DESC
+                ? _resultedQueryable.OrderByDescending(lambda)
+                : _resultedQueryable.OrderBy(lambda);
+
+            return _resultedQueryable;
         }
+
 
         public IQueryable<T> Sort(string sortOrderStr)
         {
-            // examples for sortOrderStr -> name_desc, name
             if (string.IsNullOrEmpty(sortOrderStr))
                 return _resultedQueryable;
+
             var sortOrder = SortOrderEnum.ASC;
             var fieldName = sortOrderStr;
 
-            if (sortOrderStr.Contains("_desc"))
+            if (sortOrderStr.EndsWith("_desc"))
+            {
                 sortOrder = SortOrderEnum.DESC;
-            fieldName = fieldName.Replace("_desc", "");
+                fieldName = fieldName.Substring(0, fieldName.Length - "_desc".Length);
+            }
+
             return Sort(fieldName, sortOrder);
         }
 
@@ -172,18 +145,12 @@ namespace OgrenciAidatSistemi.Helpers
             return Sort(sortOrder);
         }
 
-        public IQueryable<T> GetResult()
-        {
-            return _resultedQueryable;
-        }
+        public IQueryable<T> GetResult() => _resultedQueryable;
 
-        public IQueryable<T> GetSource()
-        {
-            return _sourceQueryable;
-        }
+        public IQueryable<T> GetSource() => _sourceQueryable;
 
         public IQueryable<T> List(
-        ViewDataDictionary ViewData,
+            ViewDataDictionary ViewData,
             string searchString = null,
             string searchField = null,
             string sortOrder = null,
@@ -191,21 +158,23 @@ namespace OgrenciAidatSistemi.Helpers
             int pageSize = 20
         )
         {
+            ViewData["IdSortParam"] = string.IsNullOrEmpty(sortOrder) ? "id_desc" : "";
             ViewData["CurrentSortOrder"] = sortOrder;
             ViewData["CurrentSearchString"] = searchString;
             ViewData["NameSortParam"] = string.IsNullOrEmpty(sortOrder) ? "name_desc" : "";
             ViewData["DateSortParam"] = sortOrder == "Date" ? "date_desc" : "Date";
+
             _resultedQueryable = SearchAndSort(searchString, searchField, sortOrder);
             var paginatedModel = _resultedQueryable
-            .Skip((pageIndex - 1) * pageSize)
-            .Take(pageSize)
-                .AsQueryable();
+                .Skip((pageIndex - 1) * pageSize)
+                .Take(pageSize);
+
             var countOfmodelopResult = _resultedQueryable.Count();
             ViewData["CurrentPageIndex"] = pageIndex;
-            ViewData["TotalPages"] = (int)
-                Math.Ceiling(countOfmodelopResult / (double)pageSize);
+            ViewData["TotalPages"] = (int)Math.Ceiling(countOfmodelopResult / (double)pageSize);
             ViewData["TotalItems"] = countOfmodelopResult;
             ViewData["PageSize"] = pageSize;
+
             return paginatedModel;
         }
     }

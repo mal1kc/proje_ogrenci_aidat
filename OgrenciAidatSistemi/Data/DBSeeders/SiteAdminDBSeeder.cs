@@ -6,53 +6,43 @@ namespace OgrenciAidatSistemi.Data
     public class SiteAdminDBSeeder : DbSeeder<AppDbContext, SiteAdmin>
     {
         public SiteAdminDBSeeder(AppDbContext context, IConfiguration configuration)
-            : base(context, configuration)
-        {
-            _seedData = new()
-            {
-                new(
-                    username: "mal1kc",
-                    firstName: "mal1kc",
-                    lastName: "",
-                    emailAddress: "admin@example.com",
-                    passwordHash: SiteAdmin.ComputeHash("Aadmin123")
-                )
-            };
-            if (_verboselogging)
-            {
-                Console.WriteLine("created SiteAdminDBSeeder");
-            }
-        }
+            : base(context, configuration) { }
 
         protected override async Task SeedDataAsync()
         {
-            if (_verboselogging)
+            foreach (var siteAdmin in _seedData)
             {
-                Console.WriteLine("SiteAdminDBSeeder: Seeding SiteAdmins");
-            }
-
-            foreach (var siteadmin in _seedData)
-            {
-                if (_verboselogging)
-                {
-                    Console.WriteLine(
-                        $"SiteAdminDBSeeder: Seeding SiteAdmins {siteadmin.Username}"
-                    );
-                }
-
-                if (await _context.SiteAdmins.AnyAsync(a => a.Username == siteadmin.Username))
+                if (
+                    await _context.SiteAdmins.AnyAsync(a =>
+                        a.EmailAddress == siteAdmin.EmailAddress
+                    )
+                )
                 {
                     continue;
                 }
-                siteadmin.CreatedAt = DateTime.Now;
-                siteadmin.UpdatedAt = DateTime.Now;
-                object value = await _context.SiteAdmins.AddAsync(siteadmin);
-                if (_verboselogging)
+
+                siteAdmin.CreatedAt = DateTime.Now;
+                siteAdmin.UpdatedAt = DateTime.Now;
+
+                await _context.SiteAdmins.AddAsync(siteAdmin);
+            }
+
+            await _context.SaveChangesAsync();
+        }
+
+        protected override async Task SeedRandomDataAsync()
+        {
+            for (int i = 0; i < 10; i++) // Seed 10 random site admins
+            {
+                var siteAdmin = CreateRandomModel();
+                Console.WriteLine(
+                    $"Generated SiteAdmin: EmailAddress: {siteAdmin.EmailAddress}, Password: RandomPassword_{siteAdmin.EmailAddress}"
+                );
+                if (await _context.Users.AnyAsync(u => u.EmailAddress == siteAdmin.EmailAddress))
                 {
-                    Console.WriteLine(
-                        $"SiteAdminDBSeeder: Seeding SiteAdmins {siteadmin.Username} {value}"
-                    );
+                    continue;
                 }
+                await _context.SiteAdmins.AddAsync(siteAdmin);
             }
 
             await _context.SaveChangesAsync();
@@ -60,41 +50,56 @@ namespace OgrenciAidatSistemi.Data
 
         protected override async Task AfterSeedDataAsync()
         {
-            // search seed data in dbcontext if not raise exception
-            if (_verboselogging)
+            if (_verboseLogging)
             {
                 Console.WriteLine("SiteAdminDBSeeder: AfterSeedDataAsync");
-                Console.WriteLine(" we have seed data");
-                for (int i = 0; i < _seedData.Count; i++)
+                Console.WriteLine("We have seed data:");
+                foreach (var siteAdmin in _seedData)
                 {
                     Console.WriteLine(
-                        $"SiteAdminDBSeeder: AfterSeedDataAsync {_seedData[i].Username}"
+                        $"SiteAdminDBSeeder: AfterSeedDataAsync {siteAdmin.EmailAddress}"
                     );
                 }
             }
 
-            foreach (var siteadmin in _seedData)
+            foreach (var siteAdmin in _seedData)
             {
-                if (_verboselogging)
+                if (
+                    !await _context.SiteAdmins.AnyAsync(a =>
+                        a.EmailAddress == siteAdmin.EmailAddress
+                    )
+                )
                 {
-                    Console.WriteLine(
-                        $"SiteAdminDBSeeder: AfterSeedDataAsync {siteadmin.Username}"
+                    throw new Exception(
+                        $"SiteAdminDBSeeder: AfterSeedDataAsync {siteAdmin.EmailAddress} not found"
                     );
                 }
-
-                if (await _context.SiteAdmins.AnyAsync(a => a.Username == siteadmin.Username))
-                {
-                    continue;
-                }
-                throw new Exception(
-                    $"SiteAdminDBSeeder: AfterSeedDataAsync {siteadmin.Username} not found in db"
-                );
             }
         }
 
-        protected override async Task SeedRandomDataAsync()
+        protected override SiteAdmin CreateRandomModel()
         {
-            throw new NotImplementedException();
+            var email_nm = "random_user" + random.Next(100);
+            var password = "RandomPassword_" + email_nm; // gitleaks:allow
+            return new SiteAdmin
+            {
+                FirstName = "rnd_fn_" + RandomizerHelper.GenerateRandomString(5),
+                LastName = "rnd_ln_" + RandomizerHelper.GenerateRandomString(5),
+                EmailAddress = $"{email_nm}@example.com",
+                PasswordHash = SiteAdmin.ComputeHash(password)
+            };
         }
+
+        private readonly List<SiteAdmin> _seedData = new List<SiteAdmin>
+        {
+            new SiteAdmin
+            {
+                Username = "mal1kc",
+                FirstName = "mal1kc",
+                LastName = "",
+                EmailAddress = "admin@example.com",
+                PasswordHash = SiteAdmin.ComputeHash("Aadmin123")
+            }
+        };
     }
 }

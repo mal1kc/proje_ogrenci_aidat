@@ -6,6 +6,7 @@ namespace OgrenciAidatSistemi.Models
 {
     public class SiteAdmin : User, ISearchableModel
     {
+        public string Username { get; set; }
         public override DateTime CreatedAt { get; set; }
         public override DateTime UpdatedAt { get; set; }
 
@@ -45,29 +46,17 @@ namespace OgrenciAidatSistemi.Models
 
     public class SiteAdminView : UserView
     {
-        public SiteAdmin ToAdmin
-        {
-            get
-            {
-                SiteAdmin siteAdmin =
-                    new(
-                        Username,
-                        firstName: FirstName,
-                        lastName: LastName,
-                        emailAddress: EmailAddress,
-                        passwordHash: SiteAdmin.ComputeHash(Password)
-                    );
-                return siteAdmin;
-            }
-        }
+        public string Username { get; set; }
 
-        public override bool CheckUsernameExists(AppDbContext dbctx)
+        public override bool CheckUserExists(AppDbContext dbctx)
         {
             if (dbctx.SiteAdmins == null)
             {
                 throw new System.Exception("SiteAdmins table is null");
             }
-            return dbctx.SiteAdmins.Any(admin => admin.Username == Username);
+            return dbctx.SiteAdmins.Any(admin =>
+                admin.Username == Username || admin.EmailAddress == EmailAddress
+            );
         }
 
         public override bool CheckEmailAddressExists(AppDbContext dbctx)

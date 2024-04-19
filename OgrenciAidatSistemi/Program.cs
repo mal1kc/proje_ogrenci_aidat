@@ -75,22 +75,25 @@ internal class Program
 
             if (configuration.GetSection("SeedData").GetValue("SeedDB", true) == true)
             {
+                var _verbs = configuration.GetSection("SeedData").GetValue("VerboseLogging", false);
                 Console.WriteLine("Seeding Database");
 
                 List<IDbSeeder<AppDbContext>> DBseeders =
                     new()
                     {
                         new SiteAdminDBSeeder(context: ctx, configuration: configuration),
-                        new SchoolAdminDBSeeder(context: ctx, configuration: configuration)
+                        new SchoolAdminDBSeeder(context: ctx, configuration: configuration),
+                        new SchoolDBSeeder(context: ctx, configuration: configuration),
+                        new StudentDBSeeder(context: ctx, configuration: configuration),
                     };
-                if (configuration.GetSection("SeedData").GetValue("VerboseLogging", false))
+                if (_verbs)
                 {
                     Console.WriteLine("we have " + DBseeders.Count + " seeders");
                 }
 
                 foreach (var seeder in DBseeders)
                 {
-                    if (configuration.GetSection("SeedData").GetValue("VerboseLogging", false))
+                    if (_verbs)
                     {
                         Console.WriteLine("Seeding with " + seeder.GetType().Name);
                     }

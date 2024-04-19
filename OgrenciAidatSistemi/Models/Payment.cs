@@ -17,7 +17,7 @@ namespace OgrenciAidatSistemi.Models
         public DateTime CreatedAt { get; set; }
         public DateTime UpdatedAt { get; set; }
 
-        public Student Student { get; set; }
+        public required Student Student { get; set; }
         public int StudentId { get; set; }
 
         public DateTime PaymentDate { get; set; }
@@ -33,7 +33,7 @@ namespace OgrenciAidatSistemi.Models
     {
         public int Id { get; set; }
         public PaymentMethod PaymentMethod { get; set; }
-        public StudentView Student { get; set; }
+        public required StudentView Student { get; set; }
         public DateTime PaymentDate { get; set; }
         public decimal Amount { get; set; }
         public DateTime CreatedAt { get; set; }
@@ -49,7 +49,7 @@ namespace OgrenciAidatSistemi.Models
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }
         public decimal Amount { get; set; }
-        public ISet<Payment> Payments { get; set; }
+        public required ISet<Payment> Payments { get; set; }
         public Occurence Occurence { get; set; }
     }
 
@@ -71,44 +71,44 @@ namespace OgrenciAidatSistemi.Models
 
     public class BankPayment : Payment
     {
-        public string BankName { get; set; }
-        public string AccountNumber { get; set; }
-        public string BranchCode { get; set; }
+        public required string BankName { get; set; }
+        public required string AccountNumber { get; set; }
+        public required string BranchCode { get; set; }
     }
 
     public class CreditCardPayment : Payment
     {
-        public string CardNumber { get; set; }
-        public string CardHolderName { get; set; }
-        public string ExpiryDate { get; set; }
-        public string CVC { get; set; }
+        public required string CardNumber { get; set; }
+        public required string CardHolderName { get; set; }
+        public required string ExpiryDate { get; set; }
+        public required string CVC { get; set; }
     }
 
     public class CheckPayment : Payment
     {
-        public string CheckNumber { get; set; }
-        public string BankName { get; set; }
-        public string BranchCode { get; set; }
+        public required string CheckNumber { get; set; }
+        public required string BankName { get; set; }
+        public required string BranchCode { get; set; }
     }
 
     public class DebitCardPayment : Payment
     {
-        public string CardNumber { get; set; }
-        public string CardHolderName { get; set; }
-        public string ExpiryDate { get; set; }
-        public string CVC { get; set; }
+        public required string CardNumber { get; set; }
+        public required string CardHolderName { get; set; }
+        public required string ExpiryDate { get; set; }
+        public required string CVC { get; set; }
     }
 
     public class CashPayment : Payment
     {
-        public string CashierName { get; set; }
-        public FilePath Receipt { get; set; }
+        public required string CashierName { get; set; }
+        public required FilePath Receipt { get; set; }
     }
 
     public class BankTransferPayment : Payment
     {
-        public string BankName { get; set; }
-        public string AccountNumber { get; set; }
-        public string BranchCode { get; set; }
+        public required string BankName { get; set; }
+        public required string AccountNumber { get; set; }
+        public required string BranchCode { get; set; }
     }
 }

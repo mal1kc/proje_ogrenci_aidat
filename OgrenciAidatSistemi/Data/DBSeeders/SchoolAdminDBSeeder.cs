@@ -1,61 +1,39 @@
 using Microsoft.EntityFrameworkCore;
 using OgrenciAidatSistemi.Models;
-using OgrenciAidatSistemi.Models.Interfaces;
 
 namespace OgrenciAidatSistemi.Data
 {
     public class SchoolAdminDBSeeder : DbSeeder<AppDbContext, SchoolAdmin>
     {
         public SchoolAdminDBSeeder(AppDbContext context, IConfiguration configuration)
-            : base(context, configuration)
-        {
-            _seedData = new()
-            {
-                new()
-                {
-                    Username = "sch_admin",
-                    FirstName = "mustafa",
-                    LastName = "admin",
-                    EmailAddress = "sch_admin123@example.com",
-                    PasswordHash = SchoolAdmin.ComputeHash("SchAdmin123"),
-                    _School = new() { Name = "School 1" }
-                }
-            };
-            if (_verboselogging)
-            {
-                Console.WriteLine("created SchoolAdminDBSeeder");
-            }
-        }
+            : base(context, configuration) { }
 
         protected override async Task SeedDataAsync()
         {
-            if (_verboselogging)
+            foreach (var schoolAdmin in _seedData)
             {
-                Console.WriteLine("SchoolAdminDBSeeder: Seeding SchoolAdmins");
-            }
-
-            foreach (var schooladmin in _seedData)
-            {
-                if (_verboselogging)
-                {
-                    Console.WriteLine(
-                        $"SchoolAdminDBSeeder: Seeding SchoolAdmins {schooladmin.Username}"
-                    );
-                }
-
-                if (await _context.SchoolAdmins.AnyAsync(a => a.Username == schooladmin.Username))
+                if (await _context.Users.AnyAsync(u => u.EmailAddress == schoolAdmin.EmailAddress))
                 {
                     continue;
                 }
-                schooladmin.CreatedAt = DateTime.Now;
-                schooladmin.UpdatedAt = DateTime.Now;
-                object value = await _context.SchoolAdmins.AddAsync(schooladmin);
-                if (_verboselogging)
+
+                schoolAdmin.CreatedAt = DateTime.Now;
+                schoolAdmin.UpdatedAt = DateTime.Now;
+
+                if (await _context.Schools.AnyAsync(s => s.Name == schoolAdmin.School.Name))
                 {
-                    Console.WriteLine(
-                        $"SchoolAdminDBSeeder: Seeding SchoolAdmins {schooladmin.Username} {value}"
+                    schoolAdmin.School = await _context.Schools.FirstAsync(s =>
+                        s.Name == schoolAdmin.School.Name
                     );
                 }
+                else
+                {
+                    schoolAdmin.School.CreatedAt = DateTime.Now;
+                    schoolAdmin.School.UpdatedAt = DateTime.Now;
+                    await _context.Schools.AddAsync(schoolAdmin.School);
+                }
+
+                await _context.SchoolAdmins.AddAsync(schoolAdmin);
             }
 
             await _context.SaveChangesAsync();
@@ -63,36 +41,77 @@ namespace OgrenciAidatSistemi.Data
 
         protected override async Task SeedRandomDataAsync()
         {
-            throw new NotImplementedException();
+            for (int i = 0; i < 10; i++) // Seed 10 random school admins
+            {
+                var schoolAdmin = CreateRandomModel();
+                Console.WriteLine(
+                    $"Generated SchoolAdmin: EmailAddress: {schoolAdmin.EmailAddress}, Password: {"RandomPassword_" + schoolAdmin.EmailAddress.Split('@')[0]}"
+                );
+                if (await _context.Users.AnyAsync(a => a.EmailAddress == schoolAdmin.EmailAddress))
+                {
+                    continue;
+                }
+                await _context.SchoolAdmins.AddAsync(schoolAdmin);
+            }
+            await _context.SaveChangesAsync();
         }
 
-        // <summary>
-        // generally used for testing is seed data is created correctly
-        // </summary>
         protected override async Task AfterSeedDataAsync()
         {
-            // search seed data in dbcontext if not raise exception
-            if (_verboselogging)
+            if (_verboseLogging)
             {
                 Console.WriteLine("SchoolAdminDBSeeder: AfterSeedDataAsync");
-                Console.WriteLine(" we have seed data");
-                for (int i = 0; i < _seedData.Count; i++)
+                Console.WriteLine("We have seed data:");
+                foreach (var schoolAdmin in _seedData)
                 {
                     Console.WriteLine(
-                        $"SchoolAdminDBSeeder: AfterSeedDataAsync {_seedData[i].Username}"
+                        $"SchoolAdminDBSeeder: AfterSeedDataAsync {schoolAdmin.EmailAddress}"
                     );
                 }
             }
 
-            foreach (var schooladmin in _seedData)
+            foreach (var schoolAdmin in _seedData)
             {
-                if (!await _context.SchoolAdmins.AnyAsync(a => a.Username == schooladmin.Username))
+                if (
+                    !await _context.SchoolAdmins.AnyAsync(a =>
+                        a.EmailAddress == schoolAdmin.EmailAddress
+                    )
+                )
                 {
                     throw new Exception(
-                        $"SchoolAdminDBSeeder: AfterSeedDataAsync {schooladmin.Username} not found"
+                        $"SchoolAdminDBSeeder: AfterSeedDataAsync {schoolAdmin.EmailAddress} not found"
                     );
                 }
             }
         }
+
+        protected override SchoolAdmin CreateRandomModel()
+        {
+            var email = $"rnd_ml_{random.Next(100)}@example.com";
+            return new SchoolAdmin
+            {
+                FirstName = "rschAdmin" + RandomizerHelper.GenerateRandomString(random.Next(2, 10)),
+                LastName = "rschAdmin" + RandomizerHelper.GenerateRandomString(random.Next(2, 10)),
+                EmailAddress = email,
+                PasswordHash = SchoolAdmin.ComputeHash("RandomPassword_" + email.Split('@')[0]),
+                School = new School
+                {
+                    Name = "School" + RandomizerHelper.GenerateRandomString(random.Next(2, 10)),
+                    Students = new HashSet<Student>()
+                }
+            };
+        }
+
+        private readonly List<SchoolAdmin> _seedData = new List<SchoolAdmin>
+        {
+            new SchoolAdmin
+            {
+                FirstName = "mustafa",
+                LastName = "admin",
+                EmailAddress = "sch_admin123@example.com",
+                PasswordHash = SchoolAdmin.ComputeHash("SchAdmin123"),
+                School = new School { Name = "School 1", Students = new HashSet<Student>() }
+            }
+        };
     }
 }

@@ -5,8 +5,7 @@ namespace OgrenciAidatSistemi.Models
 {
     public class SchoolAdmin : User, ISearchableModel
     {
-        public int SchoolId { get; set; }
-        public School _School { get; set; }
+        public School School { get; set; }
 
         public override DateTime CreatedAt { get; set; }
         public override DateTime UpdatedAt { get; set; }
@@ -19,17 +18,15 @@ namespace OgrenciAidatSistemi.Models
             );
 
         public SchoolAdmin(
-            string username,
             string firstName,
             string? lastName,
             string emailAddress,
             string passwordHash
         )
         {
-            Username = username;
+            EmailAddress = emailAddress;
             FirstName = firstName;
             LastName = lastName;
-            EmailAddress = emailAddress;
             PasswordHash = passwordHash;
         }
 
@@ -37,21 +34,33 @@ namespace OgrenciAidatSistemi.Models
         // This constructor is only for DBSeeder
         // </summary>
         public SchoolAdmin() { }
+
+        public SchoolAdminView ToView()
+        {
+            return new SchoolAdminView()
+            {
+                Id = this.Id,
+                FirstName = this.FirstName,
+                LastName = this.LastName,
+                EmailAddress = this.EmailAddress,
+                CreatedAt = this.CreatedAt,
+                UpdatedAt = this.UpdatedAt,
+            };
+        }
     }
 
     public class SchoolAdminView : UserView
     {
-        public int Id { get; set; }
         /* public SchoolView School { get; set; } */
         public int SchoolId { get; set; }
 
-        public override bool CheckUsernameExists(AppDbContext dbctx)
+        public override bool CheckUserExists(AppDbContext dbctx)
         {
             if (dbctx.SchoolAdmins == null)
             {
                 throw new System.Exception("SchoolAdmins table is null");
             }
-            return dbctx.SchoolAdmins.Any(s => s.Username == Username);
+            return dbctx.SchoolAdmins.Any(s => s.EmailAddress == EmailAddress);
         }
 
         public override bool CheckEmailAddressExists(AppDbContext dbctx)
@@ -68,7 +77,6 @@ namespace OgrenciAidatSistemi.Models
     {
         public static readonly string[] AllowedFieldsForSearch = new string[]
         {
-            "username",
             "firstName",
             "lastName",
             "emailAddress"
@@ -78,10 +86,7 @@ namespace OgrenciAidatSistemi.Models
             "CreatedAt",
             "UpdatedAt",
         }
-        .Concat(AllowedFieldsForSearch)
+            .Concat(AllowedFieldsForSearch)
             .ToArray();
-
     }
-
-
 }
