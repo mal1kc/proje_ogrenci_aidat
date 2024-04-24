@@ -11,7 +11,7 @@ using OgrenciAidatSistemi.Data;
 namespace OgrenciAidatSistemi.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20240419145406_init_mgrt")]
+    [Migration("20240424135204_init_mgrt")]
     partial class init_mgrt
     {
         /// <inheritdoc />
@@ -183,14 +183,11 @@ namespace OgrenciAidatSistemi.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<int>("Role")
-                        .HasColumnType("INTEGER");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER")
+                        .HasDefaultValue(0);
 
                     b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("UserType")
-                        .IsRequired()
-                        .HasMaxLength(13)
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");
@@ -198,11 +195,14 @@ namespace OgrenciAidatSistemi.Migrations
                     b.HasIndex("EmailAddress")
                         .IsUnique();
 
+                    b.HasIndex("Id")
+                        .IsUnique();
+
+                    b.HasIndex("Role");
+
                     b.ToTable("Users");
 
-                    b.HasDiscriminator<string>("UserType").HasValue("User");
-
-                    b.UseTphMappingStrategy();
+                    b.UseTptMappingStrategy();
                 });
 
             modelBuilder.Entity("OgrenciAidatSistemi.Models.BankTransferPayment", b =>
@@ -338,13 +338,7 @@ namespace OgrenciAidatSistemi.Migrations
 
                     b.HasIndex("SchoolId");
 
-                    b.ToTable("Users", t =>
-                        {
-                            t.Property("SchoolId")
-                                .HasColumnName("SchoolAdmin_SchoolId");
-                        });
-
-                    b.HasDiscriminator().HasValue("SchoolAdmin");
+                    b.ToTable("SchoolAdmins");
                 });
 
             modelBuilder.Entity("OgrenciAidatSistemi.Models.SiteAdmin", b =>
@@ -355,7 +349,7 @@ namespace OgrenciAidatSistemi.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
-                    b.HasDiscriminator().HasValue("SiteAdmin");
+                    b.ToTable("SiteAdmins");
                 });
 
             modelBuilder.Entity("OgrenciAidatSistemi.Models.Student", b =>
@@ -376,7 +370,10 @@ namespace OgrenciAidatSistemi.Migrations
 
                     b.HasIndex("SchoolId");
 
-                    b.HasDiscriminator().HasValue("Student");
+                    b.HasIndex("StudentId")
+                        .IsUnique();
+
+                    b.ToTable("Students");
                 });
 
             modelBuilder.Entity("OgrenciAidatSistemi.Models.Payment", b =>
@@ -409,6 +406,12 @@ namespace OgrenciAidatSistemi.Migrations
 
             modelBuilder.Entity("OgrenciAidatSistemi.Models.SchoolAdmin", b =>
                 {
+                    b.HasOne("OgrenciAidatSistemi.Models.User", null)
+                        .WithOne()
+                        .HasForeignKey("OgrenciAidatSistemi.Models.SchoolAdmin", "Id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("OgrenciAidatSistemi.Models.School", "School")
                         .WithMany("SchoolAdmins")
                         .HasForeignKey("SchoolId")
@@ -418,8 +421,23 @@ namespace OgrenciAidatSistemi.Migrations
                     b.Navigation("School");
                 });
 
+            modelBuilder.Entity("OgrenciAidatSistemi.Models.SiteAdmin", b =>
+                {
+                    b.HasOne("OgrenciAidatSistemi.Models.User", null)
+                        .WithOne()
+                        .HasForeignKey("OgrenciAidatSistemi.Models.SiteAdmin", "Id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("OgrenciAidatSistemi.Models.Student", b =>
                 {
+                    b.HasOne("OgrenciAidatSistemi.Models.User", null)
+                        .WithOne()
+                        .HasForeignKey("OgrenciAidatSistemi.Models.Student", "Id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("OgrenciAidatSistemi.Models.School", "School")
                         .WithMany("Students")
                         .HasForeignKey("SchoolId")

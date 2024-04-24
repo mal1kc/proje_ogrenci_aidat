@@ -26,7 +26,7 @@ namespace OgrenciAidatSistemi.Helpers
             _resultedQueryable = _sourceQueryable;
         }
 
-        public IQueryable<T> Search(string searchString, string? searchField = null)
+        public IQueryable<T> Search(string? searchString, string? searchField = null)
         {
             if (string.IsNullOrEmpty(searchString))
                 return _sourceQueryable;
@@ -61,7 +61,7 @@ namespace OgrenciAidatSistemi.Helpers
         )
         {
             var properties = typeof(T).GetProperties();
-            Expression combinedExpression = null;
+            Expression? combinedExpression = null;
 
             foreach (var property in properties)
             {
@@ -92,7 +92,9 @@ namespace OgrenciAidatSistemi.Helpers
         {
             MemberExpression property = Expression.Property(parameter, fieldName);
             ConstantExpression search = Expression.Constant(searchString);
-            MethodInfo containsMethod = typeof(string).GetMethod("Contains", new[] { typeof(string) });
+            MethodInfo? containsMethod = typeof(string).GetMethod("Contains", new[] { typeof(string) });
+            if (containsMethod == null) // If method not found return
+                return Expression.Lambda<Func<T, bool>>(Expression.Constant(false), parameter);
             MethodCallExpression containsExpression = Expression.Call(property, containsMethod, search);
             return Expression.Lambda<Func<T, bool>>(containsExpression, parameter);
         }
@@ -118,7 +120,7 @@ namespace OgrenciAidatSistemi.Helpers
         }
 
 
-        public IQueryable<T> Sort(string sortOrderStr)
+        public IQueryable<T> Sort(string? sortOrderStr)
         {
             if (string.IsNullOrEmpty(sortOrderStr))
                 return _resultedQueryable;
@@ -136,13 +138,19 @@ namespace OgrenciAidatSistemi.Helpers
         }
 
         public IQueryable<T> SearchAndSort(
-            string searchString,
-            string searchField,
-            string sortOrder
+            string? searchString,
+            string? searchField,
+            string? sortField,
+            SortOrderEnum sortType
         )
         {
-            _resultedQueryable = Search(searchString, searchField);
-            return Sort(sortOrder);
+            if (_resultedQueryable == null)
+                _resultedQueryable = _sourceQueryable;
+            if (!string.IsNullOrEmpty(searchString))
+                return Search(searchString, searchField);
+            if (!string.IsNullOrEmpty(sortField))
+                return Sort(sortField, sortType);
+            return _resultedQueryable;
         }
 
         public IQueryable<T> GetResult() => _resultedQueryable;
@@ -151,20 +159,70 @@ namespace OgrenciAidatSistemi.Helpers
 
         public IQueryable<T> List(
             ViewDataDictionary ViewData,
-            string searchString = null,
-            string searchField = null,
-            string sortOrder = null,
+            string? searchString = null,
+            string? searchField = null,
+            string? sortOrder = null,
             int pageIndex = 1,
             int pageSize = 20
         )
         {
-            ViewData["IdSortParam"] = string.IsNullOrEmpty(sortOrder) ? "id_desc" : "";
-            ViewData["CurrentSortOrder"] = sortOrder;
-            ViewData["CurrentSearchString"] = searchString;
-            ViewData["NameSortParam"] = string.IsNullOrEmpty(sortOrder) ? "name_desc" : "";
-            ViewData["DateSortParam"] = sortOrder == "Date" ? "date_desc" : "Date";
+            // validate sortOrder check '_' is exist and split it check field and type is valid
+            string? sortField = null;
+            string? sortType = null;
 
-            _resultedQueryable = SearchAndSort(searchString, searchField, sortOrder);
+            if (!string.IsNullOrEmpty(sortOrder) && sortOrder.Contains("_"))
+            {
+                var parts = sortOrder.Split('_');
+                if (parts.Length == 2)
+                {
+                    sortField = parts[0];
+                    sortType = parts[1];
+                }
+            }
+
+
+            if (searchField != null && !_searchConfig.AllowedFieldsForSearch.Contains(searchField))
+            {
+                searchField = null;
+            }
+
+            if (sortType != null && sortType != "asc" && sortType != "desc")
+            {
+                sortOrder = null;
+            }
+
+            // generate ViewData {Field}SortParam for view
+            foreach (var field in _searchConfig.AllowedFieldsForSort)
+            {
+                // example result: FirstNameSortParam = FirstName_desc or FirstName_asc
+
+                ViewData[$"{field}SortParam"] = sortOrder == null
+                    ? $"{field}_asc"
+                    : field == sortField
+                        ? sortType == "asc"
+                            ? $"{field}_desc"
+                            : $"{field}_asc"
+                        : $"{field}_asc";
+
+
+                if (field == sortField)
+                {
+                    ViewData["CurrentSortField"] = field;
+                    ViewData["CurrentSortType"] = sortType;
+                    ViewData["CurrentSortOrder"] = sortOrder;
+                }
+            }
+
+
+            ViewData["CurrentSearchString"] = searchString;
+            ViewData["CurrentSearchField"] = searchField;
+
+
+
+            _resultedQueryable = SearchAndSort(
+                    searchString, searchField, sortField,
+                    sortType == "asc" ? SortOrderEnum.ASC : SortOrderEnum.DESC
+                    );
             var paginatedModel = _resultedQueryable
                 .Skip((pageIndex - 1) * pageSize)
                 .Take(pageSize);

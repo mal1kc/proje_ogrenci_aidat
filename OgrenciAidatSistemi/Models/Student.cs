@@ -1,10 +1,14 @@
+using System.ComponentModel.DataAnnotations.Schema;
 using OgrenciAidatSistemi.Data;
 using OgrenciAidatSistemi.Models.Interfaces;
 
 namespace OgrenciAidatSistemi.Models
 {
+
+    [Table("Students")]
     public class Student : User, ISearchableModel
     {
+        override public UserRole Role => UserRole.Student;
         public int StudentId { get; set; }
         public School School { get; set; }
         public int GradLevel { get; set; }
@@ -40,7 +44,8 @@ namespace OgrenciAidatSistemi.Models
     {
         public static readonly string[] AllowedFieldsForSearch = new string[]
         {
-            "id",
+            "Id",
+            "StudentId",
             "Username",
             "FirstName",
             "LastName",
@@ -51,13 +56,16 @@ namespace OgrenciAidatSistemi.Models
 
         public static readonly string[] AllowedFieldsForSort = new string[]
         {
-            "id",
+            "Id",
+            "StudentId",
             "Username",
             "FirstName",
             "LastName",
             "EmailAddress",
             "GradLevel",
-            "IsGraduated"
+            "IsGraduated",
+            "CreatedAt",
+            "UpdatedAt"
         };
     }
 }

@@ -14,7 +14,12 @@
         Search: <input type="text" name="searchString" value="@ViewData["CurrentSearchString"]" />
         in
         <select name="searchField">
+            @if(ViewData["CurrentSearchField"] != null){
+            <option value='@ViewData["CurrentSearchField"]' selected>@ViewData["CurrentSearchField"]</option>
+            }
+
             <option value="">All</option>
+
             <option value="FirstName">First Name</option>
             <option value="LastName">Last Name</option>
             <option value="EmailAddress">Email Adress</option>
@@ -28,22 +33,27 @@
     <thead>
         <tr>
             <th>
-                <a asp-action="List" asp-route-sortOrder="@ViewData["NameSortParam"]" asp-route-searchString="@ViewData["CurrentSearchString"]" >First Name</a>
+            <a asp-action="List" asp-route-sortOrder="@ViewData["IdSortParam"]" asp-route-searchString="@ViewData["CurrentSearchString"]" >Id</a>
             </th>
             <th>
-                <a asp-action="List" asp-route-sortOrder="@ViewData["NameSortParam"]"  asp-route-searchString="@ViewData["CurrentSearchString"]" >Last Name</a>
-            </th>
-            @* TODO : add email sorting *@
-            <th>
-                <a asp-action="List" asp-route-sortOrder="@ViewData["NameSortParam"]" asp-route-searchString="@ViewData["CurrentSearchString"]" >Email Address</a>
+            <a asp-action="List" asp-route-sortOrder="@ViewData["SchoolSortParam"]" asp-route-searchString="@ViewData["CurrentSearchString"]" >School</a>
             </th>
             <th>
-                <a asp-action="List" asp-route-sortOrder="@ViewData["DateSortParam"]" asp-route-searchString="@ViewData["CurrentSearchString"]" >Created At</a>
+                <a asp-action="List" asp-route-sortOrder="@ViewData["FirstNameSortParam"]" asp-route-searchString="@ViewData["CurrentSearchString"]" >First Name</a>
             </th>
             <th>
-                <a asp-action="List" asp-route-sortOrder="@ViewData["DateSortParam"]" asp-route-searchString="@ViewData["CurrentSearchString"]" >Updated At</a>
+                <a asp-action="List" asp-route-sortOrder="@ViewData["LastNameSortParam"]"  asp-route-searchString="@ViewData["CurrentSearchString"]" >Last Name</a>
             </th>
-            <!-- Add more columns as needed -->
+            <th>
+                <a asp-action="List" asp-route-sortOrder="@ViewData["EmailAddressSortParam"]" asp-route-searchString="@ViewData["CurrentSearchString"]" >Email Address</a>
+            </th>
+            <th>
+                <a asp-action="List" asp-route-sortOrder="@ViewData["CreatedAtSortParam"]" asp-route-searchString="@ViewData["CurrentSearchString"]" >Created At</a>
+            </th>
+            <th>
+                <a asp-action="List" asp-route-sortOrder="@ViewData["UpdatedAtSortParam"]" asp-route-searchString="@ViewData["CurrentSearchString"]" >Updated At</a>
+            </th>
+             <!-- Add more columns as needed -->
             <th></th> <!-- column for buttons edit | details | delete -->
         </tr>
     </thead>
@@ -51,6 +61,23 @@
         @foreach (var item in Model)
         {
             <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Id)
+                </td>
+                <td>
+                @if (item.School != null)
+                {
+                    @Html.Partial("_SchoolViewPartial",item.School.ToView())
+                }
+                else
+                {
+                    <p>
+                    School not avaliable
+                    </p>
+                }
+
+                </td>
+
                 <td>
                     @Html.DisplayFor(modelItem => item.FirstName)
                 </td>

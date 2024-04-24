@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using OgrenciAidatSistemi.Data;
 using OgrenciAidatSistemi.Helpers;
 using OgrenciAidatSistemi.Models;
@@ -122,7 +123,7 @@ namespace OgrenciAidatSistemi.Controllers
             }
 
             var modelList = new QueryableModelHelper<SchoolAdmin>(
-                _dbContext.SchoolAdmins.AsQueryable(),
+                _dbContext.SchoolAdmins.Include(sa => sa.School).AsQueryable(),
                 new ModelSearchConfig(
                     SchoolAdminSearchConfig.AllowedFieldsForSearch,
                     SchoolAdminSearchConfig.AllowedFieldsForSort

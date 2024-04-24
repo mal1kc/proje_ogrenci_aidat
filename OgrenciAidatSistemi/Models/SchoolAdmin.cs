@@ -1,10 +1,13 @@
+using System.ComponentModel.DataAnnotations.Schema;
 using OgrenciAidatSistemi.Data;
 using OgrenciAidatSistemi.Models.Interfaces;
 
 namespace OgrenciAidatSistemi.Models
 {
+    [Table("SchoolAdmins")]
     public class SchoolAdmin : User, ISearchableModel
     {
+        public override UserRole Role => UserRole.SchoolAdmin;
         public School School { get; set; }
 
         public override DateTime CreatedAt { get; set; }
@@ -77,9 +80,10 @@ namespace OgrenciAidatSistemi.Models
     {
         public static readonly string[] AllowedFieldsForSearch = new string[]
         {
-            "firstName",
-            "lastName",
-            "emailAddress"
+            "Id",
+            "FirstName",
+            "LastName",
+            "EmailAddress"
         };
         public static readonly string[] AllowedFieldsForSort = new string[]
         {

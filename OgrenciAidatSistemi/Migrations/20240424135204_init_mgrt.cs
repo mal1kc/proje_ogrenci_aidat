@@ -72,32 +72,85 @@ namespace OgrenciAidatSistemi.Migrations
                         .Annotation("Sqlite:Autoincrement", true),
                     PasswordHash = table.Column<string>(type: "TEXT", nullable: false),
                     EmailAddress = table.Column<string>(type: "TEXT", nullable: false),
-                    Role = table.Column<int>(type: "INTEGER", nullable: false),
+                    Role = table.Column<int>(type: "INTEGER", nullable: false, defaultValue: 0),
                     FirstName = table.Column<string>(type: "TEXT", nullable: false),
                     LastName = table.Column<string>(type: "TEXT", nullable: true),
                     CreatedAt = table.Column<DateTime>(type: "TEXT", nullable: false),
-                    UpdatedAt = table.Column<DateTime>(type: "TEXT", nullable: false),
-                    UserType = table.Column<string>(type: "TEXT", maxLength: 13, nullable: false),
-                    SchoolAdmin_SchoolId = table.Column<int>(type: "INTEGER", nullable: true),
-                    Username = table.Column<string>(type: "TEXT", nullable: true),
-                    StudentId = table.Column<int>(type: "INTEGER", nullable: true),
-                    SchoolId = table.Column<int>(type: "INTEGER", nullable: true),
-                    GradLevel = table.Column<int>(type: "INTEGER", nullable: true),
-                    IsGraduated = table.Column<bool>(type: "INTEGER", nullable: true)
+                    UpdatedAt = table.Column<DateTime>(type: "TEXT", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Users", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "SchoolAdmins",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    SchoolId = table.Column<int>(type: "INTEGER", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_SchoolAdmins", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Users_Schools_SchoolAdmin_SchoolId",
-                        column: x => x.SchoolAdmin_SchoolId,
+                        name: "FK_SchoolAdmins_Schools_SchoolId",
+                        column: x => x.SchoolId,
                         principalTable: "Schools",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_Users_Schools_SchoolId",
+                        name: "FK_SchoolAdmins_Users_Id",
+                        column: x => x.Id,
+                        principalTable: "Users",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "SiteAdmins",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    Username = table.Column<string>(type: "TEXT", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_SiteAdmins", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_SiteAdmins_Users_Id",
+                        column: x => x.Id,
+                        principalTable: "Users",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Students",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    StudentId = table.Column<int>(type: "INTEGER", nullable: false),
+                    SchoolId = table.Column<int>(type: "INTEGER", nullable: false),
+                    GradLevel = table.Column<int>(type: "INTEGER", nullable: false),
+                    IsGraduated = table.Column<bool>(type: "INTEGER", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Students", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Students_Schools_SchoolId",
                         column: x => x.SchoolId,
                         principalTable: "Schools",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Students_Users_Id",
+                        column: x => x.Id,
+                        principalTable: "Users",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -149,9 +202,9 @@ namespace OgrenciAidatSistemi.Migrations
                         principalTable: "PaymentPeriods",
                         principalColumn: "Id");
                     table.ForeignKey(
-                        name: "FK_Payments_Users_StudentId",
+                        name: "FK_Payments_Students_StudentId",
                         column: x => x.StudentId,
-                        principalTable: "Users",
+                        principalTable: "Students",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -172,20 +225,55 @@ namespace OgrenciAidatSistemi.Migrations
                 column: "StudentId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_SchoolAdmins_Id",
+                table: "SchoolAdmins",
+                column: "Id",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_SchoolAdmins_SchoolId",
+                table: "SchoolAdmins",
+                column: "SchoolId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_SiteAdmins_Id",
+                table: "SiteAdmins",
+                column: "Id",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Students_Id",
+                table: "Students",
+                column: "Id",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Students_SchoolId",
+                table: "Students",
+                column: "SchoolId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Students_StudentId",
+                table: "Students",
+                column: "StudentId",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Users_EmailAddress",
                 table: "Users",
                 column: "EmailAddress",
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_Users_SchoolAdmin_SchoolId",
+                name: "IX_Users_Id",
                 table: "Users",
-                column: "SchoolAdmin_SchoolId");
+                column: "Id",
+                unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_Users_SchoolId",
+                name: "IX_Users_Role",
                 table: "Users",
-                column: "SchoolId");
+                column: "Role");
         }
 
         /// <inheritdoc />
@@ -195,16 +283,25 @@ namespace OgrenciAidatSistemi.Migrations
                 name: "Payments");
 
             migrationBuilder.DropTable(
+                name: "SchoolAdmins");
+
+            migrationBuilder.DropTable(
+                name: "SiteAdmins");
+
+            migrationBuilder.DropTable(
                 name: "FilePath");
 
             migrationBuilder.DropTable(
                 name: "PaymentPeriods");
 
             migrationBuilder.DropTable(
-                name: "Users");
+                name: "Students");
 
             migrationBuilder.DropTable(
                 name: "Schools");
+
+            migrationBuilder.DropTable(
+                name: "Users");
         }
     }
 }

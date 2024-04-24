@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using OgrenciAidatSistemi.Data;
 using OgrenciAidatSistemi.Helpers;
 using OgrenciAidatSistemi.Models;
@@ -121,14 +122,12 @@ namespace OgrenciAidatSistemi.Controllers
             }
 
             var modelList = new QueryableModelHelper<Student>(
-                _dbContext.Students.AsQueryable(),
+                _dbContext.Students.Include(s => s.School).AsQueryable(),
                 new ModelSearchConfig(
                     StudentSearchConfig.AllowedFieldsForSearch,
                     StudentSearchConfig.AllowedFieldsForSort
                 )
             );
-
-            ViewData["SchoolSortParam"] = string.IsNullOrEmpty(sortOrder) ? "school_desc" : "";
 
             return View(
                 modelList.List(ViewData, searchString, searchField, sortOrder, pageIndex, pageSize)
@@ -287,6 +286,22 @@ namespace OgrenciAidatSistemi.Controllers
             if (!isUserDeleted)
                 ViewData["Message"] = "Error while deleting user";
             return RedirectToAction("List");
+        }
+
+        [Authorize]
+        public async Task<PartialViewResult> SchoolViewPartial(int? id)
+        {
+            if (id == null)
+            {
+                return PartialView("_SchoolViewPartial", null);
+            }
+            var school = await _dbContext.Schools.FindAsync(id);
+            if (school == null)
+            {
+                return PartialView("_SchoolViewPartial", null);
+            }
+            var schView = school.ToView();
+            return PartialView("_SchoolViewPartial", schView);
         }
     }
 }

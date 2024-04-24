@@ -14,6 +14,9 @@
         Search: <input type="text" name="searchString" value="@ViewData["CurrentSearchString"]" />
         in
         <select name="searchField">
+            @if(ViewData["CurrentSearchField"] != null){
+            <option value='@ViewData["CurrentSearchField"]' selected>@ViewData["CurrentSearchField"]</option>
+            }
             <option value="">All</option>
             <option value="id">Id</option>
             <option value="name">Name</option>
@@ -33,10 +36,10 @@
                 <a asp-action="List" asp-route-sortOrder="@ViewData["NameSortParam"]" asp-route-searchString="@ViewData["CurrentSearchString"]" >Name</a>
             </th>
             <th>
-                <a asp-action="List" asp-route-sortOrder="@ViewData["DateSortParam"]" asp-route-searchString="@ViewData["CurrentSearchString"]" >Created At</a>
+                <a asp-action="List" asp-route-sortOrder="@ViewData["CreatedAtSortParam"]" asp-route-searchString="@ViewData["CurrentSearchString"]" >Created At</a>
             </th>
             <th>
-                <a asp-action="List" asp-route-sortOrder="@ViewData["DateSortParam"]" asp-route-searchString="@ViewData["CurrentSearchString"]" >Updated At</a>
+                <a asp-action="List" asp-route-sortOrder="@ViewData["UpdatedAtSortParam"]" asp-route-searchString="@ViewData["CurrentSearchString"]" >Updated At</a>
             </th>
             <th></th> <!-- column for buttons edit | details | delete -->
         </tr>

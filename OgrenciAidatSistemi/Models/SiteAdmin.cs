@@ -1,11 +1,14 @@
+using System.ComponentModel.DataAnnotations.Schema;
 using OgrenciAidatSistemi.Configurations;
 using OgrenciAidatSistemi.Data;
 using OgrenciAidatSistemi.Models.Interfaces;
 
 namespace OgrenciAidatSistemi.Models
 {
+    [Table("SiteAdmins")]
     public class SiteAdmin : User, ISearchableModel
     {
+        override public UserRole Role => UserRole.SiteAdmin;
         public string Username { get; set; }
         public override DateTime CreatedAt { get; set; }
         public override DateTime UpdatedAt { get; set; }
