@@ -269,11 +269,6 @@ namespace OgrenciAidatSistemi.Migrations
                 table: "Users",
                 column: "Id",
                 unique: true);
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Users_Role",
-                table: "Users",
-                column: "Role");
         }
 
         /// <inheritdoc />

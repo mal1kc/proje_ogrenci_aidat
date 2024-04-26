@@ -7,7 +7,6 @@ namespace OgrenciAidatSistemi.Models
     [Table("SchoolAdmins")]
     public class SchoolAdmin : User, ISearchableModel
     {
-        public override UserRole Role => UserRole.SchoolAdmin;
         public School School { get; set; }
 
         public override DateTime CreatedAt { get; set; }
@@ -27,6 +26,7 @@ namespace OgrenciAidatSistemi.Models
             string passwordHash
         )
         {
+            Role = UserRole.SchoolAdmin;
             EmailAddress = emailAddress;
             FirstName = firstName;
             LastName = lastName;
@@ -36,15 +36,19 @@ namespace OgrenciAidatSistemi.Models
         // <summary>
         // This constructor is only for DBSeeder
         // </summary>
-        public SchoolAdmin() { }
+        public SchoolAdmin()
+        {
+            Role = UserRole.SchoolAdmin;
+        }
 
-        public SchoolAdminView ToView()
+        public SchoolAdminView ToView(bool ignoreBidirectNav = false)
         {
             return new SchoolAdminView()
             {
                 Id = this.Id,
                 FirstName = this.FirstName,
                 LastName = this.LastName,
+                SchoolView = ignoreBidirectNav ? null : this.School.ToView(ignoreBidirectNav: true),
                 EmailAddress = this.EmailAddress,
                 CreatedAt = this.CreatedAt,
                 UpdatedAt = this.UpdatedAt,
@@ -54,8 +58,9 @@ namespace OgrenciAidatSistemi.Models
 
     public class SchoolAdminView : UserView
     {
-        /* public SchoolView School { get; set; } */
+        public SchoolView? SchoolView { get; set; }
         public int SchoolId { get; set; }
+
 
         public override bool CheckUserExists(AppDbContext dbctx)
         {

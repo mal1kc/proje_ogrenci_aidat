@@ -195,8 +195,6 @@ namespace OgrenciAidatSistemi.Migrations
                     b.HasIndex("Id")
                         .IsUnique();
 
-                    b.HasIndex("Role");
-
                     b.ToTable("Users");
 
                     b.UseTptMappingStrategy();

@@ -18,15 +18,13 @@ namespace OgrenciAidatSistemi.Models
             SchoolSearchConfig.AllowedFieldsForSort
             );
 
-        public SchoolView ToView()
+        public SchoolView ToView(bool ignoreBidirectNav = false)
         {
             return new SchoolView()
             {
                 Id = this.Id,
                 Name = this.Name,
-                SchoolAdmins = this
-                    .SchoolAdmins?.Select(schoolAdmin => schoolAdmin.ToView())
-                    .ToHashSet(),
+                SchoolAdmins = ignoreBidirectNav ? null : this.SchoolAdmins?.Select(sa => sa.ToView(ignoreBidirectNav: true)).ToHashSet(),
                 CreatedAt = this.CreatedAt,
                 UpdatedAt = this.UpdatedAt
             };

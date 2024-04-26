@@ -102,102 +102,22 @@ namespace OgrenciAidatSistemi.Controllers
                 _appDbContext.SiteAdmins = _appDbContext.Set<SiteAdmin>();
             }
 
-            ViewData["CurrentSortOrder"] = sortOrder;
-            ViewData["CurrentSearchString"] = searchString;
-            ViewData["NameSortParam"] = string.IsNullOrEmpty(sortOrder) ? "name_desc" : "";
-            ViewData["DateSortParam"] = sortOrder == "Date" ? "date_desc" : "Date";
-
-            var modelSearch = new QueryableModelHelper<SiteAdmin>(
+            var modelHelper = new QueryableModelHelper<SiteAdmin>(
                 _appDbContext.SiteAdmins.AsQueryable(),
                 new ModelSearchConfig(
                     SiteAdminSearchConfig.AllowedFieldsForSearch,
                     SiteAdminSearchConfig.AllowedFieldsForSort
                 )
             );
-            var filteredSiteAdmins = modelSearch.Search(searchString, searchField);
 
-            Func<IQueryable<SiteAdmin>, IOrderedQueryable<SiteAdmin>> sortFunc = null;
-
-            if (!string.IsNullOrEmpty(sortOrder))
-            {
-                string sortOrderBase = sortOrder.ToLower().EndsWith("_desc")
-                    ? sortOrder.Substring(0, sortOrder.Length - 5)
-                    : sortOrder;
-
-                if (!string.IsNullOrEmpty(searchField))
-                {
-                    if (!SiteAdminSearchConfig.AllowedFieldsForSearch.Contains(searchField))
-                        throw new ArgumentException("Invalid search field");
-                }
-
-                switch (sortOrderBase)
-                {
-                    case "name":
-                        sortFunc = q => q.OrderBy(e => e.FirstName).ThenBy(e => e.LastName);
-                        break;
-                    case "date":
-                        sortFunc = q => q.OrderBy(e => e.CreatedAt);
-                        break;
-                    // Add more sorting options for other fields as needed
-                    default:
-                        sortFunc = q => q.OrderBy(e => e.UpdatedAt); // default sort
-                        break;
-                }
-
-                // Apply descending order if needed
-                if (sortOrder.EndsWith("_desc"))
-                {
-                    var sortedQuery = sortFunc(filteredSiteAdmins.AsQueryable());
-                    sortFunc = q => sortedQuery.OrderByDescending(e => e);
-                }
-            }
-
-            Console.WriteLine("After determine Sorting Func {0} with {1}", sortFunc, sortOrder);
-            // call the sort function
-            var sortedSiteAdmins =
-                sortFunc != null ? sortFunc(filteredSiteAdmins.AsQueryable()) : filteredSiteAdmins;
-            Console.WriteLine("After Sorting");
-
-            var paginatedSiteAdmins = sortedSiteAdmins
-                .Skip((pageIndex - 1) * pageSize)
-                .Take(pageSize)
-                .AsQueryable();
-
-            ViewData["CurrentPageIndex"] = pageIndex;
-            ViewData["TotalPages"] = (int)
-                Math.Ceiling(filteredSiteAdmins.Count() / (double)pageSize);
-            ViewData["TotalItems"] = filteredSiteAdmins.Count();
-            ViewData["PageSize"] = pageSize;
-
-            Console.WriteLine(
-                "ids of paginatedsiteadmins: {0}",
-                string.Join(", ", paginatedSiteAdmins.Select(e => e.Id))
-            );
-
-            return View(paginatedSiteAdmins);
-
-            // create collecttion from paginatedsiteadmins with ids
-
-            var paginatedSiteAdmins_withIds = _appDbContext
-                .SiteAdmins.Join(
-                    _appDbContext.Users,
-                    sa => sa.Id, // Foreign key property in SiteAdmin
-                    ot => ot.Id, // Primary key property in OtherTable
-                    (sa, ot) =>
-                        new SiteAdmin
-                        {
-                            Id = ot.Id,
-                            FirstName = sa.FirstName,
-                            LastName = sa.LastName,
-                            Username = sa.Username,
-                            EmailAddress = sa.EmailAddress,
-                            PasswordHash = sa.PasswordHash,
-                            CreatedAt = sa.CreatedAt,
-                            UpdatedAt = sa.UpdatedAt
-                        }
-                )
-                .ToList();
-            return View(paginatedSiteAdmins_withIds);
+            return View(
+                    modelHelper.List(
+                        ViewData,
+                        searchString,
+                        searchField,
+                        sortOrder, pageIndex, pageSize
+                        )
+                    );
         }
 
         // Create a new SiteAdmin
@@ -297,7 +217,7 @@ namespace OgrenciAidatSistemi.Controllers
                 return RedirectToAction("List");
             }
 
-            return View(siteAdmin);
+            return View(siteAdmin.ToView());
         }
 
         // POST: /SiteAdmin/DeleteConfirmed/5
@@ -323,24 +243,34 @@ namespace OgrenciAidatSistemi.Controllers
 
         public async Task<IActionResult> DeleteConfirmed(int? id)
         {
-            if (id == null)
-            {
+            if (id == null || _appDbContext.Users == null)
                 return NotFound();
-            }
-            /* var siteAdmin = _appDbContext.SiteAdmins.Where(e => e.Id == id).FirstOrDefault(); */
-            /**/
 
             var dbUser = _appDbContext.Users.Where(e => e.Id == id).FirstOrDefault();
 
             if (dbUser == null)
-            {
                 return NotFound();
-            }
 
             bool isDeleted = await _userService.DeleteUser(dbUser.Id);
             if (!isDeleted)
                 ViewData["Message"] = "Error while deleting the user";
             return RedirectToAction("List");
         }
+
+        // GET: /SiteAdmin/Details/5
+        // Show details of a SiteAdmin
+        // This page is read-only // This page is accessible by siteAdmins only
+
+        [Authorize(Roles = Configurations.Constants.userRoles.SiteAdmin)]
+        public async Task<IActionResult> Details(int? id)
+        {
+            if (id == null || _appDbContext.SiteAdmins == null)
+                return NotFound();
+            var siteAdmin = await _appDbContext.SiteAdmins.FindAsync(id);
+            if (siteAdmin == null)
+                return NotFound();
+            return View(siteAdmin.ToView());
+        }
+
     }
 }

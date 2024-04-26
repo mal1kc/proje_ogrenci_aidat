@@ -55,9 +55,10 @@ namespace OgrenciAidatSistemi.Data
             /*     .HasValue<SchoolAdmin>("SchoolAdmin") */
             /*     .HasValue<SiteAdmin>("SiteAdmin"); */
 
+            modelBuilder.Entity<User>().Property(u => u.Role).HasConversion<int>();
+
             modelBuilder.Entity<User>().HasIndex(u => u.EmailAddress).IsUnique();
             modelBuilder.Entity<User>().HasIndex(u => u.Id).IsUnique();
-            modelBuilder.Entity<User>().HasIndex(u => u.Role);
 
             modelBuilder.Entity<Student>().HasIndex(s => s.StudentId).IsUnique();
             modelBuilder.Entity<Student>().Property(s => s.Role).HasDefaultValue(UserRole.Student);

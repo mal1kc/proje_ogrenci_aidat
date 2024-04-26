@@ -1,0 +1,47 @@
+@model SiteAdminView
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Site Admin Details</title>
+</head>
+<body>
+    <div class="container mt-5">
+        <h1 class="mb-4">Site Admin Details</h1>
+        <dl class="row">
+            <dt class="col-sm-3">Id:</dt>
+            <dd class="col-sm-9">@Model.Id</dd>
+
+            <dt class="col-sm-3">Username:</dt>
+            <dd class="col-sm-9">@Model.Username</dd>
+
+            <dt class="col-sm-3">First Name:</dt>
+            <dd class="col-sm-9">@Model.FirstName</dd>
+
+            <dt class="col-sm-3">Last Name:</dt>
+            <dd class="col-sm-9">@Model.LastName</dd>
+
+            <dt class="col-sm-3">Email Address:</dt>
+            <dd class="col-sm-9">@Model.EmailAddress</dd>
+
+            <dt class="col-sm-3">Created At:</dt>
+            <dd class="col-sm-9">@Model.CreatedAt</dd>
+
+            <dt class="col-sm-3">Updated At:</dt>
+            <dd class="col-sm-9">@Model.UpdatedAt</dd>
+        </dl>
+        <hr>
+
+        <!-- Edit and Delete buttons -->
+        <div class="row mt-4">
+            <div class="col">
+                <form asp-action="Delete" asp-route-id="@Model.Id" method="post" onsubmit="return confirm('Are you sure you want to delete this item?');">
+                    <a class="btn btn-primary ms-2" href="@Url.Action("Edit", new { id = Model.Id })">Edit</a>
+                    <button type="submit" class="btn btn-danger ms-2">Delete</button>
+                    <a class="btn btn-secondary ms-2" href="@Url.Action("List")">Back to List</a>
+                </form>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

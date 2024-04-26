@@ -189,7 +189,7 @@ namespace OgrenciAidatSistemi.Models
         public int Id { get; set; }
         public required string PasswordHash { get; set; }
         public required string EmailAddress { get; set; }
-        public virtual UserRole Role { get; protected set; }
+        public UserRole Role { get; protected set; }
         public string FirstName { get; set; }
         public string? LastName { get; set; }
         public abstract DateTime CreatedAt { get; set; }

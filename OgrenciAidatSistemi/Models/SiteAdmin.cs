@@ -8,7 +8,6 @@ namespace OgrenciAidatSistemi.Models
     [Table("SiteAdmins")]
     public class SiteAdmin : User, ISearchableModel
     {
-        override public UserRole Role => UserRole.SiteAdmin;
         public string Username { get; set; }
         public override DateTime CreatedAt { get; set; }
         public override DateTime UpdatedAt { get; set; }
@@ -29,6 +28,7 @@ namespace OgrenciAidatSistemi.Models
             string passwordHash
         )
         {
+            Role = UserRole.SiteAdmin;
             Username = username;
             FirstName = firstName;
             LastName = lastName;
@@ -39,12 +39,30 @@ namespace OgrenciAidatSistemi.Models
         /// <summary>
         /// This constructor is only for DBSeeder
         /// </summary>
-        public SiteAdmin() { }
+        public SiteAdmin()
+        {
+            Role = UserRole.SiteAdmin;
+        }
 
         public static string ComputeHash(string rawData)
         {
             return ComputeHash(rawData, Constants.AdminPasswordSalt);
         }
+
+        public SiteAdminView ToView()
+        {
+            return new SiteAdminView
+            {
+                Id = Id,
+                Username = Username,
+                FirstName = FirstName,
+                LastName = LastName,
+                EmailAddress = EmailAddress,
+                CreatedAt = CreatedAt,
+                UpdatedAt = UpdatedAt
+            };
+        }
+
     }
 
     public class SiteAdminView : UserView
@@ -77,7 +95,7 @@ namespace OgrenciAidatSistemi.Models
         public static string[] AllowedFieldsForSearch =>
             new string[] { "Username", "FirstName", "LastName", "EmailAddress" };
         public static string[] AllowedFieldsForSort =>
-            new string[] { "CreatedAt", "UpdatedAt" }
+            new string[] { "Id", "CreatedAt", "UpdatedAt" }
                 .Concat(AllowedFieldsForSearch)
                 .ToArray();
     }

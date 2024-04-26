@@ -11,7 +11,7 @@ using OgrenciAidatSistemi.Data;
 namespace OgrenciAidatSistemi.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20240424135204_init_mgrt")]
+    [Migration("20240426141352_init_mgrt")]
     partial class init_mgrt
     {
         /// <inheritdoc />
@@ -197,8 +197,6 @@ namespace OgrenciAidatSistemi.Migrations
 
                     b.HasIndex("Id")
                         .IsUnique();
-
-                    b.HasIndex("Role");
 
                     b.ToTable("Users");
 

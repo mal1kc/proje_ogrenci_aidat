@@ -246,17 +246,15 @@ namespace OgrenciAidatSistemi.Controllers
         [Authorize(Roles = Configurations.Constants.userRoles.SiteAdmin)]
         public async Task<IActionResult> Delete(int? id)
         {
-            if (id == null)
-            {
+            if (id == null || _dbContext.SchoolAdmins == null)
                 return NotFound();
-            }
-
-            var siteAdmin = _dbContext.SchoolAdmins.Where(e => e.Id == id).FirstOrDefault();
-
+            var siteAdmin = await _dbContext.SchoolAdmins
+                .Include(sa => sa.School)
+                .Where(sa => sa.Id == id)
+                .FirstOrDefaultAsync();
             if (siteAdmin == null)
-            {
                 return NotFound();
-            }
+
 
             // check if the user is logged in
             // if the user is logged in, prevent deletion
@@ -270,7 +268,7 @@ namespace OgrenciAidatSistemi.Controllers
                 return RedirectToAction("List");
             }
 
-            return View(siteAdmin);
+            return View(siteAdmin.ToView());
         }
 
         [HttpPost, ActionName("DeleteConfirmed")]
@@ -279,13 +277,29 @@ namespace OgrenciAidatSistemi.Controllers
         public async Task<IActionResult> DeleteConfirmed(int? id)
         {
             if (id == null)
-            {
                 return NotFound();
-            }
             bool isUserDeleted = await _userService.DeleteUser((int)id);
             if (!isUserDeleted)
                 ViewData["Message"] = "Error while deleting user";
             return RedirectToAction("List");
         }
+
+        // GET: SchoolAdmin/Detalis/5
+        //  only accessible by site admin
+        [Authorize(Roles = Configurations.Constants.userRoles.SiteAdmin)]
+        public async Task<IActionResult> Details(int? id)
+        {
+            if (id == null || _dbContext.SchoolAdmins == null)
+                return NotFound();
+            var siteAdmin = await _dbContext.SchoolAdmins
+                .Include(sa => sa.School)
+                .Where(sa => sa.Id == id)
+                .FirstOrDefaultAsync();
+            if (siteAdmin == null)
+                return NotFound();
+            return View(siteAdmin.ToView());
+        }
+
+
     }
 }
