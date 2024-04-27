@@ -15,11 +15,11 @@ namespace OgrenciAidatSistemi.Services
 
         private HttpContext? HttpContext => _httpContextAccessor.HttpContext;
 
-        public UserService(AppDbContext dbContext, IHttpContextAccessor httpContextAccessor)
+        public UserService(ILogger<UserService> logger, AppDbContext dbContext, IHttpContextAccessor httpContextAccessor)
         {
             _dbContext = dbContext;
             _httpContextAccessor = httpContextAccessor;
-            _logger = new Logger<UserService>(new LoggerFactory());
+            _logger = logger;
         }
 
         public async Task<User?> GetUserById(int userId)

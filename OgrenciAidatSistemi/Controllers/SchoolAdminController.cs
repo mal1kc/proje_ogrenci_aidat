@@ -17,11 +17,11 @@ namespace OgrenciAidatSistemi.Controllers
 
         private readonly UserService _userService;
 
-        public SchoolAdminController(ILogger<SchoolAdminController> logger, AppDbContext dbContext)
+        public SchoolAdminController(ILogger<SchoolAdminController> logger, AppDbContext dbContext, UserService userService)
         {
             _logger = logger;
             _dbContext = dbContext;
-            _userService = new UserService(dbContext, new HttpContextAccessor());
+            _userService = userService;
         }
 
         [Authorize(Roles = Configurations.Constants.userRoles.SchoolAdmin)]
@@ -130,10 +130,7 @@ namespace OgrenciAidatSistemi.Controllers
 
             var modelList = new QueryableModelHelper<SchoolAdmin>(
                 _dbContext.SchoolAdmins.Include(sa => sa.School).AsQueryable(),
-                new ModelSearchConfig(
-                    SchoolAdminSearchConfig.AllowedFieldsForSearch,
-                    SchoolAdminSearchConfig.AllowedFieldsForSort
-                )
+                    SchoolAdmin.SearchConfig
             );
 
             return View(

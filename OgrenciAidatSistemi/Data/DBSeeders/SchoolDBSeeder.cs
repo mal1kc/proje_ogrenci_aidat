@@ -86,7 +86,6 @@ namespace OgrenciAidatSistemi.Data
                 Name = "School 1",
                 CreatedAt = DateTime.Now,
                 UpdatedAt = DateTime.Now,
-
                 Students = new HashSet<Student>()
             },
             new School
@@ -94,7 +93,6 @@ namespace OgrenciAidatSistemi.Data
                 Name = "School 2",
                 CreatedAt = DateTime.Now,
                 UpdatedAt = DateTime.Now,
-
                 Students = new HashSet<Student>()
             },
             new School
@@ -102,7 +100,6 @@ namespace OgrenciAidatSistemi.Data
                 Name = "School 3",
                 CreatedAt = DateTime.Now,
                 UpdatedAt = DateTime.Now,
-
                 Students = new HashSet<Student>()
             }
         };

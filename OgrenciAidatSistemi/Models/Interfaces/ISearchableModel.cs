@@ -2,7 +2,7 @@ namespace OgrenciAidatSistemi.Models.Interfaces
 {
     public interface ISearchableModel
     {
-        public ModelSearchConfig SearchConfig { get; }
+        public static ModelSearchConfig SearchConfig { get; }
     }
 
     public class ModelSearchConfig

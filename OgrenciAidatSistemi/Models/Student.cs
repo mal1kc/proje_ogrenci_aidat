@@ -9,7 +9,7 @@ namespace OgrenciAidatSistemi.Models
     public class Student : User, ISearchableModel
     {
         public int StudentId { get; set; }
-        public School School { get; set; }
+        public required School School { get; set; }
         public int GradLevel { get; set; }
         public bool IsGraduated { get; set; }
         public ISet<Payment>? Payments { get; set; }
@@ -18,7 +18,7 @@ namespace OgrenciAidatSistemi.Models
         public override DateTime CreatedAt { get; set; }
         public override DateTime UpdatedAt { get; set; }
 
-        public ContactInfo ContactInfo { get; set; }
+        public ContactInfo? ContactInfo { get; set; }
 
         public Student()
         {
@@ -43,7 +43,7 @@ namespace OgrenciAidatSistemi.Models
         }
 
 
-        public ModelSearchConfig SearchConfig =>
+        public static ModelSearchConfig SearchConfig =>
             new ModelSearchConfig(
                 StudentSearchConfig.AllowedFieldsForSearch,
                 StudentSearchConfig.AllowedFieldsForSort

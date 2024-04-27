@@ -5,17 +5,19 @@ namespace OgrenciAidatSistemi.Models
     public enum PaymentMethod
     {
         Cash,
-        BankTransfer,
+        Bank,
         CreditCard,
         DebitCard,
         Check
     }
 
-    public abstract class Payment : IBaseDbModel
+    public abstract class Payment : IBaseDbModel, ISearchableModel
     {
         public int Id { get; set; }
         public DateTime CreatedAt { get; set; }
         public DateTime UpdatedAt { get; set; }
+
+        public required School School { get; set; }
 
         public required Student Student { get; set; }
         public int StudentId { get; set; }
@@ -27,6 +29,17 @@ namespace OgrenciAidatSistemi.Models
         public int PaymentPeriodId { get; set; }
 
         public decimal Amount { get; set; }
+
+        public bool isVerified { get; set; }
+
+        public FilePath Receipt { get; set; }
+
+        public static ModelSearchConfig SearchConfig =>
+            new ModelSearchConfig(
+            PaymentSearchConfig.AllowedFieldsForSearch,
+            PaymentSearchConfig.AllowedFieldsForSort
+            );
+
     }
 
     public class PaymentView : IBaseDbModelView
@@ -51,7 +64,7 @@ namespace OgrenciAidatSistemi.Models
         public decimal Amount { get; set; }
         public required School School { get; set; }
         public required ISet<Payment> Payments { get; set; }
-        public WorkYear WorkYear { get; set; }
+        public required WorkYear WorkYear { get; set; }
         public Occurence Occurence { get; set; }
     }
 
@@ -76,6 +89,13 @@ namespace OgrenciAidatSistemi.Models
         public required string BankName { get; set; }
         public required string AccountNumber { get; set; }
         public required string BranchCode { get; set; }
+
+        public required string IBAN { get; set; }
+
+        public BankPayment()
+        {
+            PaymentMethod = PaymentMethod.Bank;
+        }
     }
 
     public class CreditCardPayment : Payment
@@ -84,6 +104,12 @@ namespace OgrenciAidatSistemi.Models
         public required string CardHolderName { get; set; }
         public required string ExpiryDate { get; set; }
         public required string CVC { get; set; }
+
+        public CreditCardPayment()
+        {
+            PaymentMethod = PaymentMethod.CreditCard;
+        }
+
     }
 
     public class CheckPayment : Payment
@@ -91,6 +117,12 @@ namespace OgrenciAidatSistemi.Models
         public required string CheckNumber { get; set; }
         public required string BankName { get; set; }
         public required string BranchCode { get; set; }
+
+        public CheckPayment()
+        {
+            PaymentMethod = PaymentMethod.Check;
+        }
+
     }
 
     public class DebitCardPayment : Payment
@@ -99,18 +131,47 @@ namespace OgrenciAidatSistemi.Models
         public required string CardHolderName { get; set; }
         public required string ExpiryDate { get; set; }
         public required string CVC { get; set; }
+
+        public DebitCardPayment()
+        {
+            PaymentMethod = PaymentMethod.DebitCard;
+        }
+
     }
 
     public class CashPayment : Payment
     {
         public required string CashierName { get; set; }
-        public required FilePath Receipt { get; set; }
+        public required string ReceiptNumber { get; set; }
+        public required DateTime ReceiptDate { get; set; }
+        public required string ReceiptIssuer { get; set; }
+
+        public CashPayment()
+        {
+            PaymentMethod = PaymentMethod.Cash;
+        }
+
     }
 
-    public class BankTransferPayment : Payment
+    public static class PaymentSearchConfig
     {
-        public required string BankName { get; set; }
-        public required string AccountNumber { get; set; }
-        public required string BranchCode { get; set; }
+        public static readonly string[] AllowedFieldsForSearch = new string[]
+        {
+            "PaymentMethod",
+            "PaymentDate",
+            "Amount",
+            "CreatedAt",
+            "UpdatedAt"
+        };
+        public static readonly string[] AllowedFieldsForSort = new string[]
+        {
+            "PaymentMethod",
+            "PaymentDate",
+            "Amount",
+            "CreatedAt",
+            "UpdatedAt",
+            "isVerified"
+        };
     }
+
 }

@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using NReco.Logging.File;
 using OgrenciAidatSistemi.Configurations;
 using OgrenciAidatSistemi.Data;
+using OgrenciAidatSistemi.Services;
 
 internal class Program
 {
@@ -43,6 +44,9 @@ internal class Program
                 var loggingSection = configuration.GetSection("Logging");
                 loggingBuilder.AddFile(loggingSection);
             });
+
+            _ = services.AddScoped<FileService>();
+            _ = services.AddScoped<UserService>();
         }
 
         async Task ConfigureAppAsync(WebApplication app)

@@ -7,6 +7,8 @@ using OgrenciAidatSistemi.Models;
 using OgrenciAidatSistemi.Models.Interfaces;
 using OgrenciAidatSistemi.Services;
 
+
+
 namespace OgrenciAidatSistemi.Controllers
 {
     public class StudentController : Controller
@@ -17,11 +19,11 @@ namespace OgrenciAidatSistemi.Controllers
 
         private readonly UserService _userService;
 
-        public StudentController(ILogger<StudentController> logger, AppDbContext dbContext)
+        public StudentController(ILogger<StudentController> logger, AppDbContext dbContext, UserService userService)
         {
             _logger = logger;
             _dbContext = dbContext;
-            _userService = new UserService(dbContext, new HttpContextAccessor());
+            _userService = userService;
         }
 
         [Authorize(Roles = Configurations.Constants.userRoles.Student)]
@@ -129,10 +131,8 @@ namespace OgrenciAidatSistemi.Controllers
 
             var modelList = new QueryableModelHelper<Student>(
                 _dbContext.Students.Include(s => s.School).AsQueryable(),
-                new ModelSearchConfig(
-                    StudentSearchConfig.AllowedFieldsForSearch,
-                    StudentSearchConfig.AllowedFieldsForSort
-                )
+                Student.SearchConfig
+
             );
 
             return View(

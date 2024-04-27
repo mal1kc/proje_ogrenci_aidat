@@ -14,8 +14,7 @@ namespace OgrenciAidatSistemi.Models
 
         public ContactInfo ContactInfo { get; set; }
 
-        [System.Text.Json.Serialization.JsonIgnore]
-        public ModelSearchConfig SearchConfig =>
+        public static ModelSearchConfig SearchConfig =>
             new ModelSearchConfig(
                 SchoolAdminSearchConfig.AllowedFieldsForSearch,
                 SchoolAdminSearchConfig.AllowedFieldsForSort

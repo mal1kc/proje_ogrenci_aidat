@@ -107,20 +107,37 @@ namespace OgrenciAidatSistemi.Data
                 {
                     Name = "School" + RandomizerHelper.GenerateRandomString(random.Next(2, 10)),
                     Students = new HashSet<Student>()
+                },
+                ContactInfo = new ContactInfo
+                {
+                    Name = "Random Name",
+                    Email = email,
                 }
             };
         }
 
         private readonly List<SchoolAdmin> _seedData = new List<SchoolAdmin>
         {
-            new SchoolAdmin
+
+        new SchoolAdmin
             {
-                FirstName = "mustafa",
-                LastName = "admin",
-                EmailAddress = "sch_admin123@example.com",
-                PasswordHash = SchoolAdmin.ComputeHash("SchAdmin123"),
-                School = new School { Name = "School 1", Students = new HashSet<Student>() }
-            }
+                FirstName = "SchoolAdmin1",
+                LastName = "SchoolAdmin1",
+                EmailAddress = "sch_admin1@school1",
+                PasswordHash = SchoolAdmin.ComputeHash("Password1"),
+                School = new School
+                {
+                    Name = "School1",
+                    Students = new HashSet<Student>()
+                },
+                ContactInfo = new ContactInfo
+                {
+                    Name = "SchoolAdmin2",
+                    Email = "sch_admin2@school2",
+                    PhoneNumber = "+90 555 555 55 56",
+                }
+            },
+
         };
     }
 }

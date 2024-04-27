@@ -99,7 +99,7 @@ namespace OgrenciAidatSistemi.Data
             new SiteAdmin
             {
                 Username = "mal1kc",
-                FirstName = "mal1kc",
+                FirstName = "malik",
                 LastName = "",
                 EmailAddress = "admin@example.com",
                 PasswordHash = SiteAdmin.ComputeHash("Aadmin123")

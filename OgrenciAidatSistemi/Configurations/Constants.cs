@@ -11,6 +11,7 @@ namespace OgrenciAidatSistemi.Configurations
 
         public const String EmailRegEx =
             @"\A(?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?)\Z";
+        public const String PhoneNumberRegEx = @"\d{10}";
 
         // this should be read from .env file
         public const String AdminPasswordSalt =
@@ -30,5 +31,9 @@ namespace OgrenciAidatSistemi.Configurations
         }
 
         public const String AuthenticationAccessDeniedPath = "/Error/Error403";
+
+        // 10 MB file size
+        public const int MaxFileSize = 10 * 1024 * 1024;
+
     }
 }

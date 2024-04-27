@@ -13,6 +13,9 @@ namespace OgrenciAidatSistemi.Data
         public DbSet<Student>? Students { get; set; }
         public DbSet<School>? Schools { get; set; }
 
+        public DbSet<ContactInfo>? Contacts { get; set; }
+
+
         public DbSet<Payment>? Payments { get; set; }
         public DbSet<PaymentPeriode>? PaymentPeriods { get; set; }
 
@@ -20,10 +23,12 @@ namespace OgrenciAidatSistemi.Data
         public DbSet<CreditCardPayment>? CreditCardPayments { get; set; }
         public DbSet<CheckPayment>? CheckPayments { get; set; }
         public DbSet<DebitCardPayment>? DebitCardPayments { get; set; }
-        public DbSet<BankTransferPayment>? BankTransferPayments { get; set; }
+
 
         public DbSet<WorkYear>? WorkYears { get; set; }
         public DbSet<Grade>? Grades { get; set; }
+
+        public DbSet<FilePath>? FilePaths { get; set; }
 
         // TODO: needs to be change in devlopment and production use
 
@@ -36,7 +41,6 @@ namespace OgrenciAidatSistemi.Data
             modelBuilder.Entity<CreditCardPayment>().HasBaseType<Payment>();
             modelBuilder.Entity<CheckPayment>().HasBaseType<Payment>();
             modelBuilder.Entity<DebitCardPayment>().HasBaseType<Payment>();
-            modelBuilder.Entity<BankTransferPayment>().HasBaseType<Payment>();
 
             // Add configurations for other derived types if applicable
 

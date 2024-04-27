@@ -6,6 +6,8 @@ using OgrenciAidatSistemi.Models;
 using OgrenciAidatSistemi.Models.Interfaces;
 using OgrenciAidatSistemi.Services;
 
+using OgrenciAidatSistemi.Helpers.Controller;
+
 namespace OgrenciAidatSistemi.Controllers
 {
     public class SiteAdminController : Controller
@@ -15,11 +17,11 @@ namespace OgrenciAidatSistemi.Controllers
 
         private readonly UserService _userService;
 
-        public SiteAdminController(ILogger<SiteAdminController> logger, AppDbContext appDbContext)
+        public SiteAdminController(ILogger<SiteAdminController> logger, AppDbContext appDbContext, UserService userService)
         {
             _logger = logger;
             _appDbContext = appDbContext;
-            _userService = new UserService(appDbContext, new HttpContextAccessor());
+            _userService = userService;
         }
 
         // AKA : Admin Dashboard
@@ -104,10 +106,7 @@ namespace OgrenciAidatSistemi.Controllers
 
             var modelHelper = new QueryableModelHelper<SiteAdmin>(
                 _appDbContext.SiteAdmins.AsQueryable(),
-                new ModelSearchConfig(
-                    SiteAdminSearchConfig.AllowedFieldsForSearch,
-                    SiteAdminSearchConfig.AllowedFieldsForSort
-                )
+                SiteAdmin.SearchConfig
             );
 
             return View(
@@ -239,6 +238,8 @@ namespace OgrenciAidatSistemi.Controllers
 
             return Task.FromResult<IActionResult>(View(siteAdmin.ToView()));
         }
+
+        // TODO: change action name  to Delete
 
         // POST: /SiteAdmin/DeleteConfirmed/5
         // Delete a SiteAdmin

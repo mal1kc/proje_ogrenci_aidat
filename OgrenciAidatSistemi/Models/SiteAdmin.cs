@@ -12,9 +12,7 @@ namespace OgrenciAidatSistemi.Models
         public override DateTime CreatedAt { get; set; }
         public override DateTime UpdatedAt { get; set; }
 
-        // ignore this field in serialization
-        [System.Text.Json.Serialization.JsonIgnore]
-        public ModelSearchConfig SearchConfig =>
+        public static ModelSearchConfig SearchConfig =>
             new ModelSearchConfig(
                 SiteAdminSearchConfig.AllowedFieldsForSearch,
                 SiteAdminSearchConfig.AllowedFieldsForSort

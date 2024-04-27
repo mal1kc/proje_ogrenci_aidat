@@ -18,12 +18,12 @@ namespace OgrenciAidatSistemi.Controllers
 
         private readonly UserService _userService;
 
-        public SchoolController(ILogger<SchoolController> logger, AppDbContext dbContext)
+        public SchoolController(ILogger<SchoolController> logger, AppDbContext dbContext, UserService userService)
         {
             _logger = logger;
             _dbContext = dbContext;
 
-            _userService = new UserService(dbContext, new HttpContextAccessor());
+            _userService = userService;
         }
 
         [Authorize(Roles = Configurations.Constants.userRoles.SchoolAdmin)]
@@ -99,6 +99,7 @@ namespace OgrenciAidatSistemi.Controllers
 
 
 
+#warning This method is not tested
         [Authorize(Roles = Configurations.Constants.userRoles.SchoolAdmin + "," + Configurations.Constants.userRoles.SiteAdmin)]
         public async Task<IActionResult> Details(int? id)
         {
