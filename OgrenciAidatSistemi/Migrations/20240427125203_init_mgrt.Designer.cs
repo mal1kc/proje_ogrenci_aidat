@@ -11,7 +11,7 @@ using OgrenciAidatSistemi.Data;
 namespace OgrenciAidatSistemi.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20240426141352_init_mgrt")]
+    [Migration("20240427125203_init_mgrt")]
     partial class init_mgrt
     {
         /// <inheritdoc />
@@ -19,6 +19,54 @@ namespace OgrenciAidatSistemi.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "8.0.2");
+
+            modelBuilder.Entity("GradeStudent", b =>
+                {
+                    b.Property<int>("GradesId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("StudentsId")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("GradesId", "StudentsId");
+
+                    b.HasIndex("StudentsId");
+
+                    b.ToTable("GradeStudent");
+                });
+
+            modelBuilder.Entity("OgrenciAidatSistemi.Models.ContactInfo", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Addresses")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("PhoneNumbers")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("ContactInfo");
+                });
 
             modelBuilder.Entity("OgrenciAidatSistemi.Models.FilePath", b =>
                 {
@@ -60,6 +108,35 @@ namespace OgrenciAidatSistemi.Migrations
                     b.ToTable("FilePath");
                 });
 
+            modelBuilder.Entity("OgrenciAidatSistemi.Models.Grade", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("GradeLevel")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("SchoolId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("SchoolId");
+
+                    b.ToTable("Grades");
+                });
+
             modelBuilder.Entity("OgrenciAidatSistemi.Models.Payment", b =>
                 {
                     b.Property<int>("Id")
@@ -89,6 +166,9 @@ namespace OgrenciAidatSistemi.Migrations
                         .HasMaxLength(21)
                         .HasColumnType("TEXT");
 
+                    b.Property<int?>("SchoolId")
+                        .HasColumnType("INTEGER");
+
                     b.Property<int>("StudentId")
                         .HasColumnType("INTEGER");
 
@@ -98,6 +178,8 @@ namespace OgrenciAidatSistemi.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("PaymentPeriodeId");
+
+                    b.HasIndex("SchoolId");
 
                     b.HasIndex("StudentId");
 
@@ -126,13 +208,28 @@ namespace OgrenciAidatSistemi.Migrations
                     b.Property<int>("Occurence")
                         .HasColumnType("INTEGER");
 
+                    b.Property<int>("SchoolId")
+                        .HasColumnType("INTEGER");
+
                     b.Property<DateTime>("StartDate")
                         .HasColumnType("TEXT");
+
+                    b.Property<int?>("StudentId")
+                        .HasColumnType("INTEGER");
 
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("TEXT");
 
+                    b.Property<int>("WorkYearId")
+                        .HasColumnType("INTEGER");
+
                     b.HasKey("Id");
+
+                    b.HasIndex("SchoolId");
+
+                    b.HasIndex("StudentId");
+
+                    b.HasIndex("WorkYearId");
 
                     b.ToTable("PaymentPeriods");
                 });
@@ -201,6 +298,44 @@ namespace OgrenciAidatSistemi.Migrations
                     b.ToTable("Users");
 
                     b.UseTptMappingStrategy();
+                });
+
+            modelBuilder.Entity("OgrenciAidatSistemi.Models.WorkYear", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("EndDate")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("StartDate")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("WorkYears");
+                });
+
+            modelBuilder.Entity("SchoolWorkYear", b =>
+                {
+                    b.Property<int>("SchoolsId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("WorkYearsId")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("SchoolsId", "WorkYearsId");
+
+                    b.HasIndex("WorkYearsId");
+
+                    b.ToTable("SchoolWorkYear");
                 });
 
             modelBuilder.Entity("OgrenciAidatSistemi.Models.BankTransferPayment", b =>
@@ -331,8 +466,13 @@ namespace OgrenciAidatSistemi.Migrations
                 {
                     b.HasBaseType("OgrenciAidatSistemi.Models.User");
 
+                    b.Property<int>("ContactInfoId")
+                        .HasColumnType("INTEGER");
+
                     b.Property<int>("SchoolId")
                         .HasColumnType("INTEGER");
+
+                    b.HasIndex("ContactInfoId");
 
                     b.HasIndex("SchoolId");
 
@@ -354,6 +494,9 @@ namespace OgrenciAidatSistemi.Migrations
                 {
                     b.HasBaseType("OgrenciAidatSistemi.Models.User");
 
+                    b.Property<int>("ContactInfoId")
+                        .HasColumnType("INTEGER");
+
                     b.Property<int>("GradLevel")
                         .HasColumnType("INTEGER");
 
@@ -366,6 +509,8 @@ namespace OgrenciAidatSistemi.Migrations
                     b.Property<int>("StudentId")
                         .HasColumnType("INTEGER");
 
+                    b.HasIndex("ContactInfoId");
+
                     b.HasIndex("SchoolId");
 
                     b.HasIndex("StudentId")
@@ -374,14 +519,44 @@ namespace OgrenciAidatSistemi.Migrations
                     b.ToTable("Students");
                 });
 
+            modelBuilder.Entity("GradeStudent", b =>
+                {
+                    b.HasOne("OgrenciAidatSistemi.Models.Grade", null)
+                        .WithMany()
+                        .HasForeignKey("GradesId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("OgrenciAidatSistemi.Models.Student", null)
+                        .WithMany()
+                        .HasForeignKey("StudentsId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("OgrenciAidatSistemi.Models.Grade", b =>
+                {
+                    b.HasOne("OgrenciAidatSistemi.Models.School", "School")
+                        .WithMany("Grades")
+                        .HasForeignKey("SchoolId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("School");
+                });
+
             modelBuilder.Entity("OgrenciAidatSistemi.Models.Payment", b =>
                 {
                     b.HasOne("OgrenciAidatSistemi.Models.PaymentPeriode", "PaymentPeriode")
                         .WithMany("Payments")
                         .HasForeignKey("PaymentPeriodeId");
 
+                    b.HasOne("OgrenciAidatSistemi.Models.School", null)
+                        .WithMany("Payments")
+                        .HasForeignKey("SchoolId");
+
                     b.HasOne("OgrenciAidatSistemi.Models.Student", "Student")
-                        .WithMany()
+                        .WithMany("Payments")
                         .HasForeignKey("StudentId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -389,6 +564,44 @@ namespace OgrenciAidatSistemi.Migrations
                     b.Navigation("PaymentPeriode");
 
                     b.Navigation("Student");
+                });
+
+            modelBuilder.Entity("OgrenciAidatSistemi.Models.PaymentPeriode", b =>
+                {
+                    b.HasOne("OgrenciAidatSistemi.Models.School", "School")
+                        .WithMany()
+                        .HasForeignKey("SchoolId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("OgrenciAidatSistemi.Models.Student", null)
+                        .WithMany("PaymentPeriods")
+                        .HasForeignKey("StudentId");
+
+                    b.HasOne("OgrenciAidatSistemi.Models.WorkYear", "WorkYear")
+                        .WithMany("PaymentPeriods")
+                        .HasForeignKey("WorkYearId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("School");
+
+                    b.Navigation("WorkYear");
+                });
+
+            modelBuilder.Entity("SchoolWorkYear", b =>
+                {
+                    b.HasOne("OgrenciAidatSistemi.Models.School", null)
+                        .WithMany()
+                        .HasForeignKey("SchoolsId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("OgrenciAidatSistemi.Models.WorkYear", null)
+                        .WithMany()
+                        .HasForeignKey("WorkYearsId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("OgrenciAidatSistemi.Models.CashPayment", b =>
@@ -404,6 +617,12 @@ namespace OgrenciAidatSistemi.Migrations
 
             modelBuilder.Entity("OgrenciAidatSistemi.Models.SchoolAdmin", b =>
                 {
+                    b.HasOne("OgrenciAidatSistemi.Models.ContactInfo", "ContactInfo")
+                        .WithMany()
+                        .HasForeignKey("ContactInfoId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("OgrenciAidatSistemi.Models.User", null)
                         .WithOne()
                         .HasForeignKey("OgrenciAidatSistemi.Models.SchoolAdmin", "Id")
@@ -415,6 +634,8 @@ namespace OgrenciAidatSistemi.Migrations
                         .HasForeignKey("SchoolId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("ContactInfo");
 
                     b.Navigation("School");
                 });
@@ -430,6 +651,12 @@ namespace OgrenciAidatSistemi.Migrations
 
             modelBuilder.Entity("OgrenciAidatSistemi.Models.Student", b =>
                 {
+                    b.HasOne("OgrenciAidatSistemi.Models.ContactInfo", "ContactInfo")
+                        .WithMany()
+                        .HasForeignKey("ContactInfoId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("OgrenciAidatSistemi.Models.User", null)
                         .WithOne()
                         .HasForeignKey("OgrenciAidatSistemi.Models.Student", "Id")
@@ -442,6 +669,8 @@ namespace OgrenciAidatSistemi.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.Navigation("ContactInfo");
+
                     b.Navigation("School");
                 });
 
@@ -452,9 +681,25 @@ namespace OgrenciAidatSistemi.Migrations
 
             modelBuilder.Entity("OgrenciAidatSistemi.Models.School", b =>
                 {
+                    b.Navigation("Grades");
+
+                    b.Navigation("Payments");
+
                     b.Navigation("SchoolAdmins");
 
                     b.Navigation("Students");
+                });
+
+            modelBuilder.Entity("OgrenciAidatSistemi.Models.WorkYear", b =>
+                {
+                    b.Navigation("PaymentPeriods");
+                });
+
+            modelBuilder.Entity("OgrenciAidatSistemi.Models.Student", b =>
+                {
+                    b.Navigation("PaymentPeriods");
+
+                    b.Navigation("Payments");
                 });
 #pragma warning restore 612, 618
         }

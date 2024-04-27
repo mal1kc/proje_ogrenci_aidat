@@ -34,9 +34,9 @@ namespace OgrenciAidatSistemi.Controllers
 
         [Authorize(Roles = Configurations.Constants.userRoles.SiteAdmin)]
         public IActionResult List(
-            string searchString = null,
-            string searchField = null,
-            string sortOrder = null,
+            string? searchString = null,
+            string? searchField = null,
+            string? sortOrder = null,
             int pageIndex = 1,
             int pageSize = 20
         )

@@ -66,6 +66,11 @@ namespace OgrenciAidatSistemi.Controllers
 
             // check if user exists
             var passwordHash = _userService.HashPassword(scAdminView.Password);
+            if (_dbContext.SchoolAdmins == null)
+            {
+                _logger.LogWarning("SchoolAdmins table is came null from dbcontext");
+                _dbContext.SchoolAdmins = _dbContext.Set<SchoolAdmin>();
+            }
             var schAdmin = _dbContext
                 .SchoolAdmins.Where(u =>
                     u.EmailAddress == scAdminView.EmailAddress && u.PasswordHash == passwordHash
@@ -75,22 +80,23 @@ namespace OgrenciAidatSistemi.Controllers
             {
                 ModelState.AddModelError("EmailAddress", "User not found");
             }
-
-            _logger.LogDebug("User {0} signed in", schAdmin.EmailAddress);
-
-            try
+            else
             {
-                await _userService.SignInUser(schAdmin, UserRole.SiteAdmin);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(
-                    "Error while signing in user {0}: {1}",
-                    schAdmin.EmailAddress,
-                    ex.Message
-                );
-                TempData["CantSignIn"] = true;
-                return RedirectToAction("SignIn");
+                _logger.LogDebug("User {0} signed in", schAdmin.EmailAddress);
+                try
+                {
+                    await _userService.SignInUser(schAdmin, UserRole.SchoolAdmin);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(
+                "Error while signing in user {0}: {1}",
+                schAdmin.EmailAddress,
+                ex.Message
+                    );
+                    TempData["CantSignIn"] = true;
+                    return RedirectToAction("SignIn");
+                }
             }
             return RedirectToAction("Index");
         }
@@ -105,9 +111,9 @@ namespace OgrenciAidatSistemi.Controllers
 
         [Authorize(Roles = Configurations.Constants.userRoles.SiteAdmin)]
         public IActionResult List(
-            string searchString = null,
-            string searchField = null,
-            string sortOrder = null,
+            string? searchString = null,
+            string? searchField = null,
+            string? sortOrder = null,
             int pageIndex = 1,
             int pageSize = 20
         )

@@ -177,8 +177,22 @@ namespace OgrenciAidatSistemi.Controllers
                     CreatedAt = DateTime.Now,
                     UpdatedAt = DateTime.Now
                 };
-                _appDbContext.SiteAdmins.Add(newSiteAdmin);
-                await _appDbContext.SaveChangesAsync();
+                if (_appDbContext.SiteAdmins == null)
+                {
+                    _logger.LogError("SiteAdmins table is null");
+                    _appDbContext.SiteAdmins = _appDbContext.Set<SiteAdmin>();
+                }
+                try
+                {
+                    _appDbContext.SiteAdmins.Add(newSiteAdmin);
+
+                    await _appDbContext.SaveChangesAsync();
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError("Error while adding new site admin: {0}", ex.Message);
+                    return View(siteAdmin);
+                }
                 return RedirectToAction("List");
             }
             return View(siteAdmin);
@@ -191,18 +205,24 @@ namespace OgrenciAidatSistemi.Controllers
         [Authorize(Roles = Configurations.Constants.userRoles.SiteAdmin)]
         [DebugOnly]
         // [DisabledAction]
-        public async Task<IActionResult> Delete(int? id)
+        public Task<IActionResult> Delete(int? id)
         {
             if (id == null)
             {
-                return NotFound();
+                return Task.FromResult<IActionResult>(NotFound());
+            }
+
+            if (_appDbContext.SiteAdmins == null)
+            {
+                _logger.LogError("SiteAdmins table is null");
+                _appDbContext.SiteAdmins = _appDbContext.Set<SiteAdmin>();
             }
 
             var siteAdmin = _appDbContext.SiteAdmins.Where(e => e.Id == id).FirstOrDefault();
 
             if (siteAdmin == null)
             {
-                return NotFound();
+                return Task.FromResult<IActionResult>(NotFound());
             }
 
             // check if the user is logged in
@@ -214,10 +234,10 @@ namespace OgrenciAidatSistemi.Controllers
             if (loggedInUserId == id)
             {
                 ViewData["Message"] = "You cannot delete the account you are logged in with";
-                return RedirectToAction("List");
+                return Task.FromResult<IActionResult>(RedirectToAction("List"));
             }
 
-            return View(siteAdmin.ToView());
+            return Task.FromResult<IActionResult>(View(siteAdmin.ToView()));
         }
 
         // POST: /SiteAdmin/DeleteConfirmed/5

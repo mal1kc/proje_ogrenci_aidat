@@ -12,12 +12,34 @@ namespace OgrenciAidatSistemi.Models
         public School School { get; set; }
         public int GradLevel { get; set; }
         public bool IsGraduated { get; set; }
+        public ISet<Payment>? Payments { get; set; }
+        public ISet<PaymentPeriode>? PaymentPeriods { get; set; }
+        public ISet<Grade>? Grades { get; set; }
         public override DateTime CreatedAt { get; set; }
         public override DateTime UpdatedAt { get; set; }
+
+        public ContactInfo ContactInfo { get; set; }
 
         public Student()
         {
             Role = UserRole.Student;
+        }
+
+        public StudentView ToView(bool ignoreBidirectNav = false)
+        {
+            return new StudentView()
+            {
+                Id = this.Id,
+                StudentId = this.StudentId,
+                FirstName = this.FirstName,
+                LastName = this.LastName,
+                School = ignoreBidirectNav ? null : this.School.ToView(ignoreBidirectNav: true),
+                GradLevel = this.GradLevel,
+                IsGraduated = this.IsGraduated,
+                EmailAddress = this.EmailAddress,
+                CreatedAt = this.CreatedAt,
+                UpdatedAt = this.UpdatedAt,
+            };
         }
 
 
@@ -26,11 +48,15 @@ namespace OgrenciAidatSistemi.Models
                 StudentSearchConfig.AllowedFieldsForSearch,
                 StudentSearchConfig.AllowedFieldsForSort
             );
+
     }
 
     public class StudentView : UserView
     {
+
         public int SchoolId { get; set; }
+        public SchoolView? School { get; set; }
+        public int StudentId { get; set; }
         public int GradLevel { get; set; }
         public bool IsGraduated { get; set; }
 

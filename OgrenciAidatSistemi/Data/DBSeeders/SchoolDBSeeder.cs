@@ -1,6 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using OgrenciAidatSistemi.Models;
-
+#pragma warning disable CS8604 // Possible null reference argument.
 namespace OgrenciAidatSistemi.Data
 {
     public class SchoolDBSeeder : DbSeeder<AppDbContext, School>
@@ -10,6 +10,10 @@ namespace OgrenciAidatSistemi.Data
 
         protected override async Task SeedDataAsync()
         {
+            if (_context.Schools == null)
+            {
+                throw new NullReferenceException("SchoolDBSeeder: _context.Schools is null");
+            }
             foreach (var school in _seedData)
             {
                 if (await _context.Schools.AnyAsync(s => s.Name == school.Name))
@@ -28,6 +32,10 @@ namespace OgrenciAidatSistemi.Data
 
         protected override async Task SeedRandomDataAsync()
         {
+            if (_context.Schools == null)
+            {
+                throw new NullReferenceException("SchoolDBSeeder: _context.Schools is null");
+            }
             for (int i = 0; i < 5; i++) // Seed 5 random schools
             {
                 var school = CreateRandomModel();

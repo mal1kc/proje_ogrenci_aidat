@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using OgrenciAidatSistemi.Models;
 
+#pragma warning disable CS8604 // Possible null reference argument.
 namespace OgrenciAidatSistemi.Data
 {
     public class SchoolAdminDBSeeder : DbSeeder<AppDbContext, SchoolAdmin>
@@ -10,6 +11,10 @@ namespace OgrenciAidatSistemi.Data
 
         protected override async Task SeedDataAsync()
         {
+            if (_context.SchoolAdmins == null)
+            {
+                throw new NullReferenceException("SchoolAdminDBSeeder: _context.SchoolAdmins is null");
+            }
             foreach (var schoolAdmin in _seedData)
             {
                 if (await _context.Users.AnyAsync(u => u.EmailAddress == schoolAdmin.EmailAddress))
@@ -41,6 +46,10 @@ namespace OgrenciAidatSistemi.Data
 
         protected override async Task SeedRandomDataAsync()
         {
+            if (_context.SchoolAdmins == null)
+            {
+                throw new NullReferenceException("SchoolAdminDBSeeder: _context.SchoolAdmins is null");
+            }
             for (int i = 0; i < 10; i++) // Seed 10 random school admins
             {
                 var schoolAdmin = CreateRandomModel();

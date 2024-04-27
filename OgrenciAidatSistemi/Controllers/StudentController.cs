@@ -64,6 +64,9 @@ namespace OgrenciAidatSistemi.Controllers
                 return View(scAdminView);
             }
 
+            if (_dbContext.Students == null)
+                _dbContext.Students = _dbContext.Set<Student>();
+
             var passwordHash = _userService.HashPassword(scAdminView.Password);
             var schAdmin = _dbContext
                 .Students.Where(u =>
@@ -73,9 +76,12 @@ namespace OgrenciAidatSistemi.Controllers
             if (schAdmin == null)
             {
                 ModelState.AddModelError("EmailAddress", "User not found");
+                return RedirectToAction("Index");
             }
-
-            _logger.LogDebug("User {0} signed in", schAdmin.EmailAddress);
+            else
+            {
+                _logger.LogDebug("User {0} signed in", schAdmin.EmailAddress);
+            }
 
             try
             {
@@ -104,9 +110,9 @@ namespace OgrenciAidatSistemi.Controllers
 
         [Authorize(Roles = Configurations.Constants.userRoles.SiteAdmin)]
         public IActionResult List(
-            string searchString = null,
-            string searchField = null,
-            string sortOrder = null,
+            string? searchString = null,
+            string? searchField = null,
+            string? sortOrder = null,
             int pageIndex = 1,
             int pageSize = 20
         )
@@ -244,11 +250,16 @@ namespace OgrenciAidatSistemi.Controllers
         }
 
         [Authorize(Roles = Configurations.Constants.userRoles.SiteAdmin)]
-        public async Task<IActionResult> Delete(int? id)
+        public IActionResult Delete(int? id)
         {
             if (id == null)
             {
                 return NotFound();
+            }
+
+            if (_dbContext.Students == null)
+            {
+                _dbContext.Students = _dbContext.Set<Student>();
             }
 
             var siteAdmin = _dbContext.Students.Where(e => e.Id == id).FirstOrDefault();
@@ -291,6 +302,8 @@ namespace OgrenciAidatSistemi.Controllers
         [Authorize]
         public async Task<PartialViewResult> SchoolViewPartial(int? id)
         {
+            if (_dbContext.Schools == null)
+                _dbContext.Schools = _dbContext.Set<School>();
             if (id == null)
             {
                 return PartialView("_SchoolViewPartial", null);

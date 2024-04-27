@@ -49,7 +49,9 @@ namespace OgrenciAidatSistemi.Models
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }
         public decimal Amount { get; set; }
+        public required School School { get; set; }
         public required ISet<Payment> Payments { get; set; }
+        public WorkYear WorkYear { get; set; }
         public Occurence Occurence { get; set; }
     }
 

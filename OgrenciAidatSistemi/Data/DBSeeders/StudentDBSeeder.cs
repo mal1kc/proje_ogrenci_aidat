@@ -1,6 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using OgrenciAidatSistemi.Models;
-
+#pragma warning disable CS8604 // Possible null reference argument.
 namespace OgrenciAidatSistemi.Data
 {
     public class StudentDBSeeder : DbSeeder<AppDbContext, Student>
@@ -11,6 +11,7 @@ namespace OgrenciAidatSistemi.Data
         protected override async Task SeedDataAsync()
         {
             foreach (var student in _seedData)
+
             {
                 if (await _context.Students.AnyAsync(s => s.StudentId == student.StudentId))
                 {

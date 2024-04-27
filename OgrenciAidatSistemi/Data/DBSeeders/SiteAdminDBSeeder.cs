@@ -1,6 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using OgrenciAidatSistemi.Models;
-
+#pragma warning disable CS8604 // Possible null reference argument.
 namespace OgrenciAidatSistemi.Data
 {
     public class SiteAdminDBSeeder : DbSeeder<AppDbContext, SiteAdmin>
@@ -32,6 +32,10 @@ namespace OgrenciAidatSistemi.Data
 
         protected override async Task SeedRandomDataAsync()
         {
+            if (_context.SiteAdmins == null)
+            {
+                throw new Exception("SiteAdminDBSeeder: SeedRandomDataAsync _context.SiteAdmins is null");
+            }
             for (int i = 0; i < 10; i++) // Seed 10 random site admins
             {
                 var siteAdmin = CreateRandomModel();

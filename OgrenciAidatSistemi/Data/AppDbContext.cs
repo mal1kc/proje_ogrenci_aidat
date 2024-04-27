@@ -1,4 +1,3 @@
-using System.Diagnostics.CodeAnalysis;
 using Microsoft.EntityFrameworkCore;
 using OgrenciAidatSistemi.Models;
 
@@ -22,6 +21,9 @@ namespace OgrenciAidatSistemi.Data
         public DbSet<CheckPayment>? CheckPayments { get; set; }
         public DbSet<DebitCardPayment>? DebitCardPayments { get; set; }
         public DbSet<BankTransferPayment>? BankTransferPayments { get; set; }
+
+        public DbSet<WorkYear>? WorkYears { get; set; }
+        public DbSet<Grade>? Grades { get; set; }
 
         // TODO: needs to be change in devlopment and production use
 

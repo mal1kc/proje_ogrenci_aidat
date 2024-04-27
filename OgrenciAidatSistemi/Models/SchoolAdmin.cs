@@ -12,6 +12,8 @@ namespace OgrenciAidatSistemi.Models
         public override DateTime CreatedAt { get; set; }
         public override DateTime UpdatedAt { get; set; }
 
+        public ContactInfo ContactInfo { get; set; }
+
         [System.Text.Json.Serialization.JsonIgnore]
         public ModelSearchConfig SearchConfig =>
             new ModelSearchConfig(

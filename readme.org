@@ -11,9 +11,9 @@
 
 ** okul admini yönetim paneli
 
-** okul çalışma yılı yönetimi
+** okul çalışma yılı yönetimi (payment periods)
 
-** aidat dönemi yönetimi
+** aidat dönemi yönetimi (single payment period)
 
 ** öğrenci yönetimi
 
@@ -24,8 +24,3 @@
 ** dekont depolama
 
 ** veli ödeme arayüzü
-
-* yapılacaklar - [0%]
- - [ ] daha düzgün bir userservice yaz
-   - [ ] userservice i kullanıma sok
- - [ ] admin dash board tasarla gimp vb bişeyle sade görsel ve fieldlar
