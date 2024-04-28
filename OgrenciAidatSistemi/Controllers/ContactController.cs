@@ -1,15 +1,12 @@
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
-
+using Microsoft.AspNetCore.Mvc;
 using OgrenciAidatSistemi.Data;
-using OgrenciAidatSistemi.Services;
 using OgrenciAidatSistemi.Helpers;
-
 using OgrenciAidatSistemi.Models;
+using OgrenciAidatSistemi.Services;
 
 namespace OgrenciAidatSistemi.Controllers
 {
-
     // TODO: change authorization roles for actions
     // must be SiteAdmin or SchoolAdmin (for its school and school students) => list, create, edit, delete ,details
     // or Student (for its own contact info) => details, edit
@@ -20,12 +17,17 @@ namespace OgrenciAidatSistemi.Controllers
         private readonly AppDbContext _dbContext;
         private readonly UserService _userService;
 
-        public ContactController(ILogger<ContactController> logger, AppDbContext dbContext, UserService userService)
+        public ContactController(
+            ILogger<ContactController> logger,
+            AppDbContext dbContext,
+            UserService userService
+        )
         {
             _logger = logger;
             _dbContext = dbContext;
             _userService = userService;
         }
+
 #warning "This action not tested"
         [Authorize(Roles = Configurations.Constants.userRoles.SiteAdmin)]
         public IActionResult List(
@@ -79,7 +81,11 @@ namespace OgrenciAidatSistemi.Controllers
         }
 
         // POST: Contact/Delete/5
-        [HttpPost, ActionName("Delete"), Authorize(Roles = Configurations.Constants.userRoles.SiteAdmin)]
+        [
+            HttpPost,
+            ActionName("Delete"),
+            Authorize(Roles = Configurations.Constants.userRoles.SiteAdmin)
+        ]
         public IActionResult DeleteConfirmed(int? id)
         {
             // TODO: implement contactinfo delete action
@@ -94,6 +100,5 @@ namespace OgrenciAidatSistemi.Controllers
             // TODO: implement contactinfo details action
             throw new NotImplementedException("Details action not implemented");
         }
-
     }
 }

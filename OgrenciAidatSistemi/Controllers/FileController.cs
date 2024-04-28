@@ -11,7 +11,12 @@ namespace OgrenciAidatSistemi.Controllers
         private readonly FileService _fileService;
         private readonly UserService _userService;
 
-        public FileController(ILogger<FileController> logger, AppDbContext dbContext, UserService userService, FileService fileService)
+        public FileController(
+            ILogger<FileController> logger,
+            AppDbContext dbContext,
+            UserService userService,
+            FileService fileService
+        )
         {
             _logger = logger;
             _dbContext = dbContext;
@@ -20,13 +25,11 @@ namespace OgrenciAidatSistemi.Controllers
         }
 
         [HttpGet]
-
         [HttpGet]
         public IActionResult Upload()
         {
             return View();
         }
-
 
         [HttpPost]
         public async Task<IActionResult> Upload(IFormFile file)
@@ -53,7 +56,10 @@ namespace OgrenciAidatSistemi.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error uploading file");
-                return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while uploading the file");
+                return StatusCode(
+                    StatusCodes.Status500InternalServerError,
+                    "An error occurred while uploading the file"
+                );
             }
         }
 
@@ -72,7 +78,10 @@ namespace OgrenciAidatSistemi.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error downloading file");
-                return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while downloading the file");
+                return StatusCode(
+                    StatusCodes.Status500InternalServerError,
+                    "An error occurred while downloading the file"
+                );
             }
         }
     }

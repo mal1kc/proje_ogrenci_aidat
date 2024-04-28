@@ -5,7 +5,6 @@ using Microsoft.AspNetCore.Mvc.Filters;
 
 namespace OgrenciAidatSistemi.Helpers.Controller
 {
-
     [AttributeUsage(AttributeTargets.Method, AllowMultiple = false)]
     public class DebugOnlyAttribute : ActionFilterAttribute
     {
@@ -15,8 +14,8 @@ namespace OgrenciAidatSistemi.Helpers.Controller
             // Allow execution of the action method
             base.OnActionExecuting(context);
 #else
-        // Return a 404 Not Found result
-        context.Result = new NotFoundResult();
+            // Return a 404 Not Found result
+            context.Result = new NotFoundResult();
 #endif
         }
     }

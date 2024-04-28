@@ -13,7 +13,9 @@ namespace OgrenciAidatSistemi.Data
         {
             if (_context.SchoolAdmins == null)
             {
-                throw new NullReferenceException("SchoolAdminDBSeeder: _context.SchoolAdmins is null");
+                throw new NullReferenceException(
+                    "SchoolAdminDBSeeder: _context.SchoolAdmins is null"
+                );
             }
             foreach (var schoolAdmin in _seedData)
             {
@@ -48,7 +50,9 @@ namespace OgrenciAidatSistemi.Data
         {
             if (_context.SchoolAdmins == null)
             {
-                throw new NullReferenceException("SchoolAdminDBSeeder: _context.SchoolAdmins is null");
+                throw new NullReferenceException(
+                    "SchoolAdminDBSeeder: _context.SchoolAdmins is null"
+                );
             }
             for (int i = 0; i < 10; i++) // Seed 10 random school admins
             {
@@ -108,28 +112,19 @@ namespace OgrenciAidatSistemi.Data
                     Name = "School" + RandomizerHelper.GenerateRandomString(random.Next(2, 10)),
                     Students = new HashSet<Student>()
                 },
-                ContactInfo = new ContactInfo
-                {
-                    Name = "Random Name",
-                    Email = email,
-                }
+                ContactInfo = new ContactInfo { Name = "Random Name", Email = email, }
             };
         }
 
         private readonly List<SchoolAdmin> _seedData = new List<SchoolAdmin>
         {
-
-        new SchoolAdmin
+            new SchoolAdmin
             {
                 FirstName = "SchoolAdmin1",
                 LastName = "SchoolAdmin1",
                 EmailAddress = "sch_admin1@school1",
                 PasswordHash = SchoolAdmin.ComputeHash("Password1"),
-                School = new School
-                {
-                    Name = "School1",
-                    Students = new HashSet<Student>()
-                },
+                School = new School { Name = "School1", Students = new HashSet<Student>() },
                 ContactInfo = new ContactInfo
                 {
                     Name = "SchoolAdmin2",
@@ -137,7 +132,6 @@ namespace OgrenciAidatSistemi.Data
                     PhoneNumber = "+90 555 555 55 56",
                 }
             },
-
         };
     }
 }

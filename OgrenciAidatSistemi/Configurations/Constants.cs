@@ -34,6 +34,5 @@ namespace OgrenciAidatSistemi.Configurations
 
         // 10 MB file size
         public const int MaxFileSize = 10 * 1024 * 1024;
-
     }
 }

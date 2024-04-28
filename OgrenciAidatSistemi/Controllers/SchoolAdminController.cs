@@ -17,7 +17,11 @@ namespace OgrenciAidatSistemi.Controllers
 
         private readonly UserService _userService;
 
-        public SchoolAdminController(ILogger<SchoolAdminController> logger, AppDbContext dbContext, UserService userService)
+        public SchoolAdminController(
+            ILogger<SchoolAdminController> logger,
+            AppDbContext dbContext,
+            UserService userService
+        )
         {
             _logger = logger;
             _dbContext = dbContext;
@@ -90,9 +94,9 @@ namespace OgrenciAidatSistemi.Controllers
                 catch (Exception ex)
                 {
                     _logger.LogError(
-                "Error while signing in user {0}: {1}",
-                schAdmin.EmailAddress,
-                ex.Message
+                        "Error while signing in user {0}: {1}",
+                        schAdmin.EmailAddress,
+                        ex.Message
                     );
                     TempData["CantSignIn"] = true;
                     return RedirectToAction("SignIn");
@@ -130,7 +134,7 @@ namespace OgrenciAidatSistemi.Controllers
 
             var modelList = new QueryableModelHelper<SchoolAdmin>(
                 _dbContext.SchoolAdmins.Include(sa => sa.School).AsQueryable(),
-                    SchoolAdmin.SearchConfig
+                SchoolAdmin.SearchConfig
             );
 
             return View(
@@ -251,13 +255,12 @@ namespace OgrenciAidatSistemi.Controllers
         {
             if (id == null || _dbContext.SchoolAdmins == null)
                 return NotFound();
-            var siteAdmin = await _dbContext.SchoolAdmins
-                .Include(sa => sa.School)
+            var siteAdmin = await _dbContext
+                .SchoolAdmins.Include(sa => sa.School)
                 .Where(sa => sa.Id == id)
                 .FirstOrDefaultAsync();
             if (siteAdmin == null)
                 return NotFound();
-
 
             // check if the user is logged in
             // if the user is logged in, prevent deletion
@@ -294,15 +297,13 @@ namespace OgrenciAidatSistemi.Controllers
         {
             if (id == null || _dbContext.SchoolAdmins == null)
                 return NotFound();
-            var siteAdmin = await _dbContext.SchoolAdmins
-                .Include(sa => sa.School)
+            var siteAdmin = await _dbContext
+                .SchoolAdmins.Include(sa => sa.School)
                 .Where(sa => sa.Id == id)
                 .FirstOrDefaultAsync();
             if (siteAdmin == null)
                 return NotFound();
             return View(siteAdmin.ToView());
         }
-
-
     }
 }

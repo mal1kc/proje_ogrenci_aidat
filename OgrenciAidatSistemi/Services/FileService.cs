@@ -10,7 +10,11 @@ namespace OgrenciAidatSistemi.Services
         private readonly AppDbContext _dbContext;
         private readonly IWebHostEnvironment _environment;
 
-        public FileService(ILogger<FileService> logger, AppDbContext dbContext, IWebHostEnvironment environment)
+        public FileService(
+            ILogger<FileService> logger,
+            AppDbContext dbContext,
+            IWebHostEnvironment environment
+        )
         {
             _logger = logger;
             _dbContext = dbContext;
@@ -19,7 +23,11 @@ namespace OgrenciAidatSistemi.Services
 
         public async Task<string> UploadFileAsync(IFormFile file, User createdBy)
         {
-            if (file == null || file.Length == 0 || file.Length > Configurations.Constants.MaxFileSize)
+            if (
+                file == null
+                || file.Length == 0
+                || file.Length > Configurations.Constants.MaxFileSize
+            )
             {
                 throw new ArgumentException("File is empty or exceeds the maximum allowed size.");
             }
@@ -97,7 +105,6 @@ namespace OgrenciAidatSistemi.Services
                     throw new InvalidOperationException("No file paths found in the database");
                 }
             }
-
 
             var fileModel = await _dbContext.FilePaths.FindAsync(fileId);
             if (fileModel == null)

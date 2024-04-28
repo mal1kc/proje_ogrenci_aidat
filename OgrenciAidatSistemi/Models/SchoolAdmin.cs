@@ -62,7 +62,6 @@ namespace OgrenciAidatSistemi.Models
         public SchoolView? SchoolView { get; set; }
         public int SchoolId { get; set; }
 
-
         public override bool CheckUserExists(AppDbContext dbctx)
         {
             if (dbctx.SchoolAdmins == null)

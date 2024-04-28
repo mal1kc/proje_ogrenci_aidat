@@ -15,7 +15,11 @@ namespace OgrenciAidatSistemi.Services
 
         private HttpContext? HttpContext => _httpContextAccessor.HttpContext;
 
-        public UserService(ILogger<UserService> logger, AppDbContext dbContext, IHttpContextAccessor httpContextAccessor)
+        public UserService(
+            ILogger<UserService> logger,
+            AppDbContext dbContext,
+            IHttpContextAccessor httpContextAccessor
+        )
         {
             _dbContext = dbContext;
             _httpContextAccessor = httpContextAccessor;

@@ -15,7 +15,6 @@ namespace OgrenciAidatSistemi.Data
 
         public DbSet<ContactInfo>? Contacts { get; set; }
 
-
         public DbSet<Payment>? Payments { get; set; }
         public DbSet<PaymentPeriode>? PaymentPeriods { get; set; }
 
@@ -23,7 +22,6 @@ namespace OgrenciAidatSistemi.Data
         public DbSet<CreditCardPayment>? CreditCardPayments { get; set; }
         public DbSet<CheckPayment>? CheckPayments { get; set; }
         public DbSet<DebitCardPayment>? DebitCardPayments { get; set; }
-
 
         public DbSet<WorkYear>? WorkYears { get; set; }
         public DbSet<Grade>? Grades { get; set; }
@@ -72,17 +70,20 @@ namespace OgrenciAidatSistemi.Data
             // TODO implement auto generate student id for using school id etc
             /* modelBuilder.Entity<Student>().Property(s => s.StudentId).ValueGeneratedOnAdd */
 
-            modelBuilder.Entity<SchoolAdmin>().Property(sa => sa.Role).HasDefaultValue(UserRole.SchoolAdmin);
-            modelBuilder.Entity<SiteAdmin>().Property(sa => sa.Role).HasDefaultValue(UserRole.SiteAdmin);
-
-
+            modelBuilder
+                .Entity<SchoolAdmin>()
+                .Property(sa => sa.Role)
+                .HasDefaultValue(UserRole.SchoolAdmin);
+            modelBuilder
+                .Entity<SiteAdmin>()
+                .Property(sa => sa.Role)
+                .HasDefaultValue(UserRole.SiteAdmin);
 
             // all the time include school in student and school admin
             modelBuilder.Entity<Student>().HasOne(s => s.School);
             modelBuilder.Entity<SchoolAdmin>().HasOne(s => s.School);
 
             modelBuilder.Entity<Payment>().HasOne(p => p.Student);
-
 
             base.OnModelCreating(modelBuilder);
         }
@@ -95,6 +96,5 @@ namespace OgrenciAidatSistemi.Data
         /*     }; */
         /* } */
         /**/
-
     }
 }

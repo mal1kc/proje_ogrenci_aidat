@@ -4,7 +4,6 @@ using OgrenciAidatSistemi.Models.Interfaces;
 
 namespace OgrenciAidatSistemi.Models
 {
-
     [Table("Students")]
     public class Student : User, ISearchableModel
     {
@@ -42,18 +41,15 @@ namespace OgrenciAidatSistemi.Models
             };
         }
 
-
         public static ModelSearchConfig SearchConfig =>
             new ModelSearchConfig(
                 StudentSearchConfig.AllowedFieldsForSearch,
                 StudentSearchConfig.AllowedFieldsForSort
             );
-
     }
 
     public class StudentView : UserView
     {
-
         public int SchoolId { get; set; }
         public SchoolView? School { get; set; }
         public int StudentId { get; set; }

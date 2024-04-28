@@ -2,11 +2,10 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using OgrenciAidatSistemi.Data;
 using OgrenciAidatSistemi.Helpers;
+using OgrenciAidatSistemi.Helpers.Controller;
 using OgrenciAidatSistemi.Models;
 using OgrenciAidatSistemi.Models.Interfaces;
 using OgrenciAidatSistemi.Services;
-
-using OgrenciAidatSistemi.Helpers.Controller;
 
 namespace OgrenciAidatSistemi.Controllers
 {
@@ -17,7 +16,11 @@ namespace OgrenciAidatSistemi.Controllers
 
         private readonly UserService _userService;
 
-        public SiteAdminController(ILogger<SiteAdminController> logger, AppDbContext appDbContext, UserService userService)
+        public SiteAdminController(
+            ILogger<SiteAdminController> logger,
+            AppDbContext appDbContext,
+            UserService userService
+        )
         {
             _logger = logger;
             _appDbContext = appDbContext;
@@ -110,13 +113,15 @@ namespace OgrenciAidatSistemi.Controllers
             );
 
             return View(
-                    modelHelper.List(
-                        ViewData,
-                        searchString,
-                        searchField,
-                        sortOrder, pageIndex, pageSize
-                        )
-                    );
+                modelHelper.List(
+                    ViewData,
+                    searchString,
+                    searchField,
+                    sortOrder,
+                    pageIndex,
+                    pageSize
+                )
+            );
         }
 
         // Create a new SiteAdmin
@@ -292,6 +297,5 @@ namespace OgrenciAidatSistemi.Controllers
                 return NotFound();
             return View(siteAdmin.ToView());
         }
-
     }
 }

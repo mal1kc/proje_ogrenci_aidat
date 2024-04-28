@@ -16,10 +16,9 @@ namespace OgrenciAidatSistemi.Models
 
         public static ModelSearchConfig SearchConfig =>
             new ModelSearchConfig(
-            ContactSearchConfig.AllowedFieldsForSearch,
-            ContactSearchConfig.AllowedFieldsForSort
+                ContactSearchConfig.AllowedFieldsForSearch,
+                ContactSearchConfig.AllowedFieldsForSort
             );
-
 
         bool validateEmail(string email)
         {
@@ -43,10 +42,6 @@ namespace OgrenciAidatSistemi.Models
             "Addresses",
             "Email"
         };
-        public static readonly string[] AllowedFieldsForSort = new string[]
-        {
-            "Name",
-            "Email"
-        };
+        public static readonly string[] AllowedFieldsForSort = new string[] { "Name", "Email" };
     }
 }

@@ -1,4 +1,5 @@
 using OgrenciAidatSistemi.Models.Interfaces;
+
 namespace OgrenciAidatSistemi.Models
 {
     public class WorkYear : IBaseDbModel, ISearchableModel
@@ -12,8 +13,8 @@ namespace OgrenciAidatSistemi.Models
         public ISet<School>? Schools { get; set; }
         public ModelSearchConfig SearchConfig =>
             new ModelSearchConfig(
-            WorkYearSearchConfig.AllowedFieldsForSearch,
-            WorkYearSearchConfig.AllowedFieldsForSort
+                WorkYearSearchConfig.AllowedFieldsForSearch,
+                WorkYearSearchConfig.AllowedFieldsForSort
             );
     }
 

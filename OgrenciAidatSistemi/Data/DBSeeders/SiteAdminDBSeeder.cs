@@ -34,7 +34,9 @@ namespace OgrenciAidatSistemi.Data
         {
             if (_context.SiteAdmins == null)
             {
-                throw new Exception("SiteAdminDBSeeder: SeedRandomDataAsync _context.SiteAdmins is null");
+                throw new Exception(
+                    "SiteAdminDBSeeder: SeedRandomDataAsync _context.SiteAdmins is null"
+                );
             }
             for (int i = 0; i < 10; i++) // Seed 10 random site admins
             {

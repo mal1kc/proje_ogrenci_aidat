@@ -1,16 +1,13 @@
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
-
+using Microsoft.AspNetCore.Mvc;
 using OgrenciAidatSistemi.Data;
-using OgrenciAidatSistemi.Services;
 using OgrenciAidatSistemi.Helpers;
-using OgrenciAidatSistemi.Models;
-
 using OgrenciAidatSistemi.Helpers.Controller;
+using OgrenciAidatSistemi.Models;
+using OgrenciAidatSistemi.Services;
 
 namespace OgrenciAidatSistemi.Controllers
 {
-
     // TODO: change authorization roles for actions
     // debug : for only edit,delete action
     // must be SiteAdmin or SchoolAdmin (for its school) => list, create, details
@@ -22,12 +19,17 @@ namespace OgrenciAidatSistemi.Controllers
         private readonly AppDbContext _dbContext;
         private readonly UserService _userService;
 
-        public PaymentController(ILogger<PaymentController> logger, AppDbContext dbContext, UserService userService)
+        public PaymentController(
+            ILogger<PaymentController> logger,
+            AppDbContext dbContext,
+            UserService userService
+        )
         {
             _logger = logger;
             _dbContext = dbContext;
             _userService = userService;
         }
+
 #warning "This action not tested"
         [Authorize(Roles = Configurations.Constants.userRoles.SiteAdmin)]
         public IActionResult List(
@@ -81,10 +83,13 @@ namespace OgrenciAidatSistemi.Controllers
             throw new NotImplementedException("Delete action not implemented");
         }
 
-
         // POST: Payment/Delete/5
         [DebugOnly]
-        [HttpPost, ActionName("Delete"), Authorize(Roles = Configurations.Constants.userRoles.SiteAdmin)]
+        [
+            HttpPost,
+            ActionName("Delete"),
+            Authorize(Roles = Configurations.Constants.userRoles.SiteAdmin)
+        ]
         public IActionResult DeleteConfirmed(int? id)
         {
             // TODO: implement Paymentinfo delete action
@@ -99,6 +104,5 @@ namespace OgrenciAidatSistemi.Controllers
             // TODO: implement Paymentinfo details action
             throw new NotImplementedException("Details action not implemented");
         }
-
     }
 }

@@ -20,7 +20,14 @@ namespace OgrenciAidatSistemi.Models
         public DateTime CreatedAt { get; set; }
         public DateTime UpdatedAt { get; set; }
 
-        public FilePath(string path, string name, string extension, string contentType, long size, string description)
+        public FilePath(
+            string path,
+            string name,
+            string extension,
+            string contentType,
+            long size,
+            string description
+        )
         {
             Path = path;
             Name = name;
@@ -34,8 +41,8 @@ namespace OgrenciAidatSistemi.Models
 
         public static ModelSearchConfig SearchConfig =>
             new ModelSearchConfig(
-            new string[] { "Name", "Description", "Extension", "ContentType" },
-            new string[] { "Name", "Description", "Extension", "ContentType" }
+                new string[] { "Name", "Description", "Extension", "ContentType" },
+                new string[] { "Name", "Description", "Extension", "ContentType" }
             );
 
         // get safely data of file asynchrously
@@ -66,6 +73,5 @@ namespace OgrenciAidatSistemi.Models
         {
             return ComputeHash(Path);
         }
-
     }
 }

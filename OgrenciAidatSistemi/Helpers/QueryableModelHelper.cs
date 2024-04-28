@@ -73,9 +73,10 @@ namespace OgrenciAidatSistemi.Helpers
                         searchString
                     );
 
-                    combinedExpression = combinedExpression == null
-                        ? containsExpression.Body
-                        : Expression.OrElse(combinedExpression, containsExpression.Body);
+                    combinedExpression =
+                        combinedExpression == null
+                            ? containsExpression.Body
+                            : Expression.OrElse(combinedExpression, containsExpression.Body);
                 }
             }
 
@@ -92,17 +93,26 @@ namespace OgrenciAidatSistemi.Helpers
         {
             MemberExpression property = Expression.Property(parameter, fieldName);
             ConstantExpression search = Expression.Constant(searchString);
-            MethodInfo? containsMethod = typeof(string).GetMethod("Contains", new[] { typeof(string) });
+            MethodInfo? containsMethod = typeof(string).GetMethod(
+                "Contains",
+                new[] { typeof(string) }
+            );
             if (containsMethod == null) // If method not found return
                 return Expression.Lambda<Func<T, bool>>(Expression.Constant(false), parameter);
-            MethodCallExpression containsExpression = Expression.Call(property, containsMethod, search);
+            MethodCallExpression containsExpression = Expression.Call(
+                property,
+                containsMethod,
+                search
+            );
             return Expression.Lambda<Func<T, bool>>(containsExpression, parameter);
         }
 
-
         public IQueryable<T> Sort(string fieldName, SortOrderEnum sortOrder)
         {
-            if (string.IsNullOrEmpty(fieldName) || !_searchConfig.AllowedFieldsForSort.Contains(fieldName))
+            if (
+                string.IsNullOrEmpty(fieldName)
+                || !_searchConfig.AllowedFieldsForSort.Contains(fieldName)
+            )
                 return _resultedQueryable;
 
             var parameter = Expression.Parameter(typeof(T), "x");
@@ -112,13 +122,13 @@ namespace OgrenciAidatSistemi.Helpers
             var conversion = Expression.Convert(property, typeof(object));
             var lambda = Expression.Lambda<Func<T, object>>(conversion, parameter);
 
-            _resultedQueryable = sortOrder == SortOrderEnum.DESC
-                ? _resultedQueryable.OrderByDescending(lambda)
-                : _resultedQueryable.OrderBy(lambda);
+            _resultedQueryable =
+                sortOrder == SortOrderEnum.DESC
+                    ? _resultedQueryable.OrderByDescending(lambda)
+                    : _resultedQueryable.OrderBy(lambda);
 
             return _resultedQueryable;
         }
-
 
         public IQueryable<T> Sort(string? sortOrderStr)
         {
@@ -180,7 +190,6 @@ namespace OgrenciAidatSistemi.Helpers
                 }
             }
 
-
             if (searchField != null && !_searchConfig.AllowedFieldsForSearch.Contains(searchField))
             {
                 searchField = null;
@@ -196,14 +205,14 @@ namespace OgrenciAidatSistemi.Helpers
             {
                 // example result: FirstNameSortParam = FirstName_desc or FirstName_asc
 
-                ViewData[$"{field}SortParam"] = sortOrder == null
-                    ? $"{field}_asc"
-                    : field == sortField
-                        ? sortType == "asc"
-                            ? $"{field}_desc"
-                            : $"{field}_asc"
-                        : $"{field}_asc";
-
+                ViewData[$"{field}SortParam"] =
+                    sortOrder == null
+                        ? $"{field}_asc"
+                        : field == sortField
+                            ? sortType == "asc"
+                                ? $"{field}_desc"
+                                : $"{field}_asc"
+                            : $"{field}_asc";
 
                 if (field == sortField)
                 {
@@ -213,19 +222,16 @@ namespace OgrenciAidatSistemi.Helpers
                 }
             }
 
-
             ViewData["CurrentSearchString"] = searchString;
             ViewData["CurrentSearchField"] = searchField;
 
-
-
             _resultedQueryable = SearchAndSort(
-                    searchString, searchField, sortField,
-                    sortType == "asc" ? SortOrderEnum.ASC : SortOrderEnum.DESC
-                    );
-            var paginatedModel = _resultedQueryable
-                .Skip((pageIndex - 1) * pageSize)
-                .Take(pageSize);
+                searchString,
+                searchField,
+                sortField,
+                sortType == "asc" ? SortOrderEnum.ASC : SortOrderEnum.DESC
+            );
+            var paginatedModel = _resultedQueryable.Skip((pageIndex - 1) * pageSize).Take(pageSize);
 
             var countOfmodelopResult = _resultedQueryable.Count();
             ViewData["CurrentPageIndex"] = pageIndex;

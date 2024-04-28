@@ -60,7 +60,6 @@ namespace OgrenciAidatSistemi.Models
                 UpdatedAt = UpdatedAt
             };
         }
-
     }
 
     public class SiteAdminView : UserView

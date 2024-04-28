@@ -36,10 +36,9 @@ namespace OgrenciAidatSistemi.Models
 
         public static ModelSearchConfig SearchConfig =>
             new ModelSearchConfig(
-            PaymentSearchConfig.AllowedFieldsForSearch,
-            PaymentSearchConfig.AllowedFieldsForSort
+                PaymentSearchConfig.AllowedFieldsForSearch,
+                PaymentSearchConfig.AllowedFieldsForSort
             );
-
     }
 
     public class PaymentView : IBaseDbModelView
@@ -109,7 +108,6 @@ namespace OgrenciAidatSistemi.Models
         {
             PaymentMethod = PaymentMethod.CreditCard;
         }
-
     }
 
     public class CheckPayment : Payment
@@ -122,7 +120,6 @@ namespace OgrenciAidatSistemi.Models
         {
             PaymentMethod = PaymentMethod.Check;
         }
-
     }
 
     public class DebitCardPayment : Payment
@@ -136,7 +133,6 @@ namespace OgrenciAidatSistemi.Models
         {
             PaymentMethod = PaymentMethod.DebitCard;
         }
-
     }
 
     public class CashPayment : Payment
@@ -150,7 +146,6 @@ namespace OgrenciAidatSistemi.Models
         {
             PaymentMethod = PaymentMethod.Cash;
         }
-
     }
 
     public static class PaymentSearchConfig
@@ -173,5 +168,4 @@ namespace OgrenciAidatSistemi.Models
             "isVerified"
         };
     }
-
 }

@@ -15,10 +15,13 @@ namespace OgrenciAidatSistemi.Controllers
 
         private readonly AppDbContext _dbContext;
 
-
         private readonly UserService _userService;
 
-        public SchoolController(ILogger<SchoolController> logger, AppDbContext dbContext, UserService userService)
+        public SchoolController(
+            ILogger<SchoolController> logger,
+            AppDbContext dbContext,
+            UserService userService
+        )
         {
             _logger = logger;
             _dbContext = dbContext;
@@ -67,7 +70,6 @@ namespace OgrenciAidatSistemi.Controllers
             return View();
         }
 
-
         [HttpPost, ActionName("DeleteConfirmed")]
         [ValidateAntiForgeryToken]
         [Authorize(Roles = Configurations.Constants.userRoles.SiteAdmin)]
@@ -100,12 +102,15 @@ namespace OgrenciAidatSistemi.Controllers
 
 
 #warning This method is not tested
-        [Authorize(Roles = Configurations.Constants.userRoles.SchoolAdmin + "," + Configurations.Constants.userRoles.SiteAdmin)]
+        [Authorize(
+            Roles = Configurations.Constants.userRoles.SchoolAdmin
+                + ","
+                + Configurations.Constants.userRoles.SiteAdmin
+        )]
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null || id == 0 || _dbContext.Schools == null)
                 return NotFound();
-
 
             if (id == null || id == 0 || _dbContext.Schools == null)
                 return NotFound();
@@ -143,6 +148,5 @@ namespace OgrenciAidatSistemi.Controllers
 
             return View(school.ToView());
         }
-
     }
 }

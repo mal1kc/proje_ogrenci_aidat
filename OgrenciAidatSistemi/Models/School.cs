@@ -13,13 +13,12 @@ namespace OgrenciAidatSistemi.Models
         public ISet<Grade>? Grades { get; set; }
         public ISet<WorkYear>? WorkYears { get; set; }
 
-
         public required ISet<Student> Students { get; set; }
 
         public ModelSearchConfig SearchConfig =>
             new ModelSearchConfig(
-            SchoolSearchConfig.AllowedFieldsForSearch,
-            SchoolSearchConfig.AllowedFieldsForSort
+                SchoolSearchConfig.AllowedFieldsForSearch,
+                SchoolSearchConfig.AllowedFieldsForSort
             );
 
         public SchoolView ToView(bool ignoreBidirectNav = false)
@@ -28,7 +27,11 @@ namespace OgrenciAidatSistemi.Models
             {
                 Id = this.Id,
                 Name = this.Name,
-                SchoolAdmins = ignoreBidirectNav ? null : this.SchoolAdmins?.Select(sa => sa.ToView(ignoreBidirectNav: true)).ToHashSet(),
+                SchoolAdmins = ignoreBidirectNav
+                    ? null
+                    : this
+                        .SchoolAdmins?.Select(sa => sa.ToView(ignoreBidirectNav: true))
+                        .ToHashSet(),
                 CreatedAt = this.CreatedAt,
                 UpdatedAt = this.UpdatedAt
             };
@@ -46,15 +49,7 @@ namespace OgrenciAidatSistemi.Models
 
     public static class SchoolSearchConfig
     {
-        public static readonly string[] AllowedFieldsForSearch = new string[]
-        {
-            "id",
-            "Name"
-        };
-        public static readonly string[] AllowedFieldsForSort = new string[]
-        {
-            "id",
-            "Name"
-        };
+        public static readonly string[] AllowedFieldsForSearch = new string[] { "id", "Name" };
+        public static readonly string[] AllowedFieldsForSort = new string[] { "id", "Name" };
     }
 }

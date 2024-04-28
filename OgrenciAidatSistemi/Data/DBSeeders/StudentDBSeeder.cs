@@ -11,7 +11,6 @@ namespace OgrenciAidatSistemi.Data
         protected override async Task SeedDataAsync()
         {
             foreach (var student in _seedData)
-
             {
                 if (await _context.Students.AnyAsync(s => s.StudentId == student.StudentId))
                 {
