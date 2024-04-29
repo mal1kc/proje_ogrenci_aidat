@@ -2,6 +2,9 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using NReco.Logging.File;
 using OgrenciAidatSistemi.Configurations;
 using OgrenciAidatSistemi.Data;
+using OgrenciAidatSistemi.Data.DBSeeders;
+using OgrenciAidatSistemi.Models;
+using OgrenciAidatSistemi.Models.Interfaces;
 using OgrenciAidatSistemi.Services;
 
 internal class Program
@@ -82,13 +85,36 @@ internal class Program
                 var _verbs = configuration.GetSection("SeedData").GetValue("VerboseLogging", false);
                 Console.WriteLine("Seeding Database");
 
+                var logger = app.Services.GetRequiredService<ILogger<Program>>();
+
                 List<IDbSeeder<AppDbContext>> DBseeders =
                     new()
                     {
-                        new SiteAdminDBSeeder(context: ctx, configuration: configuration),
-                        new SchoolAdminDBSeeder(context: ctx, configuration: configuration),
-                        new SchoolDBSeeder(context: ctx, configuration: configuration),
-                        new StudentDBSeeder(context: ctx, configuration: configuration),
+                        new SiteAdminDBSeeder(
+                            context: ctx,
+                            configuration: configuration,
+                            logger: logger
+                        ),
+                        new SchoolAdminDBSeeder(
+                            context: ctx,
+                            configuration: configuration,
+                            logger: logger
+                        ),
+                        new SchoolDBSeeder(
+                            context: ctx,
+                            configuration: configuration,
+                            logger: logger
+                        ),
+                        new StudentDBSeeder(
+                            context: ctx,
+                            configuration: configuration,
+                            logger: logger
+                        ),
+                        new PaymentDBSeeder(
+                            context: ctx,
+                            configuration: configuration,
+                            logger: logger
+                        ),
                     };
                 if (_verbs)
                 {

@@ -11,11 +11,15 @@ namespace OgrenciAidatSistemi.Controllers
 
         private readonly UserService _userService;
 
-        public UserCommonController(ILogger<UserCommonController> logger, AppDbContext appDbContext)
+        public UserCommonController(
+            ILogger<UserCommonController> logger,
+            AppDbContext appDbContext,
+            UserService userService
+        )
         {
             _logger = logger;
             _appDbContext = appDbContext;
-            _userService = new UserService(appDbContext, new HttpContextAccessor());
+            _userService = userService;
         }
 
         public ActionResult Index()

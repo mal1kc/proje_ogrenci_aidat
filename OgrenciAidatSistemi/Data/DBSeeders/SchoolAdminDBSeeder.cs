@@ -6,8 +6,12 @@ namespace OgrenciAidatSistemi.Data
 {
     public class SchoolAdminDBSeeder : DbSeeder<AppDbContext, SchoolAdmin>
     {
-        public SchoolAdminDBSeeder(AppDbContext context, IConfiguration configuration)
-            : base(context, configuration) { }
+        public SchoolAdminDBSeeder(
+            AppDbContext context,
+            IConfiguration configuration,
+            ILogger logger
+        )
+            : base(context, configuration, logger) { }
 
         protected override async Task SeedDataAsync()
         {
@@ -19,28 +23,7 @@ namespace OgrenciAidatSistemi.Data
             }
             foreach (var schoolAdmin in _seedData)
             {
-                if (await _context.Users.AnyAsync(u => u.EmailAddress == schoolAdmin.EmailAddress))
-                {
-                    continue;
-                }
-
-                schoolAdmin.CreatedAt = DateTime.Now;
-                schoolAdmin.UpdatedAt = DateTime.Now;
-
-                if (await _context.Schools.AnyAsync(s => s.Name == schoolAdmin.School.Name))
-                {
-                    schoolAdmin.School = await _context.Schools.FirstAsync(s =>
-                        s.Name == schoolAdmin.School.Name
-                    );
-                }
-                else
-                {
-                    schoolAdmin.School.CreatedAt = DateTime.Now;
-                    schoolAdmin.School.UpdatedAt = DateTime.Now;
-                    await _context.Schools.AddAsync(schoolAdmin.School);
-                }
-
-                await _context.SchoolAdmins.AddAsync(schoolAdmin);
+                await SeedEntityAsync(schoolAdmin);
             }
 
             await _context.SaveChangesAsync();
@@ -60,11 +43,7 @@ namespace OgrenciAidatSistemi.Data
                 Console.WriteLine(
                     $"Generated SchoolAdmin: EmailAddress: {schoolAdmin.EmailAddress}, Password: {"RandomPassword_" + schoolAdmin.EmailAddress.Split('@')[0]}"
                 );
-                if (await _context.Users.AnyAsync(a => a.EmailAddress == schoolAdmin.EmailAddress))
-                {
-                    continue;
-                }
-                await _context.SchoolAdmins.AddAsync(schoolAdmin);
+                await SeedEntityAsync(schoolAdmin);
             }
             await _context.SaveChangesAsync();
         }
@@ -112,8 +91,40 @@ namespace OgrenciAidatSistemi.Data
                     Name = "School" + RandomizerHelper.GenerateRandomString(random.Next(2, 10)),
                     Students = new HashSet<Student>()
                 },
-                ContactInfo = new ContactInfo { Name = "Random Name", Email = email, }
+                ContactInfo = new ContactInfo { Email = email, }
             };
+        }
+
+        public override IEnumerable<SchoolAdmin> GetSeedData(bool randomSeed = false)
+        {
+            if (randomSeed)
+            {
+                return Enumerable.Range(0, 10).Select(i => CreateRandomModel());
+            }
+            return _seedData;
+        }
+
+        protected override async Task SeedEntityAsync(SchoolAdmin entity)
+        {
+            if (await _context.SchoolAdmins.AnyAsync(a => a.EmailAddress == entity.EmailAddress))
+                return;
+
+            entity.CreatedAt = DateTime.Now;
+            entity.UpdatedAt = DateTime.Now;
+            if (entity.School != null)
+            {
+                var dbSchool = await _context.Schools.FirstOrDefaultAsync(s =>
+                    s.Name == entity.School.Name
+                );
+                entity.School.CreatedAt = DateTime.Now;
+                if (dbSchool != null)
+                {
+                    entity.School = dbSchool;
+                }
+                entity.School.UpdatedAt = DateTime.Now;
+                await _context.Schools.AddAsync(entity.School);
+            }
+            await _context.SchoolAdmins.AddAsync(entity);
         }
 
         private readonly List<SchoolAdmin> _seedData = new List<SchoolAdmin>
@@ -127,7 +138,6 @@ namespace OgrenciAidatSistemi.Data
                 School = new School { Name = "School1", Students = new HashSet<Student>() },
                 ContactInfo = new ContactInfo
                 {
-                    Name = "SchoolAdmin2",
                     Email = "sch_admin2@school2",
                     PhoneNumber = "+90 555 555 55 56",
                 }

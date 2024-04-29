@@ -5,26 +5,18 @@ namespace OgrenciAidatSistemi.Data
 {
     public class SiteAdminDBSeeder : DbSeeder<AppDbContext, SiteAdmin>
     {
-        public SiteAdminDBSeeder(AppDbContext context, IConfiguration configuration)
-            : base(context, configuration) { }
+        public SiteAdminDBSeeder(AppDbContext context, IConfiguration configuration, ILogger logger)
+            : base(context, configuration, logger) { }
 
         protected override async Task SeedDataAsync()
         {
+            if (_context.SiteAdmins == null)
+            {
+                throw new Exception("SiteAdminDBSeeder: SeedDataAsync _context.SiteAdmins is null");
+            }
             foreach (var siteAdmin in _seedData)
             {
-                if (
-                    await _context.SiteAdmins.AnyAsync(a =>
-                        a.EmailAddress == siteAdmin.EmailAddress
-                    )
-                )
-                {
-                    continue;
-                }
-
-                siteAdmin.CreatedAt = DateTime.Now;
-                siteAdmin.UpdatedAt = DateTime.Now;
-
-                await _context.SiteAdmins.AddAsync(siteAdmin);
+                await SeedEntityAsync(siteAdmin);
             }
 
             await _context.SaveChangesAsync();
@@ -44,11 +36,7 @@ namespace OgrenciAidatSistemi.Data
                 Console.WriteLine(
                     $"Generated SiteAdmin: EmailAddress: {siteAdmin.EmailAddress}, Password: RandomPassword_{siteAdmin.EmailAddress}"
                 );
-                if (await _context.Users.AnyAsync(u => u.EmailAddress == siteAdmin.EmailAddress))
-                {
-                    continue;
-                }
-                await _context.SiteAdmins.AddAsync(siteAdmin);
+                await SeedEntityAsync(siteAdmin);
             }
 
             await _context.SaveChangesAsync();
@@ -94,6 +82,28 @@ namespace OgrenciAidatSistemi.Data
                 EmailAddress = $"{email_nm}@example.com",
                 PasswordHash = SiteAdmin.ComputeHash(password)
             };
+        }
+
+        public override IEnumerable<SiteAdmin> GetSeedData(bool randomSeed = false)
+        {
+            if (randomSeed)
+            {
+                return Enumerable.Range(0, 10).Select(i => CreateRandomModel());
+            }
+            return _seedData;
+        }
+
+        protected override async Task SeedEntityAsync(SiteAdmin entity)
+        {
+            if (await _context.SiteAdmins.AnyAsync(a => a.EmailAddress == entity.EmailAddress))
+            {
+                return;
+            }
+
+            entity.CreatedAt = DateTime.Now;
+            entity.UpdatedAt = DateTime.Now;
+
+            await _context.SiteAdmins.AddAsync(entity);
         }
 
         private readonly List<SiteAdmin> _seedData = new List<SiteAdmin>

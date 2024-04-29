@@ -7,8 +7,7 @@ namespace OgrenciAidatSistemi.Models
     public class ContactInfo : IBaseDbModel, ISearchableModel
     {
         public int Id { get; set; }
-        public required string Name { get; set; }
-        public String PhoneNumber { get; set; }
+        public String? PhoneNumber { get; set; }
         public ISet<String>? Addresses { get; set; }
         public required string Email { get; set; }
         public DateTime CreatedAt { get; set; }

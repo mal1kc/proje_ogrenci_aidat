@@ -10,12 +10,17 @@ namespace OgrenciAidatSistemi.Models
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }
         public ISet<PaymentPeriode>? PaymentPeriods { get; set; }
-        public ISet<School>? Schools { get; set; }
+        public School School { get; set; }
         public ModelSearchConfig SearchConfig =>
             new ModelSearchConfig(
                 WorkYearSearchConfig.AllowedFieldsForSearch,
                 WorkYearSearchConfig.AllowedFieldsForSort
             );
+
+        public decimal TotalAmount()
+        {
+            return PaymentPeriods?.Sum(pp => pp.TotalAmount) ?? 0;
+        }
     }
 
     public class WorkYearView : IBaseDbModelView

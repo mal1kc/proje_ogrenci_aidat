@@ -18,10 +18,14 @@ namespace OgrenciAidatSistemi.Data
         public DbSet<Payment>? Payments { get; set; }
         public DbSet<PaymentPeriode>? PaymentPeriods { get; set; }
 
+
         public DbSet<CashPayment>? CashPayments { get; set; }
+
+        public DbSet<BankPayment>? BankPayments { get; set; }
         public DbSet<CreditCardPayment>? CreditCardPayments { get; set; }
-        public DbSet<CheckPayment>? CheckPayments { get; set; }
         public DbSet<DebitCardPayment>? DebitCardPayments { get; set; }
+
+        public DbSet<CheckPayment>? CheckPayments { get; set; }
 
         public DbSet<WorkYear>? WorkYears { get; set; }
         public DbSet<Grade>? Grades { get; set; }
@@ -36,6 +40,7 @@ namespace OgrenciAidatSistemi.Data
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<CashPayment>().HasBaseType<Payment>();
+            modelBuilder.Entity<BankPayment>().HasBaseType<Payment>();
             modelBuilder.Entity<CreditCardPayment>().HasBaseType<Payment>();
             modelBuilder.Entity<CheckPayment>().HasBaseType<Payment>();
             modelBuilder.Entity<DebitCardPayment>().HasBaseType<Payment>();
@@ -47,7 +52,11 @@ namespace OgrenciAidatSistemi.Data
                 .Entity<Payment>()
                 .HasDiscriminator<string>("PaymentType")
                 .HasValue<CashPayment>("Cash")
-                .HasValue<CreditCardPayment>("CreditCard");
+                .HasValue<BankPayment>("Bank")
+                .HasValue<CreditCardPayment>("CreditCard")
+                .HasValue<DebitCardPayment>("DebitCard")
+                .HasValue<CheckPayment>("Check");
+
 
             // Student and SchoolAdmin are User but they differ from SiteAdmin
             // SA has username they don't
@@ -84,6 +93,29 @@ namespace OgrenciAidatSistemi.Data
             modelBuilder.Entity<SchoolAdmin>().HasOne(s => s.School);
 
             modelBuilder.Entity<Payment>().HasOne(p => p.Student);
+            modelBuilder
+                .Entity<Payment>()
+                .HasOne(p => p.PaymentPeriode)
+                .WithMany(pp => pp.Payments);
+            modelBuilder.Entity<Payment>().HasOne(p => p.Receipt);
+            modelBuilder
+                .Entity<Payment>()
+                .HasOne(p => p.Student)
+                .WithMany(s => s.Payments)
+                .HasForeignKey(p => p.StudentId)
+                .OnDelete(DeleteBehavior.SetNull); // if student deleted set null to student field of payment
+
+            modelBuilder
+                .Entity<WorkYear>()
+                .HasMany(pp => pp.PaymentPeriods)
+                .WithOne(pp => pp.WorkYear);
+            modelBuilder.Entity<WorkYear>().HasOne(wy => wy.School).WithMany(s => s.WorkYears);
+
+            modelBuilder.Entity<PaymentPeriode>().HasOne(pp => pp.WorkYear);
+
+            modelBuilder.Entity<FilePath>().HasIndex(fp => fp.Path).IsUnique();
+
+            modelBuilder.Entity<ContactInfo>().Property(c => c.Email).IsRequired();
 
             base.OnModelCreating(modelBuilder);
         }

@@ -261,10 +261,13 @@ namespace OgrenciAidatSistemi.Controllers
         // this is a security measure to prevent accidental deletion of all SiteAdmin accounts
 
 
-        [HttpPost, ActionName("DeleteConfirmed")]
-        [ValidateAntiForgeryToken]
-        [Authorize(Roles = Configurations.Constants.userRoles.SiteAdmin)]
         [DebugOnly]
+        [
+            HttpPost,
+            ActionName("DeleteConfirmed"),
+            Authorize(Roles = Configurations.Constants.userRoles.SiteAdmin),
+            ValidateAntiForgeryToken
+        ]
         // [DisabledAction]
 
         public async Task<IActionResult> DeleteConfirmed(int? id)

@@ -12,22 +12,31 @@ namespace OgrenciAidatSistemi.Data
 
     public abstract class DbSeeder<TContext, TEntity> : IDbSeeder<TContext>
         where TContext : DbContext
-        where TEntity : class, IBaseDbModel
     {
         protected readonly TContext _context;
-        protected readonly IConfiguration Configuration;
+        protected readonly IConfiguration _configuration;
 
-        /* protected Random random = new Random(); */
+        protected static ILogger _logger;
+
+        protected readonly IDbSeeder<TContext>? _dependentSeeder; // TODO: not fully implemented
+
         protected Random random = RandomizerHelper.random;
         protected bool _verboseLogging;
 
-        protected DbSeeder(TContext context, IConfiguration configuration)
+        protected DbSeeder(
+            TContext context,
+            IConfiguration configuration,
+            ILogger logger,
+            IDbSeeder<TContext>? dependentSeeder = null
+        )
         {
             _context = context;
-            Configuration = configuration;
+            _configuration = configuration;
+            _dependentSeeder = dependentSeeder;
+            _logger = logger;
 
             // Read the value from configuration or default to true
-            _verboseLogging = Configuration.GetValue<bool>(
+            _verboseLogging = _configuration.GetValue<bool>(
                 "SeedData:VerboseLogging",
                 defaultValue: true
             );
@@ -41,6 +50,11 @@ namespace OgrenciAidatSistemi.Data
             }
 
             await _context.Database.EnsureCreatedAsync();
+
+            if (_dependentSeeder != null)
+            {
+                await _dependentSeeder.SeedAsync(randomSeed);
+            }
 
             if (randomSeed)
             {
@@ -64,9 +78,18 @@ namespace OgrenciAidatSistemi.Data
         }
 
         protected abstract Task SeedDataAsync();
+
+        /// <summary>
+        /// <b>Important:</b> this method does not call <b>SaveChangesAsync</b>. It is the responsibility of the caller to call <b>SaveChangesAsync</b>.
+        ///
+        /// </summary>
+        /// <typeparam name="TResult">The type of the result produced by the asynchronous operation.</typeparam>
+        protected abstract Task SeedEntityAsync(TEntity entity);
         protected abstract Task SeedRandomDataAsync();
         protected abstract Task AfterSeedDataAsync();
 
         protected abstract TEntity CreateRandomModel();
+
+        public abstract IEnumerable<TEntity> GetSeedData(bool randomSeed = false);
     }
 }

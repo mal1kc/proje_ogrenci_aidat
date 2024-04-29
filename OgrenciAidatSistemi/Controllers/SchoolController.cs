@@ -70,9 +70,12 @@ namespace OgrenciAidatSistemi.Controllers
             return View();
         }
 
-        [HttpPost, ActionName("DeleteConfirmed")]
-        [ValidateAntiForgeryToken]
-        [Authorize(Roles = Configurations.Constants.userRoles.SiteAdmin)]
+        [
+            HttpPost,
+            ActionName("DeleteConfirmed"),
+            ValidateAntiForgeryToken,
+            Authorize(Roles = Configurations.Constants.userRoles.SiteAdmin)
+        ]
         public async Task<IActionResult> DeleteConfirmed(int? id)
         {
             if (id == null)

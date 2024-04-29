@@ -1,0 +1,428 @@
+using System.Text.Json;
+using Microsoft.EntityFrameworkCore;
+using OgrenciAidatSistemi.Models;
+
+namespace OgrenciAidatSistemi.Data.DBSeeders
+{
+#warning "PaymentDBSeeder is not fully implemented"
+    // TODO: impelement GetSeedData, SeedDataAsync, SeedRandomDataAsync
+    // TODO: rewrite dependent dbseeders to some of seeders must have dependencies to other seeders to generate data
+
+    public class PaymentDBSeeder : DbSeeder<AppDbContext, Payment>
+    {
+        public PaymentDBSeeder(AppDbContext context, IConfiguration configuration, ILogger logger)
+            : base(context, configuration, logger) { }
+
+        public override IEnumerable<Payment> GetSeedData(bool randomSeed = false)
+        {
+            // TODO: use _dependentDbSeeders to get the seed data of schools and students to create payments
+            return Enumerable.Range(0, 10).Select(i => CreateRandomModel());
+        }
+
+        protected override Payment CreateRandomModel()
+        {
+            var paymentMethod = (PaymentMethod)
+                random.Next(Enum.GetNames(typeof(PaymentMethod)).Length);
+            Payment payment;
+
+            // TODO: write better generator of connected items like that
+            var studentId = random.Next(1000, 9999);
+            var studentEmail = $"{studentId}@randomschol.com";
+            var student = new Student
+            {
+                StudentId = studentId,
+                FirstName = "RandomStudent" + random.Next(100),
+                School = new School
+                {
+                    Name = "RandomSchool" + random.Next(100),
+                    Students = new HashSet<Student>()
+                },
+                GradLevel = random.Next(1, 13),
+                IsGraduated = random.Next(2) == 0, // Generate a random graduation status
+                PasswordHash = "password", // dont overthink it
+                EmailAddress = studentEmail,
+            };
+
+            studentEmail =
+                $"{studentId}@${new string(student.School.Name.Trim().ToLower().Where(c => char.IsLetterOrDigit(c)).ToArray())}.com";
+            student.ContactInfo = new ContactInfo
+            {
+                Email = studentEmail,
+                PhoneNumber = "+90 555 555 55 55",
+                CreatedAt = DateTime.Now,
+                UpdatedAt = DateTime.Now,
+            };
+            student.EmailAddress = studentEmail;
+            var school = student.School;
+            PaymentPeriode paymentPeriode = new PaymentPeriode
+            {
+                Payments = new HashSet<Payment>(),
+                WorkYear = new WorkYear
+                {
+                    StartDate = DateTime.Now,
+                    EndDate = DateTime.Now + TimeSpan.FromDays(180), // 6 months
+                    CreatedAt = DateTime.Now,
+                    UpdatedAt = DateTime.Now,
+                },
+                CreatedAt = DateTime.Now,
+                UpdatedAt = DateTime.Now,
+            };
+
+            switch (paymentMethod)
+            {
+                case PaymentMethod.Cash:
+                    payment = new CashPayment
+                    {
+                        Student = student,
+                        CashierName = "cashier 1",
+                        ReceiptNumber = random.NextInt64(1, 111111).ToString(),
+                        ReceiptIssuer = "issuer 1",
+                        ReceiptDate = DateTime.UtcNow,
+                        PaymentPeriode = paymentPeriode,
+                    };
+                    break;
+                case PaymentMethod.Bank:
+                    payment = new BankPayment
+                    {
+                        Student = student,
+                        PaymentPeriode = paymentPeriode,
+                        BankName = "Bank1",
+                        AccountNumber = random.NextInt64(1, 111111).ToString(),
+                        BranchCode = random.NextInt64(1, 111111).ToString(),
+                        // iban length is 26
+                        IBAN = genIban(),
+                    };
+                    break;
+                case PaymentMethod.CreditCard:
+                    payment = new CreditCardPayment
+                    {
+                        Student = student,
+                        PaymentPeriode = paymentPeriode,
+                        CardNumber = random.NextInt64(1, 111111).ToString(),
+                        CardHolderName = "cardholder 1",
+                        ExpiryDate = DateTime.UtcNow.ToString(),
+                        CVC = random.NextInt64(1, 111111).ToString(),
+                    };
+                    break;
+                case PaymentMethod.DebitCard:
+                    payment = new DebitCardPayment
+                    {
+                        Student = student,
+                        PaymentPeriode = paymentPeriode,
+                        CardNumber = random.NextInt64(1, 111111).ToString(),
+                        CardHolderName = "cardholder 1",
+                        ExpiryDate = DateTime.UtcNow.ToString(),
+                        CVC = random.NextInt64(1, 111111).ToString(),
+                    };
+                    break;
+                case PaymentMethod.Check:
+                    payment = new CheckPayment()
+                    {
+                        Student = student,
+                        PaymentPeriode = paymentPeriode,
+                        CheckNumber = random.NextInt64(1, 111111).ToString(),
+                        BankName = "Bank1",
+                        BranchCode = random.NextInt64(1, 111111).ToString(),
+                    };
+                    break;
+                default:
+                    throw new Exception("Invalid payment method");
+            }
+
+            payment.CreatedAt = DateTime.Now;
+            payment.UpdatedAt = DateTime.Now;
+            payment.PaymentDate = DateTime.Now;
+            payment.Amount = random.Next(100, 1000);
+            payment.isVerified = random.Next(2) == 0;
+            payment.Receipt = new FilePath(
+                path: null,
+                name: "Receipt of " + payment.Student.FirstName,
+                extension: ".pdf",
+                contentType: "application/pdf",
+                size: 0,
+                description: "Receipt of " + payment.Student.FirstName
+            );
+            payment.Receipt.FileHash = "invalid hash";
+
+            return payment;
+        }
+
+        protected override async Task SeedDataAsync()
+        {
+            if (_context.Payments == null)
+            {
+                throw new Exception("PaymentDBSeeder: SeedDataAsync Payments is null");
+            }
+            // TODO: use _seedData in later for now this work as SeedRandomDataAsync
+            await SeedRandomDataAsync();
+            return;
+
+            throw new NotImplementedException("PaymentDBSeeder: SeedDataAsync not implemented yet");
+        }
+
+        protected override async Task SeedRandomDataAsync()
+        {
+            if (_context.Payments == null)
+            {
+                throw new Exception("PaymentDBSeeder: SeedRandomDataAsync Payments is null");
+            }
+
+            var payments = GetSeedData(true);
+            foreach (var payment in payments)
+            {
+                await SeedEntityAsync(payment);
+            }
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (Exception e)
+            {
+                if (_verboseLogging)
+                    Console.WriteLine(
+                        $"PaymentDBSeeder: SeedRandomDataAsync could not save changes \n --- \n exception: {e} \n --- \n exception msg: {e.Message}"
+                    );
+                if (e.InnerException != null && e.InnerException.Message != null)
+                    if (_verboseLogging)
+                        Console.WriteLine(
+                            $"PaymentDBSeeder: SeedRandomDataAsync could not save change \n --- \n inner exception: {e.InnerException} \n------\n inner exception msg: {e.InnerException.Message}"
+                        );
+            }
+        }
+
+        protected override async Task AfterSeedDataAsync()
+        {
+            if (_verboseLogging)
+            {
+                Console.WriteLine("PaymentDBSeeder: AfterSeedDataAsync");
+                Console.WriteLine("We have seed data:");
+                foreach (var payment in _seedData)
+                {
+                    Console.WriteLine(
+                        $"PaymentDBSeeder: AfterSeedDataAsync {payment.StudentId} {payment.Amount} {payment.PaymentMethod}"
+                    );
+                }
+            }
+
+            // get all payments created in last 10 minutes
+
+
+            if (_context.Payments == null)
+                throw new Exception("PaymentDBSeeder: AfterSeedDataAsync Payments is null");
+
+            var tenminutesago = DateTime.Now - TimeSpan.FromMinutes(10);
+            // need to take each payment type separately
+            ICollection<Payment> dbPayments = new List<Payment>();
+            dbPayments.Concat(
+                await _context.BankPayments.Where(p => p.CreatedAt > tenminutesago).ToListAsync()
+            ).Concat(
+                await _context.CashPayments.Where(p => p.CreatedAt > tenminutesago).ToListAsync()
+            ).Concat(
+                await _context.CheckPayments.Where(p => p.CreatedAt > tenminutesago).ToListAsync()
+            ).Concat(
+                await _context.CreditCardPayments.Where(p => p.CreatedAt > tenminutesago).ToListAsync()
+            ).Concat(
+                await _context.DebitCardPayments.Where(p => p.CreatedAt > tenminutesago).ToListAsync()
+            );
+
+
+            if (dbPayments == null)
+                throw new Exception("PaymentDBSeeder: AfterSeedDataAsync dbPayments is null");
+
+            if (_verboseLogging)
+            {
+                Console.WriteLine(
+                    $"PaymentDBSeeder: AfterSeedDataAsync we have {dbPayments.Count} payments in db here they are:"
+                );
+
+                foreach (var payment in dbPayments)
+                {
+                    if (_verboseLogging)
+                        Console.WriteLine(
+                            $"PaymentDBSeeder: AfterSeedDataAsync {payment.StudentId} {payment.Amount} {payment.PaymentMethod}"
+                        );
+                }
+            }
+
+            // TODO: implement this
+            // 10 is the number of random payments
+            // if (dbPayments.Count != _seedData.Count || dbPayments.Count == 10)
+            // {
+            //     throw new Exception(
+            //         "PaymentDBSeeder: AfterSeedDataAsync dbPayments count is not equal to _seedData count"
+            //     );
+            // }
+        }
+
+        protected override async Task SeedEntityAsync(Payment entity)
+        {
+            // do some validation here befor adding to db
+            if (entity == null)
+                throw new Exception("PaymentDBSeeder: SeedEntityAsync entity is null");
+
+            if (entity.Student == null)
+                throw new Exception("PaymentDBSeeder: SeedEntityAsync entity.Student is null");
+
+            if (entity.PaymentPeriode == null)
+                throw new Exception(
+                    "PaymentDBSeeder: SeedEntityAsync entity.PaymentPeriode is null"
+                );
+
+            if (entity.Receipt == null)
+                throw new Exception("PaymentDBSeeder: SeedEntityAsync entity.Receipt is null");
+
+            var dbStudent = await _context
+                .Students.Where(s => s.StudentId == entity.Student.StudentId)
+                .FirstOrDefaultAsync();
+            if (dbStudent != null)
+            {
+                entity.Student = dbStudent;
+            }
+
+            entity.PaymentPeriode.WorkYear.School = entity.Student.School;
+            entity.PaymentPeriode.WorkYear.PaymentPeriods = new HashSet<PaymentPeriode>
+            {
+                entity.PaymentPeriode
+            };
+
+            entity.PaymentPeriode.WorkYear.CreatedAt = DateTime.Now;
+            entity.PaymentPeriode.WorkYear.UpdatedAt = DateTime.Now;
+            entity.PaymentPeriode.Occurrence = Occurrence.Monthly;
+            entity.PaymentPeriode.CreatedAt = DateTime.Now;
+            entity.PaymentPeriode.UpdatedAt = DateTime.Now;
+            if (entity.Receipt.Path == null)
+            {
+                // try to find not used path
+                if (_context.FilePaths == null)
+                    throw new Exception(
+                        "PaymentDBSeeder: SeedEntityAsync _context.FilePaths is null"
+                    );
+                while (true)
+                {
+                    var path = random.Next(1000, 9999).ToString() + ".pdf";
+                    if (
+                        await _context.FilePaths.Where(fp => fp.Path == path).FirstOrDefaultAsync()
+                        == null
+                    )
+                    {
+                        entity.Receipt.Path = path;
+                        break;
+                    }
+                }
+            }
+            entity.Receipt.CreatedBy = entity.Student;
+
+            if (_verboseLogging)
+                Console.WriteLine(
+                    $"PaymentDBSeeder: SeedEntityAsync {entity.StudentId} {entity.Amount} {entity.PaymentMethod}"
+                );
+
+            try
+            {
+                _context.Payments.Add(entity);
+                await _context.SaveChangesAsync();
+                // TODO: maybe move SaveChangesAsync with try catch to SeedRandomDataAsync
+                // probably not needed ++ needs to become stable
+            }
+            catch (Exception e)
+            {
+                // if exeption is about unique key ignore it but log it
+
+                if (e.InnerException != null && e.InnerException.Message != null)
+                {
+                    if (e.InnerException.Message.Contains("UNIQUE"))
+                    {
+                        if (_verboseLogging)
+                            Console.WriteLine(
+                                $"PaymentDBSeeder: SeedEntityAsync could not add Payment because of unique key \n exception: {e} \n\n----\n exception msg: {e.Message}"
+                            );
+                    }
+                    if (e.InnerException.Message.Contains("FOREIGN"))
+                    {
+                        var json = entity.ToJson();
+                        if (_verboseLogging)
+                            Console.WriteLine(
+                                $"PaymentDBSeeder: SeedEntityAsync could not add Payment, exception: {e} \n\n----\n exception msg: {e.Message} \nn entity: {json}"
+                            );
+                        _logger.LogError(
+                            $"PaymentDBSeeder: SeedEntityAsync could not seed Payment, exception: {e} \n\n----\n exception msg: {e.Message} \n\n entity: {json}"
+                        );
+                    }
+                    if (e.InnerException.Message.Contains("NULL"))
+                    {
+                        var json = JsonSerializer.Serialize(entity);
+                        if (_verboseLogging)
+                            Console.WriteLine(
+                                $"PaymentDBSeeder: SeedEntityAsync could not add Payment, exception: {e} \n\n----\n exception msg: {e.Message} \nn entity: {json}"
+                            );
+                        _logger.LogError(
+                            $"PaymentDBSeeder: SeedEntityAsync could not seed Payment, exception: {e} \n\n----\n exception msg: {e.Message} \n\n entity: {json}"
+                        );
+                    }
+                }
+
+                throw;
+            }
+        }
+
+        private string genIban()
+        {
+            var iban = "TR";
+            for (int i = 0; i < 24; i++)
+            {
+                iban += random.Next(0, 9);
+            }
+            return iban;
+        }
+
+        private readonly List<Payment> _seedData = new List<Payment> { };
+        // TODO: implement dependent dbseeders and better workflow for seeding with/without randomness, and with/without dependent seeders
+    }
+}
+
+
+/*
+// TODO: later look at this for better implementation
+protected override Payment CreateRandomModel()
+{
+    var school = _dependentDbSeeders[typeof(SchoolDBSeeder)].GetRandomData();
+    var student = _dependentDbSeeders[typeof(StudentDBSeeder)].GetRandomData();
+    var paymentMethod = (PaymentMethod)random.Next(0, 3);
+    Payment payment;
+
+    switch (paymentMethod)
+    {
+        case PaymentMethod.CreditCard:
+            payment = new CreditCardPayment()
+            {
+                Student = student,
+                CardNumber = random.NextInt64(1, 111111).ToString(),
+                CardHolderName = "cardholder 1",
+                ExpiryDate = DateTime.UtcNow.ToString(),
+                CVC = random.NextInt64(1, 111111).ToString(),
+            };
+            break;
+        case PaymentMethod.Check:
+            payment = new CheckPayment()
+            {
+                School = school,
+                Student = student,
+                CheckNumber = random.NextInt64(1, 111111).ToString(),
+                BankName = "Bank1",
+                BranchCode = random.NextInt64(1, 111111).ToString(),
+            };
+            break;
+        default:
+            throw new Exception("Invalid payment method");
+    }
+
+    payment.CreatedAt = DateTime.Now;
+    payment.UpdatedAt = DateTime.Now;
+    payment.PaymentDate = DateTime.Now;
+    payment.Amount = random.Next(100, 1000);
+    payment.isVerified = random.Next(2) == 0;
+
+    return payment;
+}:
+
+*/

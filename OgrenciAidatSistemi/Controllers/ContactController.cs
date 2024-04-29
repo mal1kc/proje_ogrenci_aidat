@@ -84,7 +84,8 @@ namespace OgrenciAidatSistemi.Controllers
         [
             HttpPost,
             ActionName("Delete"),
-            Authorize(Roles = Configurations.Constants.userRoles.SiteAdmin)
+            Authorize(Roles = Configurations.Constants.userRoles.SiteAdmin),
+            ValidateAntiForgeryToken
         ]
         public IActionResult DeleteConfirmed(int? id)
         {

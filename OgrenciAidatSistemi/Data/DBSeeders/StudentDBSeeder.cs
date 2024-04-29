@@ -5,43 +5,18 @@ namespace OgrenciAidatSistemi.Data
 {
     public class StudentDBSeeder : DbSeeder<AppDbContext, Student>
     {
-        public StudentDBSeeder(AppDbContext context, IConfiguration configuration)
-            : base(context, configuration) { }
+        public StudentDBSeeder(AppDbContext context, IConfiguration configuration, ILogger logger)
+            : base(context, configuration, logger) { }
 
         protected override async Task SeedDataAsync()
         {
+            if (_context.Students == null)
+            {
+                throw new NullReferenceException("StudentDBSeeder: _context.Students is null");
+            }
             foreach (var student in _seedData)
             {
-                if (await _context.Students.AnyAsync(s => s.StudentId == student.StudentId))
-                {
-                    continue;
-                }
-
-                student.CreatedAt = DateTime.Now;
-                student.UpdatedAt = DateTime.Now;
-
-                School? assumed_sch = await _context.Schools.FirstAsync(s =>
-                    s.Name == student.School.Name
-                );
-
-                if (_verboseLogging)
-                {
-                    Console.WriteLine(
-                        $"StudentDBSeeder: SeedRandomDataAsync assumed_sch: {assumed_sch}"
-                    );
-                }
-
-                if (assumed_sch != null)
-                {
-                    student.School = assumed_sch;
-                }
-                else
-                {
-                    student.School.CreatedAt = DateTime.Now;
-                    student.School.UpdatedAt = DateTime.Now;
-                    await _context.Schools.AddAsync(student.School);
-                }
-                await _context.Students.AddAsync(student);
+                await SeedEntityAsync(student);
             }
 
             await _context.SaveChangesAsync();
@@ -49,48 +24,11 @@ namespace OgrenciAidatSistemi.Data
 
         protected override async Task SeedRandomDataAsync()
         {
-            for (int i = 0; i < 5; i++) // Seed 5 random students
+            var students = GetSeedData(true);
+            foreach (var student in students)
             {
-                var student = CreateRandomModel();
-                if (await _context.Students.AnyAsync(s => s.StudentId == student.StudentId))
-                {
-                    continue;
-                }
-
-                if (_verboseLogging)
-                {
-                    Console.WriteLine(
-                        $"StudentDBSeeder: SeedRandomDataAsync StudentId: {student.StudentId}"
-                    );
-                }
-
-                School? assumed_sch = await _context.Schools.FirstAsync(s =>
-                    s.Name == student.School.Name
-                );
-
-                if (_verboseLogging)
-                {
-                    Console.WriteLine(
-                        $"StudentDBSeeder: SeedRandomDataAsync assumed_sch: {assumed_sch}"
-                    );
-                }
-
-                if (assumed_sch != null)
-                {
-                    student.School = assumed_sch;
-                }
-                else
-                {
-                    student.School.CreatedAt = DateTime.Now;
-                    student.School.UpdatedAt = DateTime.Now;
-                    await _context.Schools.AddAsync(student.School);
-                }
-
-                student.CreatedAt = DateTime.Now;
-                student.UpdatedAt = DateTime.Now;
-                await _context.Students.AddAsync(student);
+                await SeedEntityAsync(student);
             }
-
             await _context.SaveChangesAsync();
         }
 
@@ -135,6 +73,48 @@ namespace OgrenciAidatSistemi.Data
                 PasswordHash = "password", // dont overthink it
                 EmailAddress = $"{studentId}@randomschol.com"
             };
+        }
+
+        public override IEnumerable<Student> GetSeedData(bool randomSeed = false)
+        {
+            if (randomSeed)
+            {
+                return Enumerable.Range(0, 10).Select(i => CreateRandomModel());
+            }
+            return _seedData;
+        }
+
+        protected override async Task SeedEntityAsync(Student entity)
+        {
+            if (await _context.Students.AnyAsync(s => s.StudentId == entity.StudentId))
+            {
+                return;
+            }
+
+            entity.CreatedAt = DateTime.Now;
+            entity.UpdatedAt = DateTime.Now;
+
+            School? assumed_sch = await _context.Schools.FirstAsync(s =>
+                s.Name == entity.School.Name
+            );
+
+            if (_verboseLogging)
+            {
+                Console.WriteLine($"StudentDBSeeder: SeedEntityAsync assumed_sch: {assumed_sch}");
+            }
+
+            if (assumed_sch != null)
+            {
+                entity.School = assumed_sch;
+            }
+            else
+            {
+                entity.School.CreatedAt = DateTime.Now;
+                entity.School.UpdatedAt = DateTime.Now;
+                await _context.Schools.AddAsync(entity.School);
+            }
+
+            await _context.Students.AddAsync(entity);
         }
 
         private readonly List<Student> _seedData = new List<Student>

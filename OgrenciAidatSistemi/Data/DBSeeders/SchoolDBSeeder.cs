@@ -1,12 +1,13 @@
 using Microsoft.EntityFrameworkCore;
 using OgrenciAidatSistemi.Models;
+using OgrenciAidatSistemi.Models.Interfaces;
 #pragma warning disable CS8604 // Possible null reference argument.
 namespace OgrenciAidatSistemi.Data
 {
     public class SchoolDBSeeder : DbSeeder<AppDbContext, School>
     {
-        public SchoolDBSeeder(AppDbContext context, IConfiguration configuration)
-            : base(context, configuration) { }
+        public SchoolDBSeeder(AppDbContext context, IConfiguration configuration, ILogger logger)
+            : base(context, configuration, logger) { }
 
         protected override async Task SeedDataAsync()
         {
@@ -16,15 +17,7 @@ namespace OgrenciAidatSistemi.Data
             }
             foreach (var school in _seedData)
             {
-                if (await _context.Schools.AnyAsync(s => s.Name == school.Name))
-                {
-                    continue;
-                }
-
-                school.CreatedAt = DateTime.Now;
-                school.UpdatedAt = DateTime.Now;
-
-                await _context.Schools.AddAsync(school);
+                await SeedEntityAsync(school);
             }
 
             await _context.SaveChangesAsync();
@@ -39,7 +32,7 @@ namespace OgrenciAidatSistemi.Data
             for (int i = 0; i < 5; i++) // Seed 5 random schools
             {
                 var school = CreateRandomModel();
-                await _context.Schools.AddAsync(school);
+                await SeedEntityAsync(school);
             }
 
             await _context.SaveChangesAsync();
@@ -79,6 +72,28 @@ namespace OgrenciAidatSistemi.Data
             };
         }
 
+        public override IEnumerable<School> GetSeedData(bool randomSeed = false)
+        {
+            if (randomSeed)
+            {
+                return Enumerable.Range(0, 10).Select(i => CreateRandomModel());
+            }
+            return _seedData;
+        }
+
+        protected override async Task SeedEntityAsync(School entity)
+        {
+            if (await _context.Schools.AnyAsync(s => s.Name == entity.Name))
+            {
+                return;
+            }
+
+            entity.CreatedAt = DateTime.Now;
+            entity.UpdatedAt = DateTime.Now;
+
+            await _context.Schools.AddAsync(entity);
+        }
+
         private readonly List<School> _seedData = new List<School>
         {
             new School
@@ -103,5 +118,8 @@ namespace OgrenciAidatSistemi.Data
                 Students = new HashSet<Student>()
             }
         };
+        private AppDbContext context;
+        private IConfiguration configuration;
+        private Logger<DbSeeder<AppDbContext, IBaseDbModel>> logger;
     }
 }

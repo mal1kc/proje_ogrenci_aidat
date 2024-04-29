@@ -1,3 +1,5 @@
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using OgrenciAidatSistemi.Models.Interfaces;
 
 namespace OgrenciAidatSistemi.Models
@@ -17,9 +19,7 @@ namespace OgrenciAidatSistemi.Models
         public DateTime CreatedAt { get; set; }
         public DateTime UpdatedAt { get; set; }
 
-        public required School School { get; set; }
-
-        public required Student Student { get; set; }
+        public required Student? Student { get; set; }
         public int StudentId { get; set; }
 
         public DateTime PaymentDate { get; set; }
@@ -39,6 +39,17 @@ namespace OgrenciAidatSistemi.Models
                 PaymentSearchConfig.AllowedFieldsForSearch,
                 PaymentSearchConfig.AllowedFieldsForSort
             );
+
+        // to json
+        public string ToJson()
+        {
+            // has cyclic reference like Student -> School -> WorkYear -> PaymentPeriod -> Payment -> Student
+
+            return JsonSerializer.Serialize(
+                this,
+                new JsonSerializerOptions { ReferenceHandler = ReferenceHandler.Preserve }
+            );
+        }
     }
 
     public class PaymentView : IBaseDbModelView
@@ -60,14 +71,15 @@ namespace OgrenciAidatSistemi.Models
 
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }
-        public decimal Amount { get; set; }
-        public required School School { get; set; }
+        public decimal TotalAmount { get; set; }
+
+        // public required School School { get; set; } is already linked via Payment and WorkYear
         public required ISet<Payment> Payments { get; set; }
         public required WorkYear WorkYear { get; set; }
-        public Occurence Occurence { get; set; }
+        public Occurrence Occurrence { get; set; }
     }
 
-    public enum Occurence
+    public enum Occurrence
     {
         Monthly,
         Yearly,
@@ -80,7 +92,7 @@ namespace OgrenciAidatSistemi.Models
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }
         public decimal Amount { get; set; }
-        public Occurence Occurence { get; set; }
+        public Occurrence Occurence { get; set; }
     }
 
     public class BankPayment : Payment

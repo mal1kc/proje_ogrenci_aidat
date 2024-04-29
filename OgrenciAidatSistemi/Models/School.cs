@@ -9,7 +9,6 @@ namespace OgrenciAidatSistemi.Models
         public DateTime UpdatedAt { get; set; }
         public required string Name { get; set; }
         public ISet<SchoolAdmin>? SchoolAdmins { get; set; }
-        public ISet<Payment>? Payments { get; set; }
         public ISet<Grade>? Grades { get; set; }
         public ISet<WorkYear>? WorkYears { get; set; }
 
