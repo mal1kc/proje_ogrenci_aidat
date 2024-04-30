@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using OgrenciAidatSistemi.Data;
-using OgrenciAidatSistemi.Services;
 using OgrenciAidatSistemi.Helpers.Controller;
+using OgrenciAidatSistemi.Services;
 
 namespace OgrenciAidatSistemi.Controllers
 {

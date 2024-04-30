@@ -164,7 +164,7 @@ namespace OgrenciAidatSistemi.Data.DBSeeders
         {
             if (_context.Payments == null)
                 throw new Exception("PaymentDBSeeder: SeedRandomDataAsync Payments is null");
-            
+
             var dbCount = await _context.Payments.CountAsync();
             if (dbCount >= _maxSeedCount)
             {
@@ -176,7 +176,7 @@ namespace OgrenciAidatSistemi.Data.DBSeeders
             }
 
             var payments = GetSeedData(true);
-            
+
             foreach (var payment in payments)
             {
                 await SeedEntityAsync(payment);
