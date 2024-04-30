@@ -24,24 +24,24 @@ namespace OgrenciAidatSistemi.Models
     {
         public static string GetRoleString(this UserRole role)
         {
-            if (role == UserRole.SiteAdmin)
-                return Constants.userRoles.SiteAdmin;
-            if (role == UserRole.SchoolAdmin)
-                return Constants.userRoles.SchoolAdmin;
-            if (role == UserRole.Student)
-                return Constants.userRoles.Student;
-            return Constants.userRoles.Student;
+            return role switch
+            {
+                UserRole.SiteAdmin => Constants.userRoles.SiteAdmin,
+                UserRole.SchoolAdmin => Constants.userRoles.SchoolAdmin,
+                UserRole.Student => Constants.userRoles.Student,
+                _ => Constants.userRoles.Student,
+            };
         }
 
         public static UserRole GetRoleFromString(string role)
         {
-            if (role == Constants.userRoles.SiteAdmin)
-                return UserRole.SiteAdmin;
-            if (role == Constants.userRoles.SchoolAdmin)
-                return UserRole.SchoolAdmin;
-            if (role == Constants.userRoles.Student)
-                return UserRole.Student;
-            return UserRole.Student;
+            return role switch
+            {
+                Constants.userRoles.SiteAdmin => UserRole.SiteAdmin,
+                Constants.userRoles.SchoolAdmin => UserRole.SchoolAdmin,
+                Constants.userRoles.Student => UserRole.Student,
+                _ => UserRole.Student,
+            };
         }
     }
 
@@ -81,12 +81,10 @@ namespace OgrenciAidatSistemi.Models
             return UserViewValidationResult.FieldsAreValid;
         }
 
-        public UserViewValidationResult ValidateFieldsSignIn()
+        public virtual UserViewValidationResult ValidateFieldsSignIn()
         {
             if (!CheckEmailAddressRegex())
                 return UserViewValidationResult.EmailAddressNotMatchRegex;
-            if (!CheckNamesLenght())
-                return UserViewValidationResult.InvalidName;
             if (string.IsNullOrEmpty(Password))
                 return UserViewValidationResult.PasswordEmpty;
             return UserViewValidationResult.FieldsAreValid;

@@ -43,22 +43,26 @@
     <footer class="border-top footer text-muted">
         <div class="container">
             &copy; 2024 - @Constants.AppName - @Constants.AppVersion
+
+        <button id="Colorscheme_btnSwitch" class="btn btn-primary">Switch Color Scheme</button>
         </div>
     </footer>
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
     @RenderSection("jslibs", required: false)
-    <!-- <script> -->
-    <!--     document.getElementById('Colorscheme_btnSwitch').addEventListener('click', () => { -->
-    <!--         if (document.documentElement.getAttribute('data-bs-theme') == 'dark') { -->
-    <!--             document.documentElement.setAttribute('data-bs-theme', 'light') -->
-    <!--         } -->
-    <!--         else { -->
-    <!--             document.documentElement.setAttribute('data-bs-theme', 'dark') -->
-    <!--         } -->
-    <!--     }) -->
-    <!-- </script> -->
+     <script> 
+         document.getElementById('Colorscheme_btnSwitch').addEventListener('click', () => { 
+             if (document.documentElement.getAttribute('data-bs-theme') == 'dark') { 
+                 document.documentElement.setAttribute('data-bs-theme', 'light') 
+                 console.log('light')
+             } 
+             else { 
+                 document.documentElement.setAttribute('data-bs-theme', 'dark') 
+                    console.log('dark')
+             } 
+         }) 
+     </script> 
     @RenderSection("scripts", required: false)
 </body>
 

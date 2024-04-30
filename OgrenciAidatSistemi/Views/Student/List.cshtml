@@ -69,7 +69,7 @@
                 <td>
                 @if (item.School != null)
                 {
-                    @Html.Partial("_SchoolViewPartial",item.School.ToView())
+                    <partial name="_SchoolViewPartial" model="item.School.ToView()" />
                 }
                 else
                 {

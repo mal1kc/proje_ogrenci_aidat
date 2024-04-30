@@ -38,6 +38,8 @@ namespace OgrenciAidatSistemi.Models
                 EmailAddress = this.EmailAddress,
                 CreatedAt = this.CreatedAt,
                 UpdatedAt = this.UpdatedAt,
+                Payments = ignoreBidirectNav ? null : this.Payments?.ToHashSet(),
+                Grades = ignoreBidirectNav ? null : this.Grades?.ToHashSet(),
             };
         }
 
@@ -55,6 +57,11 @@ namespace OgrenciAidatSistemi.Models
         public int StudentId { get; set; }
         public int GradLevel { get; set; }
         public bool IsGraduated { get; set; }
+
+        public ICollection<Payment>? Payments { get; set; }
+        public ICollection<Grade>? Grades { get; set; }
+
+        public ICollection<PaymentPeriodeView>? PaymentPeriods { get; set; }
 
         public override bool CheckUserExists(AppDbContext dbctx)
         {

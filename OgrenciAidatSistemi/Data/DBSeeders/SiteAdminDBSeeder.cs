@@ -14,9 +14,16 @@ namespace OgrenciAidatSistemi.Data
             {
                 throw new Exception("SiteAdminDBSeeder: SeedDataAsync _context.SiteAdmins is null");
             }
+            var dbCount = await _context.SiteAdmins.CountAsync();
+            if (dbCount >= _maxSeedCount)
+                return;
+
             foreach (var siteAdmin in _seedData)
             {
                 await SeedEntityAsync(siteAdmin);
+
+                if (_seedCount + dbCount >= _maxSeedCount)
+                    break;
             }
 
             await _context.SaveChangesAsync();
@@ -25,18 +32,25 @@ namespace OgrenciAidatSistemi.Data
         protected override async Task SeedRandomDataAsync()
         {
             if (_context.SiteAdmins == null)
-            {
                 throw new Exception(
                     "SiteAdminDBSeeder: SeedRandomDataAsync _context.SiteAdmins is null"
                 );
-            }
-            for (int i = 0; i < 10; i++) // Seed 10 random site admins
+
+            var dbCount = await _context.SiteAdmins.CountAsync();
+            if (dbCount >= _maxSeedCount)
+                return;
+
+            var siteAdmins = GetSeedData(true);
+
+            foreach (var siteAdmin in siteAdmins)
             {
-                var siteAdmin = CreateRandomModel();
                 Console.WriteLine(
                     $"Generated SiteAdmin: EmailAddress: {siteAdmin.EmailAddress}, Password: RandomPassword_{siteAdmin.EmailAddress}"
                 );
                 await SeedEntityAsync(siteAdmin);
+
+                if (_seedCount + dbCount >= _maxSeedCount)
+                    break;
             }
 
             await _context.SaveChangesAsync();
@@ -104,6 +118,7 @@ namespace OgrenciAidatSistemi.Data
             entity.UpdatedAt = DateTime.Now;
 
             await _context.SiteAdmins.AddAsync(entity);
+            _seedCount++;
         }
 
         private readonly List<SiteAdmin> _seedData = new List<SiteAdmin>

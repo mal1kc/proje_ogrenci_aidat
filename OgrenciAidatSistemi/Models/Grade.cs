@@ -11,7 +11,7 @@ namespace OgrenciAidatSistemi.Models
         public required School School { get; set; }
         public int GradeLevel { get; set; }
         public ISet<Student>? Students { get; set; }
-        public ModelSearchConfig SearchConfig =>
+        public static ModelSearchConfig SearchConfig =>
             new ModelSearchConfig(
                 GradeSearchConfig.AllowedFieldsForSearch,
                 GradeSearchConfig.AllowedFieldsForSort

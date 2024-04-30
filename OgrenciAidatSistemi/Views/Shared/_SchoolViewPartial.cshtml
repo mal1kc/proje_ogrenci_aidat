@@ -1,12 +1,26 @@
-@Model SchoolView
-
+@*
+@model OgrenciAidatSistemi.Models.School
+*@
 <div class="card">
-    <div> ID: @Model.Id    </div>
-    <div> Name: @Model.Name </div>
-    <div>
-        Created At: @Model.CreatedAt
-    </div>
-    <div>
-        Updated At: @Model.UpdatedAt
+    <div class="card-body">
+        <h5 class="card-title">School Information</h5>
+        <div class="card-text">
+            <div class="row">
+                <div class="col-md-6">
+                    <strong>ID:</strong> @Model.Id
+                </div>
+                <div class="col-md-6">
+                    <strong>Name:</strong> @Model.Name
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-6">
+                    <strong>Created At:</strong> @Model.CreatedAt
+                </div>
+                <div class="col-md-6">
+                    <strong>Updated At:</strong> @Model.UpdatedAt
+                </div>
+            </div>
+        </div>
     </div>
 </div>

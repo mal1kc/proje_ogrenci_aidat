@@ -39,12 +39,12 @@ namespace OgrenciAidatSistemi.Data.DBSeeders
                 },
                 GradLevel = random.Next(1, 13),
                 IsGraduated = random.Next(2) == 0, // Generate a random graduation status
-                PasswordHash = "password", // dont overthink it
+                PasswordHash = Student.ComputeHash("password"), // dont overthink it
                 EmailAddress = studentEmail,
             };
 
             studentEmail =
-                $"{studentId}@${new string(student.School.Name.Trim().ToLower().Where(c => char.IsLetterOrDigit(c)).ToArray())}.com";
+                $"{studentId}@{new string(student.School.Name.Trim().ToLower().Where(c => char.IsLetterOrDigit(c)).ToArray())}.com";
             student.ContactInfo = new ContactInfo
             {
                 Email = studentEmail,
@@ -163,14 +163,31 @@ namespace OgrenciAidatSistemi.Data.DBSeeders
         protected override async Task SeedRandomDataAsync()
         {
             if (_context.Payments == null)
-            {
                 throw new Exception("PaymentDBSeeder: SeedRandomDataAsync Payments is null");
+            
+            var dbCount = await _context.Payments.CountAsync();
+            if (dbCount >= _maxSeedCount)
+            {
+                if (_verboseLogging)
+                    Console.WriteLine(
+                        $"PaymentDBSeeder: SeedRandomDataAsync already has {dbCount} payments in db"
+                    );
+                return;
             }
 
             var payments = GetSeedData(true);
+            
             foreach (var payment in payments)
             {
                 await SeedEntityAsync(payment);
+                if (_seedCount + dbCount >= _maxSeedCount)
+                {
+                    if (_verboseLogging)
+                        Console.WriteLine(
+                            $"PaymentDBSeeder: SeedRandomDataAsync reached max seed count of {_maxSeedCount}"
+                        );
+                    break;
+                }
             }
             try
             {
@@ -192,7 +209,7 @@ namespace OgrenciAidatSistemi.Data.DBSeeders
 
         protected override async Task AfterSeedDataAsync()
         {
-            if (_verboseLogging)
+            if (_verboseLogging && _seedData.Count > 0)
             {
                 Console.WriteLine("PaymentDBSeeder: AfterSeedDataAsync");
                 Console.WriteLine("We have seed data:");
@@ -212,24 +229,42 @@ namespace OgrenciAidatSistemi.Data.DBSeeders
 
             var tenminutesago = DateTime.Now - TimeSpan.FromMinutes(10);
             // need to take each payment type separately
-            ICollection<Payment> dbPayments = new List<Payment>();
-            dbPayments.Concat(
-                await _context.BankPayments.Where(p => p.CreatedAt > tenminutesago).ToListAsync()
-            ).Concat(
-                await _context.CashPayments.Where(p => p.CreatedAt > tenminutesago).ToListAsync()
-            ).Concat(
-                await _context.CheckPayments.Where(p => p.CreatedAt > tenminutesago).ToListAsync()
-            ).Concat(
-                await _context.CreditCardPayments.Where(p => p.CreatedAt > tenminutesago).ToListAsync()
-            ).Concat(
-                await _context.DebitCardPayments.Where(p => p.CreatedAt > tenminutesago).ToListAsync()
-            );
 
+#pragma warning disable CS8604
+
+            ICollection<CashPayment> dbCashPayments = await _context
+                .CashPayments.Where(p => p.CreatedAt > tenminutesago)
+                .ToListAsync();
+
+            ICollection<BankPayment> dbBankPayments = await _context
+                .BankPayments.Where(p => p.CreatedAt > tenminutesago)
+                .ToListAsync();
+
+            ICollection<CreditCardPayment> dbCreditCardPayments = await _context
+                .CreditCardPayments.Where(p => p.CreatedAt > tenminutesago)
+                .ToListAsync();
+
+            ICollection<DebitCardPayment> dbDebitCardPayments = await _context
+                .DebitCardPayments.Where(p => p.CreatedAt > tenminutesago)
+                .ToListAsync();
+
+            ICollection<CheckPayment> dbCheckPayments = await _context
+                .CheckPayments.Where(p => p.CreatedAt > tenminutesago)
+                .ToListAsync();
+
+            ICollection<Payment> dbPayments =
+            [
+                .. dbCashPayments,
+                .. dbBankPayments,
+                .. dbCreditCardPayments,
+                .. dbDebitCardPayments,
+                .. dbCheckPayments
+            ];
 
             if (dbPayments == null)
                 throw new Exception("PaymentDBSeeder: AfterSeedDataAsync dbPayments is null");
 
-            if (_verboseLogging)
+            if (_verboseLogging && dbPayments.Count > 0)
             {
                 Console.WriteLine(
                     $"PaymentDBSeeder: AfterSeedDataAsync we have {dbPayments.Count} payments in db here they are:"
@@ -243,15 +278,6 @@ namespace OgrenciAidatSistemi.Data.DBSeeders
                         );
                 }
             }
-
-            // TODO: implement this
-            // 10 is the number of random payments
-            // if (dbPayments.Count != _seedData.Count || dbPayments.Count == 10)
-            // {
-            //     throw new Exception(
-            //         "PaymentDBSeeder: AfterSeedDataAsync dbPayments count is not equal to _seedData count"
-            //     );
-            // }
         }
 
         protected override async Task SeedEntityAsync(Payment entity)
@@ -320,9 +346,6 @@ namespace OgrenciAidatSistemi.Data.DBSeeders
             try
             {
                 _context.Payments.Add(entity);
-                await _context.SaveChangesAsync();
-                // TODO: maybe move SaveChangesAsync with try catch to SeedRandomDataAsync
-                // probably not needed ++ needs to become stable
             }
             catch (Exception e)
             {
@@ -363,6 +386,7 @@ namespace OgrenciAidatSistemi.Data.DBSeeders
 
                 throw;
             }
+            _seedCount++;
         }
 
         private string genIban()

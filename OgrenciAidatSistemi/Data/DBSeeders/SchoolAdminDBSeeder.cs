@@ -16,14 +16,17 @@ namespace OgrenciAidatSistemi.Data
         protected override async Task SeedDataAsync()
         {
             if (_context.SchoolAdmins == null)
-            {
                 throw new NullReferenceException(
                     "SchoolAdminDBSeeder: _context.SchoolAdmins is null"
                 );
-            }
+            var dbCount = await _context.SchoolAdmins.CountAsync();
+            if (dbCount >= _maxSeedCount)
+                return;
             foreach (var schoolAdmin in _seedData)
             {
                 await SeedEntityAsync(schoolAdmin);
+                if (_seedCount + dbCount >= _maxSeedCount)
+                    break;
             }
 
             await _context.SaveChangesAsync();
@@ -37,13 +40,18 @@ namespace OgrenciAidatSistemi.Data
                     "SchoolAdminDBSeeder: _context.SchoolAdmins is null"
                 );
             }
-            for (int i = 0; i < 10; i++) // Seed 10 random school admins
+            var dbCount = await _context.SchoolAdmins.CountAsync();
+            if (dbCount >= _maxSeedCount)
+                return;
+            var schoolAdmins = GetSeedData(true);
+            foreach (var schoolAdmin in schoolAdmins)
             {
-                var schoolAdmin = CreateRandomModel();
                 Console.WriteLine(
                     $"Generated SchoolAdmin: EmailAddress: {schoolAdmin.EmailAddress}, Password: {"RandomPassword_" + schoolAdmin.EmailAddress.Split('@')[0]}"
                 );
                 await SeedEntityAsync(schoolAdmin);
+                if (_seedCount + dbCount >= _maxSeedCount)
+                    break;
             }
             await _context.SaveChangesAsync();
         }
@@ -125,6 +133,7 @@ namespace OgrenciAidatSistemi.Data
                 await _context.Schools.AddAsync(entity.School);
             }
             await _context.SchoolAdmins.AddAsync(entity);
+            _seedCount++;
         }
 
         private readonly List<SchoolAdmin> _seedData = new List<SchoolAdmin>

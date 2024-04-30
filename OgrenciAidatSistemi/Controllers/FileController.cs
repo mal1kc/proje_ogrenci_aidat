@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using OgrenciAidatSistemi.Data;
 using OgrenciAidatSistemi.Services;
+using OgrenciAidatSistemi.Helpers.Controller;
 
 namespace OgrenciAidatSistemi.Controllers
 {
@@ -63,7 +64,7 @@ namespace OgrenciAidatSistemi.Controllers
             }
         }
 
-        [HttpGet("{id}")]
+        [HttpGet]
         public async Task<IActionResult> Download(int id)
         {
             try
@@ -73,7 +74,7 @@ namespace OgrenciAidatSistemi.Controllers
             }
             catch (ArgumentException ex)
             {
-                return NotFound(ex.Message);
+                return RedirectToAction("Index", "Error", new { statusCode = 404 });
             }
             catch (Exception ex)
             {

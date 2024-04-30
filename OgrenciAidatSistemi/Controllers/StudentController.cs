@@ -29,17 +29,21 @@ namespace OgrenciAidatSistemi.Controllers
         }
 
         [Authorize(Roles = Configurations.Constants.userRoles.Student)]
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
-            return View();
+            var student = await GetLoggedInStudent();
+            if (student == null)
+            {
+                return RedirectToAction("SignIn");
+            }
+            return View(student.ToView());
         }
 
-        [Authorize(Roles = Configurations.Constants.userRoles.Student)]
         public IActionResult SignIn()
         {
             if (_userService.IsUserSignedIn())
             {
-                return RedirectToAction("Index", "Home");
+                return RedirectToAction("Index");
             }
             return View();
         }
@@ -47,12 +51,12 @@ namespace OgrenciAidatSistemi.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> SignIn(
-            [Bind("EmailAddress", "Password")] StudentView scAdminView
+            [Bind("EmailAddress", "Password")] StudentView studentView
         )
         {
             // some idoitic validation
-            scAdminView.PasswordVerify = scAdminView.Password;
-            UserViewValidationResult validationResult = scAdminView.ValidateFieldsSignIn();
+            studentView.PasswordVerify = studentView.Password;
+            UserViewValidationResult validationResult = studentView.ValidateFieldsSignIn();
             if (validationResult != UserViewValidationResult.FieldsAreValid)
             {
                 TempData["CantSignIn"] = true;
@@ -65,37 +69,37 @@ namespace OgrenciAidatSistemi.Controllers
                         ModelState.AddModelError("Password", "Password is empty");
                         break;
                 }
-                return View(scAdminView);
+                return View(studentView);
             }
 
             if (_dbContext.Students == null)
                 _dbContext.Students = _dbContext.Set<Student>();
 
-            var passwordHash = _userService.HashPassword(scAdminView.Password);
-            var schAdmin = _dbContext
+            var passwordHash = _userService.HashPassword(studentView.Password);
+            var dbStudent = _dbContext
                 .Students.Where(u =>
-                    u.EmailAddress == scAdminView.EmailAddress && u.PasswordHash == passwordHash
+                    u.EmailAddress == studentView.EmailAddress && u.PasswordHash == passwordHash
                 )
                 .FirstOrDefault();
-            if (schAdmin == null)
+            if (dbStudent == null)
             {
                 ModelState.AddModelError("EmailAddress", "User not found");
-                return RedirectToAction("Index");
+                return RedirectToAction("SignIn");
             }
             else
             {
-                _logger.LogDebug("User {0} signed in", schAdmin.EmailAddress);
+                _logger.LogDebug("User {0} signed in", dbStudent.EmailAddress);
             }
 
             try
             {
-                await _userService.SignInUser(schAdmin, UserRole.SiteAdmin);
+                await _userService.SignInUser(dbStudent, UserRole.Student);
             }
             catch (Exception ex)
             {
                 _logger.LogError(
                     "Error while signing in user {0}: {1}",
-                    schAdmin.EmailAddress,
+                    dbStudent.EmailAddress,
                     ex.Message
                 );
                 TempData["CantSignIn"] = true;
@@ -319,6 +323,77 @@ namespace OgrenciAidatSistemi.Controllers
             }
             var schView = school.ToView();
             return PartialView("_SchoolViewPartial", schView);
+        }
+
+        public async Task<Student?> GetLoggedInStudent()
+        {
+            var student = await _userService.GetCurrentUser();
+            if (student == null)
+            {
+                return null;
+            }
+            return student.Role switch
+            {
+                UserRole.Student
+                    => _dbContext
+                        .Students.Include(s => s.School)
+                        .Include(s => s.Payments)
+                        .Include(s => s.Grades)
+                        .Where(s => s.Id == student.Id)
+                        .FirstOrDefault(),
+                _ => null,
+            };
+        }
+
+        // <partial name="_PaymentHistoryPartial"/>
+
+        [Authorize(Roles = Configurations.Constants.userRoles.Student)]
+        public async Task<IActionResult> PaymentHistoryPartial()
+        {
+            var student = await GetLoggedInStudent();
+
+            var payments = new QueryableModelHelper<Payment>(
+                _dbContext.Payments.Where(p => p.StudentId == student.Id).AsQueryable(),
+                Payment.SearchConfig
+            )
+                .Sort("PaymentDate", SortOrderEnum.ASC)
+                .Take(5)
+                .ToHashSet();
+
+            return PaymentHistoryPartial(payments);
+        }
+
+        // <partial name="_PaymentHistoryPartial" model="Model.Payments" />
+
+        [Authorize(Roles = Configurations.Constants.userRoles.Student)]
+        public IActionResult PaymentHistoryPartial(HashSet<Payment> model)
+        {
+            return PartialView("_PaymentHistoryPartial", model);
+        }
+
+        // <partial name="_GradesPartial"/>
+
+        [Authorize(Roles = Configurations.Constants.userRoles.Student)]
+        public async Task<IActionResult> GradesPartial()
+        {
+            var student = await GetLoggedInStudent();
+            // student have many to many relation with grades
+            var grades = new QueryableModelHelper<Grade>(
+                _dbContext.Grades.Where(g => g.Students.Contains(student)).AsQueryable(),
+                Grade.SearchConfig
+            )
+                .Sort("GradeDate", SortOrderEnum.ASC)
+                .Take(5)
+                .ToHashSet();
+            return GradesPartial(grades);
+        }
+
+        // <partial name="_GradesPartial" model="Model.Grades" />
+
+        [Authorize(Roles = Configurations.Constants.userRoles.Student)]
+        public IActionResult GradesPartial(HashSet<Grade> model)
+        {
+            return PartialView("_GradesPartial", model);
         }
     }
 }

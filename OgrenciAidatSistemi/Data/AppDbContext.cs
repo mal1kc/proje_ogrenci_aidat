@@ -18,7 +18,6 @@ namespace OgrenciAidatSistemi.Data
         public DbSet<Payment>? Payments { get; set; }
         public DbSet<PaymentPeriode>? PaymentPeriods { get; set; }
 
-
         public DbSet<CashPayment>? CashPayments { get; set; }
 
         public DbSet<BankPayment>? BankPayments { get; set; }
@@ -56,7 +55,6 @@ namespace OgrenciAidatSistemi.Data
                 .HasValue<CreditCardPayment>("CreditCard")
                 .HasValue<DebitCardPayment>("DebitCard")
                 .HasValue<CheckPayment>("Check");
-
 
             // Student and SchoolAdmin are User but they differ from SiteAdmin
             // SA has username they don't

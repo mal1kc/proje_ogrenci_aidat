@@ -18,6 +18,10 @@ namespace OgrenciAidatSistemi.Data
 
         protected static ILogger _logger;
 
+        protected int _maxSeedCount = 100;
+
+        protected int _seedCount = 0; // to keep track of the number of entities seeded
+
         protected readonly IDbSeeder<TContext>? _dependentSeeder; // TODO: not fully implemented
 
         protected Random random = RandomizerHelper.random;
@@ -27,6 +31,7 @@ namespace OgrenciAidatSistemi.Data
             TContext context,
             IConfiguration configuration,
             ILogger logger,
+            int maxSeedCount = 100,
             IDbSeeder<TContext>? dependentSeeder = null
         )
         {
@@ -34,6 +39,11 @@ namespace OgrenciAidatSistemi.Data
             _configuration = configuration;
             _dependentSeeder = dependentSeeder;
             _logger = logger;
+            _maxSeedCount = _configuration.GetValue<int>(
+                "SeedData:MaxSeedCount",
+                defaultValue: maxSeedCount
+            );
+            _seedCount = 0;
 
             // Read the value from configuration or default to true
             _verboseLogging = _configuration.GetValue<bool>(
@@ -50,11 +60,6 @@ namespace OgrenciAidatSistemi.Data
             }
 
             await _context.Database.EnsureCreatedAsync();
-
-            if (_dependentSeeder != null)
-            {
-                await _dependentSeeder.SeedAsync(randomSeed);
-            }
 
             if (randomSeed)
             {

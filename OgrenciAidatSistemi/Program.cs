@@ -3,8 +3,6 @@ using NReco.Logging.File;
 using OgrenciAidatSistemi.Configurations;
 using OgrenciAidatSistemi.Data;
 using OgrenciAidatSistemi.Data.DBSeeders;
-using OgrenciAidatSistemi.Models;
-using OgrenciAidatSistemi.Models.Interfaces;
 using OgrenciAidatSistemi.Services;
 
 internal class Program
@@ -48,8 +46,8 @@ internal class Program
                 loggingBuilder.AddFile(loggingSection);
             });
 
-            _ = services.AddScoped<FileService>();
             _ = services.AddScoped<UserService>();
+            _ = services.AddScoped<FileService>();
         }
 
         async Task ConfigureAppAsync(WebApplication app)

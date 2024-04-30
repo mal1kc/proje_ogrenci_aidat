@@ -44,17 +44,28 @@
 
     <div>
           <div class="btn-group dropstart">
-          <button type="button" class="btn">
-            @if (User.GetType() == typeof(SiteAdmin)){
-            <a class="nav-link" asp-area=""
-                 asp-controller="SiteAdmin"
-                asp-action="AccountDetail">🐼 @User.FirstName</a>            }
-            else
-            {
-            <a class="nav-link" asp-area=""
-                asp-controller="SchoolAdmin"
-                asp-action="AccountDetail">😊 @User.FirstName</a>
-            }</button>
+<button type="button" class="btn">
+  @{
+    switch (User.GetType().Name)
+    {
+      case "SiteAdmin":
+        <a class="nav-link" asp-area=""
+           asp-controller="SiteAdmin"
+           asp-action="AccountDetail">🐼 @User.FirstName</a>
+        break;
+      case "SchoolAdmin":
+        <a class="nav-link" asp-area=""
+           asp-controller="SchoolAdmin"
+           asp-action="AccountDetail">😊 @User.FirstName</a>
+        break;
+      case "Student":
+        <a class="nav-link" asp-area=""
+           asp-controller="Student"
+           asp-action="AccountDetail">🎓 @User.FirstName</a>
+        break;
+    }
+  }
+</button>
 
           <button type="button" class="btn dropdown-toggle dropdown-toggle-split" data-bs-display="static"
               data-bs-toggle="dropdown" aria-expanded="false">
@@ -81,21 +92,23 @@
 
   else
   {
-     <div class="btn-group dropstart">
-       <button type="button" class="btn"><a class="nav-link" asp-area="" asp-controller="SiteAdmin"
-              asp-action="SignIn">SignIn</a></button>
-       <button type="button" class="btn dropdown-toggle dropdown-toggle-split" data-bs-display="static"
-            data-bs-toggle="dropdown" aria-expanded="false">
-          </button>
-       <ul class="dropdown-menu dropdown-menu-start">
-         <li>
-              <a class="dropdown-item" asp-area="" asp-controller="SiteAdmin" asp-action="SignIn">SignIn</a>
-            </li>
-         <li>
-              <a class="dropdown-item" asp-area="" asp-controller="SiteAdmin" asp-action="SignUp">SignUp</a>
-        </li>
-      </ul>
-    </div>
+<div class="btn-group dropstart">
+  <button type="button" class="btn dropdown-toggle dropdown-toggle-split" data-bs-display="static"
+      data-bs-toggle="dropdown" aria-expanded="false">
+    SignIn
+  </button>
+  <ul class="dropdown-menu dropdown-menu-start">
+    <li>
+      <a class="dropdown-item" asp-area="" asp-controller="SiteAdmin" asp-action="SignIn">SiteAdmin SignIn</a>
+    </li>
+    <li>
+      <a class="dropdown-item" asp-area="" asp-controller="SchoolAdmin" asp-action="SignIn">SchoolAdmin SignIn</a>
+    </li>
+    <li>
+      <a class="dropdown-item" asp-area="" asp-controller="Student" asp-action="SignIn">Student SignIn</a>
+    </li>
+  </ul>
+</div>
   }
 }
 

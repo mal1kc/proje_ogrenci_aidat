@@ -29,9 +29,9 @@ namespace OgrenciAidatSistemi.Controllers
 
         // AKA : Admin Dashboard
         [Authorize(Roles = Configurations.Constants.userRoles.SiteAdmin)]
-        public ActionResult Index()
+        public Task<ActionResult> Index()
         {
-            return View();
+            return Task.FromResult<ActionResult>(View());
         }
 
         [HttpGet(Configurations.Constants.AdminAuthenticationLoginPath)]

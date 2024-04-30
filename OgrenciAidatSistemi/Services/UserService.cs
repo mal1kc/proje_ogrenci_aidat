@@ -7,24 +7,17 @@ using OgrenciAidatSistemi.Models;
 
 namespace OgrenciAidatSistemi.Services
 {
-    public class UserService
+    public class UserService(
+        ILogger<UserService> logger,
+        AppDbContext dbContext,
+        IHttpContextAccessor httpContextAccessor
+    )
     {
-        private readonly AppDbContext _dbContext;
-        private readonly IHttpContextAccessor _httpContextAccessor;
-        private readonly ILogger<UserService> _logger;
+        private readonly AppDbContext _dbContext = dbContext;
+        private readonly IHttpContextAccessor _httpContextAccessor = httpContextAccessor;
+        private readonly ILogger<UserService> _logger = logger;
 
         private HttpContext? HttpContext => _httpContextAccessor.HttpContext;
-
-        public UserService(
-            ILogger<UserService> logger,
-            AppDbContext dbContext,
-            IHttpContextAccessor httpContextAccessor
-        )
-        {
-            _dbContext = dbContext;
-            _httpContextAccessor = httpContextAccessor;
-            _logger = logger;
-        }
 
         public async Task<User?> GetUserById(int userId)
         {

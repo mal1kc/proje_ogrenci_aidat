@@ -15,19 +15,14 @@ namespace OgrenciAidatSistemi.Controllers
             //     return RedirectToAction("Error404");
             // }
 
-            switch (statusCode)
+            return statusCode switch
             {
-                case "404":
-                    return RedirectToAction("Error404");
-                case "403":
-                    return RedirectToAction("Error403");
-                case "401":
-                    return RedirectToAction("Error401");
-                case "500":
-                    return RedirectToAction("Error500");
-                default:
-                    return View();
-            }
+                "404" => RedirectToAction("Error404"),
+                "403" => RedirectToAction("Error403"),
+                "401" => RedirectToAction("Error401"),
+                "500" => RedirectToAction("Error500"),
+                _ => View(),
+            };
         }
 
         public ActionResult Error404()

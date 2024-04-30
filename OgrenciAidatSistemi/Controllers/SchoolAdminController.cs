@@ -34,7 +34,6 @@ namespace OgrenciAidatSistemi.Controllers
             return View();
         }
 
-        [Authorize(Roles = Configurations.Constants.userRoles.SchoolAdmin)]
         public IActionResult SignIn()
         {
             if (_userService.IsUserSignedIn())

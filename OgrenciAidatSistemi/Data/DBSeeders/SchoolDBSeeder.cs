@@ -12,12 +12,16 @@ namespace OgrenciAidatSistemi.Data
         protected override async Task SeedDataAsync()
         {
             if (_context.Schools == null)
-            {
                 throw new NullReferenceException("SchoolDBSeeder: _context.Schools is null");
-            }
+            var dbCount = await _context.Schools.CountAsync();
+            if (dbCount >= _maxSeedCount)
+                return;
+
             foreach (var school in _seedData)
             {
                 await SeedEntityAsync(school);
+                if (_seedCount + dbCount >= _maxSeedCount)
+                    break;
             }
 
             await _context.SaveChangesAsync();
@@ -26,13 +30,16 @@ namespace OgrenciAidatSistemi.Data
         protected override async Task SeedRandomDataAsync()
         {
             if (_context.Schools == null)
-            {
                 throw new NullReferenceException("SchoolDBSeeder: _context.Schools is null");
-            }
-            for (int i = 0; i < 5; i++) // Seed 5 random schools
+            var dbCount = await _context.Schools.CountAsync();
+            if (dbCount >= _maxSeedCount)
+                return;
+            var schools = GetSeedData(true);
+            foreach (var school in schools)
             {
-                var school = CreateRandomModel();
                 await SeedEntityAsync(school);
+                if (_seedCount + dbCount >= _maxSeedCount)
+                    break;
             }
 
             await _context.SaveChangesAsync();
@@ -92,6 +99,7 @@ namespace OgrenciAidatSistemi.Data
             entity.UpdatedAt = DateTime.Now;
 
             await _context.Schools.AddAsync(entity);
+            _seedCount++;
         }
 
         private readonly List<School> _seedData = new List<School>

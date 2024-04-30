@@ -14,9 +14,19 @@ namespace OgrenciAidatSistemi.Data
             {
                 throw new NullReferenceException("StudentDBSeeder: _context.Students is null");
             }
+
+            var dbCount = await _context.Students.CountAsync();
+            if (dbCount >= _maxSeedCount)
+            {
+                return;
+            }
             foreach (var student in _seedData)
             {
                 await SeedEntityAsync(student);
+                if (_seedCount + dbCount >= _maxSeedCount)
+                {
+                    break;
+                }
             }
 
             await _context.SaveChangesAsync();
@@ -24,10 +34,17 @@ namespace OgrenciAidatSistemi.Data
 
         protected override async Task SeedRandomDataAsync()
         {
+            var dbCount = await _context.Students.CountAsync();
+            if (dbCount >= _maxSeedCount)
+                return;
+
             var students = GetSeedData(true);
             foreach (var student in students)
             {
                 await SeedEntityAsync(student);
+
+                if (_seedCount + dbCount >= _maxSeedCount)
+                    break;
             }
             await _context.SaveChangesAsync();
         }
@@ -60,18 +77,22 @@ namespace OgrenciAidatSistemi.Data
         protected override Student CreateRandomModel()
         {
             var studentId = random.Next(1000, 9999);
+            var school = new School
+            {
+                Name = "RandomSchool" + random.Next(100),
+                Students = new HashSet<Student>()
+            };
+            var email =
+                $"{studentId}@{new string(school.Name.Trim().ToLower().Where(c => char.IsLetterOrDigit(c)).ToArray())}.com";
+
             return new Student
             {
                 StudentId = studentId,
-                School = new School
-                {
-                    Name = "RandomSchool" + random.Next(100),
-                    Students = new HashSet<Student>()
-                },
+                School = school,
                 GradLevel = random.Next(1, 13),
                 IsGraduated = random.Next(2) == 0, // Generate a random graduation status
-                PasswordHash = "password", // dont overthink it
-                EmailAddress = $"{studentId}@randomschol.com"
+                PasswordHash = Student.ComputeHash("password"),
+                EmailAddress = email
             };
         }
 
@@ -113,8 +134,15 @@ namespace OgrenciAidatSistemi.Data
                 entity.School.UpdatedAt = DateTime.Now;
                 await _context.Schools.AddAsync(entity.School);
             }
+            entity.ContactInfo = new ContactInfo
+            {
+                Email = entity.EmailAddress,
+                CreatedAt = DateTime.Now,
+                UpdatedAt = DateTime.Now
+            };
 
             await _context.Students.AddAsync(entity);
+            _seedCount++;
         }
 
         private readonly List<Student> _seedData = new List<Student>
@@ -127,7 +155,7 @@ namespace OgrenciAidatSistemi.Data
                 School = new School { Name = "School 1", Students = new HashSet<Student>() },
                 GradLevel = 10,
                 IsGraduated = false,
-                PasswordHash = "password",
+                PasswordHash = Student.ComputeHash("password"),
                 EmailAddress = "101@schol1.com"
             },
             new Student
@@ -138,7 +166,7 @@ namespace OgrenciAidatSistemi.Data
                 School = new School { Name = "School 2", Students = new HashSet<Student>() },
                 GradLevel = 11,
                 IsGraduated = false,
-                PasswordHash = "password",
+                PasswordHash = Student.ComputeHash("password"),
                 EmailAddress = "102@schol2.com"
             },
         };

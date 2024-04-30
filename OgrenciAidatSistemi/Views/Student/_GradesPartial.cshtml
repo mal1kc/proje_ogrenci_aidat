@@ -1,0 +1,19 @@
+@model HashSet<OgrenciAidatSistemi.Models.Grade>
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Grade</th>
+            <td>Grade Level</td>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var grade in Model)
+        {
+            <tr>
+                <td>@grade.Name</td>
+                <td>@grade.GradeLevel</td>
+            </tr>
+        }
+    </tbody>
+</table>

@@ -85,6 +85,13 @@ namespace OgrenciAidatSistemi.Models
             }
             return dbctx.SiteAdmins.Any(admin => admin.EmailAddress == EmailAddress);
         }
+
+        public override UserViewValidationResult ValidateFieldsSignIn()
+        {
+            if (!CheckNamesLenght())
+                return UserViewValidationResult.InvalidName;
+            return base.ValidateFieldsSignIn();
+        }
     }
 
     public static class SiteAdminSearchConfig
