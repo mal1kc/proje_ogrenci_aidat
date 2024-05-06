@@ -3,31 +3,35 @@
     ViewData["Title"] = "List of Students";
 }
 
-<h1>List of Students</h1>
-
-<p>
-    <a asp-action="Create">Create New</a>
-</p>
+<h2>List of Students <a asp-action="Create" class="btn btn-sm btn-primary float-end">Create New</a></h2>
 
 <form asp-action="List" method="get">
-    <p>
-        Search: <input type="text" name="searchString" value="@ViewData["CurrentSearchString"]" />
-        in
-        <select name="searchField">
-            @if(ViewData["CurrentSearchField"] != null){
-            <option value='@ViewData["CurrentSearchField"]' selected>@ViewData["CurrentSearchField"]</option>
-            }
-            <option value="">All</option>
-            <option value="StudentId">StudentId</option>
-            <option value="FirstName">First Name</option>
-            <option value="LastName">Last Name</option>
-            <option value="EmailAddress">Email Adress</option>
-            <option value="School">School</option>
-
-            <!-- Add more search fields as needed -->
-        </select>
-        <input type="submit" value="Search" />
-    </p>
+    <div class="row">
+        <div class="col-md-6">
+            <div class="input-group mb-3">
+                <span class="input-group-text">Search:</span>
+                <input type="text" class="form-control" name="searchString" value="@ViewData["CurrentSearchString"]" />
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="input-group mb-3">
+                <span class="input-group-text">in</span>
+                <select class="form-select" name="searchField">
+                    @if(ViewData["CurrentSearchField"] != null){
+                    <option value='@ViewData["CurrentSearchField"]' selected>@ViewData["CurrentSearchField"]</option>
+                    }
+                    <option value="">All</option>
+                    <option value="StudentId">StudentId</option>
+                    <option value="FirstName">First Name</option>
+                    <option value="LastName">Last Name</option>
+                    <option value="EmailAddress">Email Adress</option>
+                    <option value="School">School</option>
+                    <!-- Add more search fields as needed -->
+                </select>
+                <button type="submit" class="btn btn-primary">Search</button>
+            </div>
+        </div>
+    </div>
 </form>
 
 <table class="table">

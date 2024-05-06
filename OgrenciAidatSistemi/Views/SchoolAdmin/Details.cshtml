@@ -14,7 +14,7 @@
             <dt class="col-sm-3">School:</dt>
             <dd class="col-sm-9"> @if (Model.SchoolView != null)
                 {
-                    @Html.Partial("_SchoolViewPartial",Model.SchoolView)
+                    <partial name="_SchoolViewPartial" model="Model.SchoolView" />
                 }
                 else
                 {

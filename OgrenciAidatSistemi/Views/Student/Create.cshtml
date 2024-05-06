@@ -3,53 +3,65 @@
     ViewData["Title"] = "Create Student";
 }
 
-<h1>Create School Admin</h1>
+<h1>Create Student</h1>
 
 <partial name="_ValidationScriptsPartial" />
 
-<form asp-action="Create" method="post">
-    @Html.AntiForgeryToken() <!-- Add anti-forgery token -->
+<form asp-action="Create" method="post" class="needs-validation" novalidate>
+    @Html.AntiForgeryToken()
 
-    <div class="form-group">
-        <label asp-for="Password"></label>
-        <input asp-for="Password" type="password" class="form-control" />
-        <span asp-validation-for="Password" class="text-danger"></span>
-    </div>
-    <div class="form-group">
-        <label asp-for="PasswordVerify"></label>
-        <input asp-for="PasswordVerify" type="password" class="form-control" />
-        <span asp-validation-for="PasswordVerify" class="text-danger"></span>
-    </div>
-    <div class="form-group">
-        <label asp-for="FirstName"></label>
-        <input asp-for="FirstName" class="form-control" />
-        <span asp-validation-for="FirstName" class="text-danger"></span>
-    </div>
-    <div class="form-group">
-        <label asp-for="LastName"></label>
-        <input asp-for="LastName" class="form-control" />
-        <span asp-validation-for="LastName" class="text-danger"></span>
-    </div>
-    <div class="form-group">
-        <label for="SchoolId">School:</label>
-        <select asp-for="SchoolId" class="form-control" id="SchoolId" name="SchoolId">
+    <div class="mb-3">
+        <label for="SchoolId" class="form-label">School</label>
+        <select asp-for="SchoolId" class="form-control" id="SchoolId" name="SchoolId" required>
             <option value="">Select School</option>
             @foreach (var School in ViewBag.Schools)
             {
                 <option value="@School.Id">@School.Name</option>
             }
         </select>
+        <div class="invalid-feedback">
+        @Html.ValidationMessageFor(model => model.SchoolId)
     </div>
-    <div class="form-group">
-        <label asp-for="EmailAddress"></label>
-        <input asp-for="EmailAddress" class="form-control" />
-        <span asp-validation-for="EmailAddress" class="text-danger"></span>
+    <div class="mb-3">
+        <label for="FirstName" class="form-label">First Name</label>
+        <input asp-for="FirstName" class="form-control" id="FirstName" required>
+        <div class="invalid-feedback">
+            @Html.ValidationMessageFor(model => model.FirstName)
+        </div>
     </div>
+    <div class="mb-3">        <label for="LastName" class="form-label">Last Name</label>
+        <input asp-for="LastName" class="form-control" id="LastName" required>
+        <div class="invalid-feedback">
+            @Html.ValidationMessageFor(model => model.LastName)
+        </div>
+    </div>
+    <div class="mb-3">
+        <label for="EmailAddress" class="form-label">Email Address</label>
+        <input asp-for="EmailAddress" class="form-control" id="EmailAddress" required>
+        <div class="invalid-feedback">            @Html.ValidationMessageFor(model => model.EmailAddress)
+        </div>
+    </div>
+    <div class="mb-3">
+        <label for="Password" class="form-label">Password</label>
+        <input asp-for="Password" type="password" class="form-control" id="Password" required>
+        <div class="invalid-feedback">
+            @Html.ValidationMessageFor(model => model.Password)
+        </div>
+    </div>
+    <div class="mb-3">
+        <label for="PasswordVerify" class="form-label">Verify Password</label>
+        <input asp-for="PasswordVerify" type="password" class="form-control" id="PasswordVerify" required>
+        <div class="invalid-feedback">
+            @Html.ValidationMessageFor(model => model.PasswordVerify)
+        </div>
+    </div>
+    
     @if (!ViewData.ModelState.IsValid)
     {
-        <div class="alert alert-danger" role="alert">
-            <strong>Error:</strong> Please fix the errors above.
+        <div class="alert alert-danger" role="alert"> 
+            <p> <strong>Error:</strong> Please fix the errors above.  </p>
         </div>
     }
     <button type="submit" class="btn btn-primary">Create</button>
+    </div>
 </form>

@@ -1,6 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
 using OgrenciAidatSistemi.Data;
-using OgrenciAidatSistemi.Helpers.Controller;
 using OgrenciAidatSistemi.Services;
 
 namespace OgrenciAidatSistemi.Controllers
@@ -74,6 +73,7 @@ namespace OgrenciAidatSistemi.Controllers
             }
             catch (ArgumentException ex)
             {
+                _logger.LogWarning(ex, "File not found");
                 return RedirectToAction("Index", "Error", new { statusCode = 404 });
             }
             catch (Exception ex)

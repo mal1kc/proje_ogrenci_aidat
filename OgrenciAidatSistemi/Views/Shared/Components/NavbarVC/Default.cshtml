@@ -20,7 +20,9 @@
         <div class="navbar-collapse collapse" id="collapseNavbar">
             <ul class="navbar-nav">
              @{
-              if (User is SiteAdmin){
+              switch(User.GetType().Name)
+              {
+                case "SiteAdmin":
                     <li class="nav-item">
                         <a class="nav-link" asp-area="" asp-controller="SiteAdmin" asp-action="List">SiteAdmins</a>
                     </li>
@@ -33,6 +35,13 @@
                     <li class="nav-item">
                         <a class="nav-link" asp-area="" asp-controller="Student" asp-action="List">Students</a>
                     </li>
+                    <li class="nav-item">
+                        <a class="nav-link" asp-area="" asp-controller="Payment" asp-action="List">Payments</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" asp-area="" asp-controller="Payment" asp-action="PeriodList">PaymentPeriods</a>
+                    </li>
+                    break;
               }
              }
             </ul>

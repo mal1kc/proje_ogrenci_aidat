@@ -100,7 +100,6 @@ namespace OgrenciAidatSistemi.Data
                 .Entity<Payment>()
                 .HasOne(p => p.Student)
                 .WithMany(s => s.Payments)
-                .HasForeignKey(p => p.StudentId)
                 .OnDelete(DeleteBehavior.SetNull); // if student deleted set null to student field of payment
 
             modelBuilder
@@ -126,5 +125,26 @@ namespace OgrenciAidatSistemi.Data
         /*     }; */
         /* } */
         /**/
+
+        public override int SaveChanges()
+        {
+            foreach (var entry in ChangeTracker.Entries())
+            {
+                if (entry.State == EntityState.Added)
+                {
+                    entry.Property("CreatedAt").CurrentValue = DateTime.Now;
+                    entry.Property("UpdatedAt").CurrentValue = DateTime.Now;
+                }
+                else if (entry.State == EntityState.Modified)
+                    entry.Property("UpdatedAt").CurrentValue = DateTime.Now;
+                // if entity is payment periode update total amount
+                if (entry.Entity is PaymentPeriode pp)
+                {
+                    pp.TotalAmount = pp.Payments.Sum(p => p.Amount);
+                }
+            }
+
+            return base.SaveChanges();
+        }
     }
 }

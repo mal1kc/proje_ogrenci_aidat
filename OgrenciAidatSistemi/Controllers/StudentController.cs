@@ -108,14 +108,6 @@ namespace OgrenciAidatSistemi.Controllers
             return RedirectToAction("Index");
         }
 
-        /*
-        ├ ƒ List(string searchString = null, string searchField = null, string sortOrder = null, int pageIndex = 1, int pageSize = 20)
-        ├ ƒ Create()
-        ├ ƒ Create(SiteAdminView siteAdmin)
-        ├ ƒ Delete(int? id)
-        └ ƒ DeleteConfirmed(int? id)
-        */
-
         [Authorize(Roles = Configurations.Constants.userRoles.SiteAdmin)]
         public IActionResult List(
             string? searchString = null,
@@ -125,10 +117,6 @@ namespace OgrenciAidatSistemi.Controllers
             int pageSize = 20
         )
         {
-            // TODO improve modelSearchConfig add
-            // 1. viewdata keys ; sortorder, searchstring, currentfield
-            // TODO improve QueryableModelHelper do sortig and searching in one method with given config
-            // ++ improve logics for searching and sorting
             if (_dbContext.Students == null)
             {
                 _logger.LogError("Students table is null");
@@ -213,7 +201,7 @@ namespace OgrenciAidatSistemi.Controllers
             _logger.LogDebug("Creating user {0}", studentView.EmailAddress);
             try
             {
-                var newSchAdmin = new Student
+                var newStdnt = new Student
                 {
                     EmailAddress = studentView.EmailAddress,
                     FirstName = studentView.FirstName,
@@ -223,13 +211,15 @@ namespace OgrenciAidatSistemi.Controllers
                     CreatedAt = DateTime.Now,
                     UpdatedAt = DateTime.Now
                 };
+                newStdnt.GenerateUniqueId(_dbContext);
                 _logger.LogDebug("User {0} created", studentView.EmailAddress);
+                _logger.LogDebug("User id generated: {0}", newStdnt.Id);
                 _logger.LogDebug("saving user {0} to db", studentView.EmailAddress);
                 if (_dbContext.Students == null)
                 {
                     _dbContext.Students = _dbContext.Set<Student>();
                 }
-                _dbContext.Students.Add(newSchAdmin);
+                _dbContext.Students.Add(newStdnt);
                 await _dbContext.SaveChangesAsync();
             }
             catch (Exception ex)
@@ -353,7 +343,7 @@ namespace OgrenciAidatSistemi.Controllers
             var student = await GetLoggedInStudent();
 
             var payments = new QueryableModelHelper<Payment>(
-                _dbContext.Payments.Where(p => p.StudentId == student.Id).AsQueryable(),
+                _dbContext.Payments.Where(p => p.Student == student).AsQueryable(),
                 Payment.SearchConfig
             )
                 .Sort("PaymentDate", SortOrderEnum.ASC)
@@ -394,6 +384,73 @@ namespace OgrenciAidatSistemi.Controllers
         public IActionResult GradesPartial(HashSet<Grade> model)
         {
             return PartialView("_GradesPartial", model);
+        }
+
+        [Authorize(Roles = Configurations.Constants.userRoles.SiteAdmin)]
+        public IActionResult Edit(int? id)
+        {
+            _logger.LogDebug("not tested function StudentController.Edit called");
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            if (_dbContext.Students == null)
+            {
+                _dbContext.Students = _dbContext.Set<Student>();
+            }
+
+            var student = _dbContext.Students.Where(e => e.Id == id).FirstOrDefault();
+
+            if (student == null)
+            {
+                return NotFound();
+            }
+
+            return View(student);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [Authorize(Roles = Configurations.Constants.userRoles.SiteAdmin)]
+        public async Task<IActionResult> Edit(
+            int id,
+            [Bind("Id,EmailAddress,Password,PasswordVerify,SchoolId,FirstName,LastName")]
+                Student student
+        )
+        {
+            _logger.LogDebug("not tested function StudentController.Edit[post] called");
+            if (id != student.Id)
+            {
+                return NotFound();
+            }
+
+            if (ModelState.IsValid)
+            {
+                try
+                {
+                    _dbContext.Update(student);
+                    await _dbContext.SaveChangesAsync();
+                }
+                catch (DbUpdateConcurrencyException)
+                {
+                    if (!StudentExists(student.Id))
+                    {
+                        return NotFound();
+                    }
+                    else
+                    {
+                        throw;
+                    }
+                }
+                return RedirectToAction(nameof(Index));
+            }
+            return View(student);
+        }
+
+        private bool StudentExists(int id)
+        {
+            return _dbContext.Students.Any(e => e.Id == id);
         }
     }
 }

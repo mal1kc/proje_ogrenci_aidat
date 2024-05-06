@@ -76,24 +76,21 @@ namespace OgrenciAidatSistemi.Data
 
         protected override Student CreateRandomModel()
         {
-            var studentId = random.Next(1000, 9999);
             var school = new School
             {
                 Name = "RandomSchool" + random.Next(100),
                 Students = new HashSet<Student>()
             };
-            var email =
-                $"{studentId}@{new string(school.Name.Trim().ToLower().Where(c => char.IsLetterOrDigit(c)).ToArray())}.com";
 
-            return new Student
+            var student = new Student
             {
-                StudentId = studentId,
                 School = school,
                 GradLevel = random.Next(1, 13),
                 IsGraduated = random.Next(2) == 0, // Generate a random graduation status
                 PasswordHash = Student.ComputeHash("password"),
-                EmailAddress = email
+                EmailAddress = "temp@random.com"
             };
+            return student;
         }
 
         public override IEnumerable<Student> GetSeedData(bool randomSeed = false)
@@ -111,9 +108,18 @@ namespace OgrenciAidatSistemi.Data
             {
                 return;
             }
-
+            entity.ContactInfo = new ContactInfo
+            {
+                Email = entity.EmailAddress,
+                PhoneNumber = "+90 555 555 55 55",
+                CreatedAt = DateTime.Now,
+                UpdatedAt = DateTime.Now,
+            };
             entity.CreatedAt = DateTime.Now;
             entity.UpdatedAt = DateTime.Now;
+            entity.GenerateUniqueId(_context);
+            entity.EmailAddress = entity.StudentId + $"@mail.school.com";
+            entity.ContactInfo.Email = entity.EmailAddress;
 
             School? assumed_sch = await _context.Schools.FirstAsync(s =>
                 s.Name == entity.School.Name
@@ -130,16 +136,24 @@ namespace OgrenciAidatSistemi.Data
             }
             else
             {
+                entity.School.Students.Add(entity);
+                entity.School.Id = _context.Schools.Count() + 1;
                 entity.School.CreatedAt = DateTime.Now;
                 entity.School.UpdatedAt = DateTime.Now;
-                await _context.Schools.AddAsync(entity.School);
             }
-            entity.ContactInfo = new ContactInfo
+
+            // regenerate unique id because we have updated the school
+            entity.GenerateUniqueId(_context);
+            entity.EmailAddress = entity.StudentId + $"@mail.school.com";
+            entity.ContactInfo.Email = entity.EmailAddress;
+
+            // check email exists in db if it does, raise an exception
+            if (await _context.Users.AnyAsync(u => u.EmailAddress == entity.EmailAddress))
             {
-                Email = entity.EmailAddress,
-                CreatedAt = DateTime.Now,
-                UpdatedAt = DateTime.Now
-            };
+                throw new Exception(
+                    $"StudentDBSeeder: SeedEntityAsync EmailAddress: {entity.EmailAddress} already exists"
+                );
+            }
 
             await _context.Students.AddAsync(entity);
             _seedCount++;
@@ -151,7 +165,6 @@ namespace OgrenciAidatSistemi.Data
             {
                 FirstName = "studento one",
                 LastName = "numberone",
-                StudentId = 101,
                 School = new School { Name = "School 1", Students = new HashSet<Student>() },
                 GradLevel = 10,
                 IsGraduated = false,
@@ -162,7 +175,6 @@ namespace OgrenciAidatSistemi.Data
             {
                 FirstName = "studento two",
                 LastName = "number two",
-                StudentId = 102,
                 School = new School { Name = "School 2", Students = new HashSet<Student>() },
                 GradLevel = 11,
                 IsGraduated = false,

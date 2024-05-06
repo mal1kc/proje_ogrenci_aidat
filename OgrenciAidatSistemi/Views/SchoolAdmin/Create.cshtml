@@ -5,7 +5,7 @@
 
 <h1>Create School Admin</h1>
 
-@{ Html.RenderPartial("_ValidationScriptsPartial"); }
+<partial name="_ValidationScriptsPartial" />
 
 <form asp-action="Create" method="post">
     @Html.AntiForgeryToken() <!-- Add anti-forgery token -->

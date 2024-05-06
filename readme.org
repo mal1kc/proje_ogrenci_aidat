@@ -11,7 +11,7 @@
 
 ** okul admini yönetim paneli
 
-** okul çalışma yılı yönetimi (payment periods)
+** okul çalışma yılı yönetimi (workyear)
 
 ** aidat dönemi yönetimi (single payment period)
 
@@ -24,3 +24,18 @@
 ** dekont depolama
 
 ** veli ödeme arayüzü
+
+
+* todo
+    + [X] studentid generator
+    + [ ] add payment verification panel for sch admin
+    + [ ] add payment panel for student
+    + [ ] crete paymentperiod service for auto create payments for students and save to db 
+    + [ ] add workyear management panel for sch admin
+    + [ ] add paymentperiod management panel for sch admin (create, edit, delete)
+
+* todo , maybe list
+
+    + [ ] öğrenci id ile giriş yapma 
+    + [ ] student email generator
+    + [ ] add predefined search filters linq queries and save as search config ( rewrite most of ModelQueryableHelper)

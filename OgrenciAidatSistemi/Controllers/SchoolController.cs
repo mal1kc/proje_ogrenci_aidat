@@ -130,23 +130,22 @@ namespace OgrenciAidatSistemi.Controllers
 
             _logger.LogInformation("Signed user: {0}, {1}", signedUser.Id, signedUser.Role);
 
-            if (signedUser.Role == UserRole.SchoolAdmin)
+            switch (signedUser.Role)
             {
-                school = await _dbContext.Schools.Where(s => s.Id == id).FirstOrDefaultAsync();
-                if (school == null)
-                    return NotFound();
-                if (school.Id != id)
+                case UserRole.SchoolAdmin:
+                    school = await _dbContext.Schools.Where(s => s.Id == id).FirstOrDefaultAsync();
+                    if (school == null)
+                        return NotFound();
+                    if (school.Id != id)
+                        return Unauthorized();
+                    break;
+                case UserRole.SiteAdmin:
+                    school = await _dbContext.Schools.Where(s => s.Id == id).FirstOrDefaultAsync();
+                    if (school == null)
+                        return NotFound();
+                    break;
+                default:
                     return Unauthorized();
-            }
-            else if (signedUser.Role == UserRole.SiteAdmin)
-            {
-                school = await _dbContext.Schools.Where(s => s.Id == id).FirstOrDefaultAsync();
-                if (school == null)
-                    return NotFound();
-            }
-            else
-            {
-                return Unauthorized();
             }
 
             return View(school.ToView());

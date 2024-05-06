@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
@@ -217,7 +217,7 @@ namespace OgrenciAidatSistemi.Migrations
                     Id = table
                         .Column<int>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
-                    StudentId = table.Column<int>(type: "INTEGER", nullable: false),
+                    StudentId = table.Column<string>(type: "TEXT", nullable: false),
                     SchoolId = table.Column<int>(type: "INTEGER", nullable: false),
                     GradLevel = table.Column<int>(type: "INTEGER", nullable: false),
                     IsGraduated = table.Column<bool>(type: "INTEGER", nullable: false),
@@ -283,14 +283,14 @@ namespace OgrenciAidatSistemi.Migrations
                     Id = table
                         .Column<int>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
+                    StudentId = table.Column<int>(type: "INTEGER", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "TEXT", nullable: false),
                     UpdatedAt = table.Column<DateTime>(type: "TEXT", nullable: false),
                     StartDate = table.Column<DateTime>(type: "TEXT", nullable: false),
                     EndDate = table.Column<DateTime>(type: "TEXT", nullable: false),
                     TotalAmount = table.Column<decimal>(type: "TEXT", nullable: false),
                     WorkYearId = table.Column<int>(type: "INTEGER", nullable: false),
-                    Occurrence = table.Column<int>(type: "INTEGER", nullable: false),
-                    StudentId = table.Column<int>(type: "INTEGER", nullable: true)
+                    Occurrence = table.Column<int>(type: "INTEGER", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -299,7 +299,8 @@ namespace OgrenciAidatSistemi.Migrations
                         name: "FK_PaymentPeriods_Students_StudentId",
                         column: x => x.StudentId,
                         principalTable: "Students",
-                        principalColumn: "Id"
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade
                     );
                     table.ForeignKey(
                         name: "FK_PaymentPeriods_WorkYears_WorkYearId",
@@ -320,14 +321,14 @@ namespace OgrenciAidatSistemi.Migrations
                         .Annotation("Sqlite:Autoincrement", true),
                     CreatedAt = table.Column<DateTime>(type: "TEXT", nullable: false),
                     UpdatedAt = table.Column<DateTime>(type: "TEXT", nullable: false),
-                    StudentId = table.Column<int>(type: "INTEGER", nullable: false),
+                    StudentId = table.Column<int>(type: "INTEGER", nullable: true),
                     PaymentDate = table.Column<DateTime>(type: "TEXT", nullable: false),
                     PaymentMethod = table.Column<int>(type: "INTEGER", nullable: false),
                     PaymentPeriodeId = table.Column<int>(type: "INTEGER", nullable: true),
                     PaymentPeriodId = table.Column<int>(type: "INTEGER", nullable: false),
                     Amount = table.Column<decimal>(type: "TEXT", nullable: false),
-                    isVerified = table.Column<bool>(type: "INTEGER", nullable: false),
-                    ReceiptId = table.Column<int>(type: "INTEGER", nullable: false),
+                    Status = table.Column<int>(type: "INTEGER", nullable: false),
+                    ReceiptId = table.Column<int>(type: "INTEGER", nullable: true),
                     PaymentType = table.Column<string>(
                         type: "TEXT",
                         maxLength: 13,
@@ -369,8 +370,7 @@ namespace OgrenciAidatSistemi.Migrations
                         name: "FK_Payments_FilePaths_ReceiptId",
                         column: x => x.ReceiptId,
                         principalTable: "FilePaths",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade
+                        principalColumn: "Id"
                     );
                     table.ForeignKey(
                         name: "FK_Payments_PaymentPeriods_PaymentPeriodeId",

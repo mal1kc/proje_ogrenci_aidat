@@ -1,0 +1,123 @@
+@model IQueryable<Payment>
+@{
+    ViewData["Title"] = "Payments";
+}
+
+<h2>@ViewData["Title"] <a asp-action="Create" class="btn btn-sm btn-primary float-end">Create New</a></h2>
+
+<form asp-action="List" method="get">
+    <div class="row">
+        <div class="col-md-6">
+            <div class="input-group mb-3">
+                <span class="input-group-text">Search:</span>
+                <input type="text" class="form-control" name="searchString" value="@ViewData["CurrentSearchString"]" />
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="input-group mb-3">
+                <span class="input-group-text">in</span>
+                <select class="form-select" name="searchField">
+
+                    @if (ViewData["CurrentSearchField"] != null)
+                    {
+                        <option value='@ViewData["CurrentSearchField"]' selected>@ViewData["CurrentSearchField"]</option>
+                    }
+                    <option value="">All</option>
+                    <option value="Id">Payment Id</option>
+                    <option value="PaymentDate">Payment Date</option>
+                    <option value="PaymentMethod">Payment Method</option>
+                    <option value="PaymentPeriodId">Payment Period</option>
+                    <option value="Amount">Amount</option>
+                    <option value="Status">Status</option>
+
+                    <!-- Add more search fields as needed -->
+                </select>
+                <button type="submit" class="btn btn-primary">Search</button>
+            </div>
+        </div>
+    </div>
+
+</form>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                <a asp-action="List" asp-route-sortOrder="@(ViewData["IdSortParm"]?.ToString())"
+                    asp-route-searchString="@ViewData["CurrentSearchString"]?.ToString()">Payment Id</a>
+
+            </th>
+            <th>
+                <a asp-action="List" asp-route-sortOrder="@(ViewData["DateSortParm"]?.ToString())"
+                    asp-route-searchString="@ViewData["CurrentSearchString"]?.ToString()">Payment Date</a>
+            </th>
+            <th>
+                <a asp-action="List" asp-route-sortOrder="@(ViewData["MethodSortParm"]?.ToString())"
+                    asp-route-searchString="@ViewData["CurrentSearchString"]?.ToString()">Payment Method</a>
+            </th>
+            <th>
+                <a asp-action="List" asp-route-sortOrder="@(ViewData["PeriodSortParm"]?.ToString())"
+                    asp-route-searchString="@ViewData["CurrentSearchString"]?.ToString()">Payment Period</a>
+            </th>
+            <th>
+                <a asp-action="List" asp-route-sortOrder="@(ViewData["AmountSortParm"]?.ToString())"
+                    asp-route-searchString="@ViewData["CurrentSearchString"]?.ToString()">Amount</a>
+            </th>
+            <th>
+                <a asp-action="List" asp-route-sortOrder="@(ViewData["StatusSortParm"]?.ToString())"
+                    asp-route-searchString="@ViewData["CurrentSearchString"]?.ToString()">Status</a>
+            </th>
+            <th>
+                <a asp-action="List" asp-route-sortOrder="@(ViewData["IsVerifiedSortParm"]?.ToString())"
+                    asp-route-searchString="@(ViewData["CurrentSearchString"]?.ToString())">Is Verified</a>
+            </th>
+            <!-- Add other fields as needed -->
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@Html.DisplayFor(modelItem => item.Id)</td>
+                <td>@Html.DisplayFor(modelItem => item.PaymentDate)</td>
+                <td>@Html.DisplayFor(modelItem => item.PaymentMethod)</td>
+                <td>@Html.DisplayFor(modelItem => item.PaymentPeriodId)</td>
+                <td>@Html.DisplayFor(modelItem => item.Amount)</td>
+                <td>@Html.DisplayFor(modelItem => item.Status)</td>
+                <td>@Html.DisplayFor(modelItem => item.IsVerified)</td>
+                <!-- Add other fields as needed -->
+            </tr>
+        }
+    </tbody>
+</table>
+
+<nav aria-label="Page navigation">
+    <ul class="pagination">
+        @if (ViewData["CurrentPageIndex"] != null)
+        {
+            int currentPageIndex = (int)ViewData["CurrentPageIndex"];
+            int totalPages = (int)ViewData["TotalPages"];
+
+            <li class="page-item @(currentPageIndex <= 1 ? "disabled" : "")">
+                <a class="page-link" asp-action="List" asp-route-pageIndex="1">First</a>
+            </li>
+            <li class="page-item @(currentPageIndex <= 1 ? "disabled" : "")">
+                <a class="page-link" asp-action="List" asp-route-pageIndex="@(currentPageIndex - 1)">Previous</a>
+            </li>
+
+            @for (int i = 1; i <= totalPages; i++)
+            {
+                <li class="page-item @(i == currentPageIndex ? "active" : "")">
+                    <a class="page-link" asp-action="List" asp-route-pageIndex="@i">@i</a>
+                </li>
+            }
+
+            <li class="page-item @(currentPageIndex >= totalPages ? "disabled" : "")">
+                <a class="page-link" asp-action="List" asp-route-pageIndex="@(currentPageIndex + 1)">Next</a>
+            </li>
+            <li class="page-item @(currentPageIndex >= totalPages ? "disabled" : "")">
+                <a class="page-link" asp-action="List" asp-route-pageIndex="@totalPages">Last</a>
+            </li>
+        }
+    </ul>
+</nav>

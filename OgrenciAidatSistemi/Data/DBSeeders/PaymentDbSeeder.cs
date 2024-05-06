@@ -26,11 +26,9 @@ namespace OgrenciAidatSistemi.Data.DBSeeders
             Payment payment;
 
             // TODO: write better generator of connected items like that
-            var studentId = random.Next(1000, 9999);
-            var studentEmail = $"{studentId}@randomschol.com";
+
             var student = new Student
             {
-                StudentId = studentId,
                 FirstName = "RandomStudent" + random.Next(100),
                 School = new School
                 {
@@ -40,23 +38,31 @@ namespace OgrenciAidatSistemi.Data.DBSeeders
                 GradLevel = random.Next(1, 13),
                 IsGraduated = random.Next(2) == 0, // Generate a random graduation status
                 PasswordHash = Student.ComputeHash("password"), // dont overthink it
-                EmailAddress = studentEmail,
+                EmailAddress = "temp@somemail.com"
             };
 
-            studentEmail =
-                $"{studentId}@{new string(student.School.Name.Trim().ToLower().Where(c => char.IsLetterOrDigit(c)).ToArray())}.com";
             student.ContactInfo = new ContactInfo
             {
-                Email = studentEmail,
+                Email = student.EmailAddress,
                 PhoneNumber = "+90 555 555 55 55",
                 CreatedAt = DateTime.Now,
                 UpdatedAt = DateTime.Now,
             };
-            student.EmailAddress = studentEmail;
+            student.CreatedAt = DateTime.Now;
+            student.UpdatedAt = DateTime.Now;
+            student.School.CreatedAt = DateTime.Now;
+            student.School.UpdatedAt = DateTime.Now;
+            student.GenerateUniqueId(_context);
+            student.EmailAddress = student.StudentId + $"@mail.school.com";
+            student.ContactInfo.Email = student.EmailAddress;
+            student.School.Students.Add(student);
+            student.School.Id = _context.Schools.Count() + 1;
+
             var school = student.School;
             PaymentPeriode paymentPeriode = new PaymentPeriode
             {
                 Payments = new HashSet<Payment>(),
+                Student = student,
                 WorkYear = new WorkYear
                 {
                     StartDate = DateTime.Now,
@@ -133,7 +139,10 @@ namespace OgrenciAidatSistemi.Data.DBSeeders
             payment.UpdatedAt = DateTime.Now;
             payment.PaymentDate = DateTime.Now;
             payment.Amount = random.Next(100, 1000);
-            payment.isVerified = random.Next(2) == 0;
+            // set status randomly  from PaymentStatus enum
+            payment.Status = (PaymentStatus)
+                random.Next(Enum.GetNames(typeof(PaymentStatus)).Length);
+
             payment.Receipt = new FilePath(
                 path: null,
                 name: "Receipt of " + payment.Student.FirstName,
@@ -176,22 +185,21 @@ namespace OgrenciAidatSistemi.Data.DBSeeders
             }
 
             var payments = GetSeedData(true);
-
-            foreach (var payment in payments)
-            {
-                await SeedEntityAsync(payment);
-                if (_seedCount + dbCount >= _maxSeedCount)
-                {
-                    if (_verboseLogging)
-                        Console.WriteLine(
-                            $"PaymentDBSeeder: SeedRandomDataAsync reached max seed count of {_maxSeedCount}"
-                        );
-                    break;
-                }
-            }
             try
             {
-                await _context.SaveChangesAsync();
+                foreach (var payment in payments)
+                {
+                    await SeedEntityAsync(payment);
+                    await _context.SaveChangesAsync();
+                    if (_seedCount + dbCount >= _maxSeedCount)
+                    {
+                        if (_verboseLogging)
+                            Console.WriteLine(
+                                $"PaymentDBSeeder: SeedRandomDataAsync reached max seed count of {_maxSeedCount}"
+                            );
+                        break;
+                    }
+                }
             }
             catch (Exception e)
             {
@@ -216,7 +224,7 @@ namespace OgrenciAidatSistemi.Data.DBSeeders
                 foreach (var payment in _seedData)
                 {
                     Console.WriteLine(
-                        $"PaymentDBSeeder: AfterSeedDataAsync {payment.StudentId} {payment.Amount} {payment.PaymentMethod}"
+                        $"PaymentDBSeeder: AfterSeedDataAsync {payment.Student?.StudentId} {payment.Amount} {payment.PaymentMethod}"
                     );
                 }
             }
@@ -274,7 +282,7 @@ namespace OgrenciAidatSistemi.Data.DBSeeders
                 {
                     if (_verboseLogging)
                         Console.WriteLine(
-                            $"PaymentDBSeeder: AfterSeedDataAsync {payment.StudentId} {payment.Amount} {payment.PaymentMethod}"
+                            $"PaymentDBSeeder: AfterSeedDataAsync {payment.Student?.StudentId} {payment.Amount} {payment.PaymentMethod}"
                         );
                 }
             }
@@ -296,14 +304,6 @@ namespace OgrenciAidatSistemi.Data.DBSeeders
 
             if (entity.Receipt == null)
                 throw new Exception("PaymentDBSeeder: SeedEntityAsync entity.Receipt is null");
-
-            var dbStudent = await _context
-                .Students.Where(s => s.StudentId == entity.Student.StudentId)
-                .FirstOrDefaultAsync();
-            if (dbStudent != null)
-            {
-                entity.Student = dbStudent;
-            }
 
             entity.PaymentPeriode.WorkYear.School = entity.Student.School;
             entity.PaymentPeriode.WorkYear.PaymentPeriods = new HashSet<PaymentPeriode>
@@ -340,7 +340,7 @@ namespace OgrenciAidatSistemi.Data.DBSeeders
 
             if (_verboseLogging)
                 Console.WriteLine(
-                    $"PaymentDBSeeder: SeedEntityAsync {entity.StudentId} {entity.Amount} {entity.PaymentMethod}"
+                    $"PaymentDBSeeder: SeedEntityAsync {entity.Student?.StudentId} {entity.Amount} {entity.PaymentMethod}"
                 );
 
             try

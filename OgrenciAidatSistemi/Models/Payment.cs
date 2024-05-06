@@ -13,6 +13,15 @@ namespace OgrenciAidatSistemi.Models
         Check
     }
 
+    public enum PaymentStatus
+    {
+        Paid,
+        Unpaid,
+
+        Verified,
+        Partial
+    }
+
     public abstract class Payment : IBaseDbModel, ISearchableModel
     {
         public int Id { get; set; }
@@ -20,8 +29,6 @@ namespace OgrenciAidatSistemi.Models
         public DateTime UpdatedAt { get; set; }
 
         public required Student? Student { get; set; }
-        public int StudentId { get; set; }
-
         public DateTime PaymentDate { get; set; }
         public PaymentMethod PaymentMethod { get; set; }
 
@@ -30,15 +37,25 @@ namespace OgrenciAidatSistemi.Models
 
         public decimal Amount { get; set; }
 
-        public bool isVerified { get; set; }
+        public bool IsVerified => Status == PaymentStatus.Verified;
 
-        public FilePath Receipt { get; set; }
+        public PaymentStatus Status { get; set; }
+
+        public FilePath? Receipt { get; set; }
 
         public static ModelSearchConfig SearchConfig =>
             new ModelSearchConfig(
                 PaymentSearchConfig.AllowedFieldsForSearch,
                 PaymentSearchConfig.AllowedFieldsForSort
             );
+
+        public Payment()
+        {
+            CreatedAt = DateTime.Now;
+            UpdatedAt = DateTime.Now;
+            PaymentDate = DateTime.Now;
+            Status = PaymentStatus.Unpaid; // default status
+        }
 
         // to json
         public string ToJson()
@@ -61,38 +78,6 @@ namespace OgrenciAidatSistemi.Models
         public decimal Amount { get; set; }
         public DateTime CreatedAt { get; set; }
         public DateTime UpdatedAt { get; set; }
-    }
-
-    public class PaymentPeriode : IBaseDbModel
-    {
-        public int Id { get; set; }
-        public DateTime CreatedAt { get; set; }
-        public DateTime UpdatedAt { get; set; }
-
-        public DateTime StartDate { get; set; }
-        public DateTime EndDate { get; set; }
-        public decimal TotalAmount { get; set; }
-
-        // public required School School { get; set; } is already linked via Payment and WorkYear
-        public required ISet<Payment> Payments { get; set; }
-        public required WorkYear WorkYear { get; set; }
-        public Occurrence Occurrence { get; set; }
-    }
-
-    public enum Occurrence
-    {
-        Monthly,
-        Yearly,
-        Weekly,
-        Daily
-    }
-
-    public class PaymentPeriodeView
-    {
-        public DateTime StartDate { get; set; }
-        public DateTime EndDate { get; set; }
-        public decimal Amount { get; set; }
-        public Occurrence Occurence { get; set; }
     }
 
     public class BankPayment : Payment
@@ -177,7 +162,7 @@ namespace OgrenciAidatSistemi.Models
             "Amount",
             "CreatedAt",
             "UpdatedAt",
-            "isVerified"
+            "Status"
         };
     }
 }
