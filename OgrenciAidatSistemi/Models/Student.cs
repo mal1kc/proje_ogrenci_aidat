@@ -43,6 +43,7 @@ namespace OgrenciAidatSistemi.Models
                 UpdatedAt = this.UpdatedAt,
                 Payments = ignoreBidirectNav ? null : this.Payments?.ToHashSet(),
                 Grades = ignoreBidirectNav ? null : this.Grades?.ToHashSet(),
+                ContactInfo = ContactInfo?.ToView(),
             };
         }
 
@@ -112,6 +113,9 @@ namespace OgrenciAidatSistemi.Models
         public int SchoolId { get; set; }
         public SchoolView? School { get; set; }
         public string StudentId { get; set; }
+
+        public ContactInfoView ContactInfo { get; set; }
+
         public int GradLevel { get; set; }
         public bool IsGraduated { get; set; }
 

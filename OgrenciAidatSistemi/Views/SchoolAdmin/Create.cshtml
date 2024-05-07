@@ -3,53 +3,170 @@
     ViewData["Title"] = "Create School Admin";
 }
 
-<h1>Create School Admin</h1>
+@using OgrenciAidatSistemi.Models
+
+<h1 class="mb-4">Create School Admin</h1>
 
 <partial name="_ValidationScriptsPartial" />
 
-<form asp-action="Create" method="post">
+<form asp-action="Create" method="post" class="needs-validation" novalidate>
     @Html.AntiForgeryToken() <!-- Add anti-forgery token -->
 
-    <div class="form-group">
-        <label asp-for="Password"></label>
-        <input asp-for="Password" type="password" class="form-control" />
-        <span asp-validation-for="Password" class="text-danger"></span>
-    </div>
-    <div class="form-group">
-        <label asp-for="PasswordVerify"></label>
-        <input asp-for="PasswordVerify" type="password" class="form-control" />
-        <span asp-validation-for="PasswordVerify" class="text-danger"></span>
-    </div>
-    <div class="form-group">
-        <label asp-for="FirstName"></label>
-        <input asp-for="FirstName" class="form-control" />
-        <span asp-validation-for="FirstName" class="text-danger"></span>
-    </div>
-    <div class="form-group">
-        <label asp-for="LastName"></label>
-        <input asp-for="LastName" class="form-control" />
-        <span asp-validation-for="LastName" class="text-danger"></span>
-    </div>
-    <div class="form-group">
-        <label for="SchoolId">School:</label>
-        <select asp-for="SchoolId" class="form-control" id="SchoolId" name="SchoolId">
-            <option value="">Select School</option>
-            @foreach (var School in ViewBag.Schools)
-            {
-                <option value="@School.Id">@School.Name</option>
-            }
-        </select>
-    </div>
-    <div class="form-group">
-        <label asp-for="EmailAddress"></label>
-        <input asp-for="EmailAddress" class="form-control" />
-        <span asp-validation-for="EmailAddress" class="text-danger"></span>
-    </div>
-    @if (!ViewData.ModelState.IsValid)
-    {
-        <div class="alert alert-danger" role="alert">
-            <strong>Error:</strong> Please fix the errors above.
+    <div class="mb-3">
+        <h2 class="mb-3">School Admin Information</h2>
+        <div class="mb-3">
+            <label for="SchoolId" class="form-label">School:</label>
+            <select asp-for="SchoolId" class="form-select" id="SchoolId" name="SchoolId">
+                <option value="">Select School</option>
+                @foreach (var School in ViewBag.Schools)
+
+                {
+                    <option value="@School.Id">@School.Name</option>
+                }
+            </select>
+            <div class="invalid-feedback">
+                Please select a school.
+            </div>
         </div>
-    }
-    <button type="submit" class="btn btn-primary">Create</button>
+
+        <div class="mb-3">
+            <label asp-for="EmailAddress" class="form-label">Email Address</label>
+            <input asp-for="EmailAddress" class="form-control" />
+            <div class="invalid-feedback">
+                Please enter a valid email address.
+            </div>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="FirstName" class="form-label">First Name</label>
+            <input asp-for="FirstName" class="form-control" />
+            <div class="invalid-feedback">
+                Please enter a first name.
+            </div>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="LastName" class="form-label">Last Name</label>
+            <input asp-for="LastName" class="form-control" />
+            <div class="invalid-feedback">
+                Please enter a last name.
+            </div>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="Password" class="form-label">Password</label>
+            <input asp-for="Password" class="form-control" type="password" />
+            <div class="invalid-feedback">
+                Please enter a password.
+            </div>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="PasswordVerify" class="form-label">Confirm Password</label>
+            <input asp-for="PasswordVerify" class="form-control" type="password" />
+            <div class="invalid-feedback">
+                Please confirm the password.
+            </div>
+        </div>
+
+        @if (!ViewData.ModelState.IsValid)
+
+        {
+            <div class="alert alert-danger" role="alert">
+                <strong>Error:</strong> Please fix the errors above.
+            </div>
+        }
+    </div>
+    <h2 class="mb-3">Contact Information</h2>
+    <div class="mb-3">
+        <div class="mb-3">
+            <label asp-for="ContactInfo.PhoneNumber" class="form-label">Phone Number</label>
+            <input asp-for="ContactInfo.PhoneNumber" class="form-control" placeholder="555 555 555" required />
+            <div class="invalid-feedback">
+                Please enter a valid phone number.
+            </div>
+        </div>
+        <div class="mb-2">
+            <label asp-for="ContactInfo.Addresses" class="form-label">Address</label>
+
+
+            <div id="addressContainer">
+                <div class="mb-3">
+                    <label class="form-label">Address 1</label>
+                    <input name="Addresses[0]" class="form-control" required />
+                    <div class="invalid-feedback">
+                        Please enter a valid address.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <button type="button" id="addAddress" class="btn btn-secondary mb-3">Add Address</button>
+
+
+    </div>
+
+
+
+
+
+    <button type="submit" class="btn btn-primary me-2">Create</button>
+    <a asp-action="List" class="btn btn-secondary">Return to List</a>
 </form>
+
+@section Scripts {
+    <script>
+  $(document).ready(function () {
+            var addressIndex = 1;
+
+            $('#addAddress').click(function () {
+                $('#addressContainer').append(`
+                    <div class="mb-3">
+                        <label class="form-label">Address ${addressIndex + 1}</label>
+                        <input name="Addresses[${addressIndex}]" class="form-control" required />
+                        <button type="button" class="btn btn-danger btn-sm removeAddress float-end">Remove</button>
+                        <div class="invalid-feedback">
+                            Please enter a valid address.
+                        </div>
+                    </div>
+                `);
+
+                addressIndex++;
+                updateLabels();
+            });
+
+            $('#addressContainer').on('click', '.removeAddress', function () {
+                $(this).parent().remove();
+                updateLabels();
+            });
+
+            function updateLabels() {
+                $('#addressContainer .form-label').each(function (index) {
+                    $(this).text(`Address ${index + 1}`);
+                });
+            }
+        })
+    </script>
+    <script>
+        // Bootstrap 5 form validation script
+        (function () {
+            'use strict'
+
+            // Fetch all the forms we want to apply custom Bootstrap validation styles to
+            var forms = document.querySelectorAll('.needs-validation')
+
+            // Loop over them and prevent submission
+            Array.prototype.slice.call(forms)
+                .forEach(function (form) {
+                    form.addEventListener('submit', function (event) {
+                        if (!form.checkValidity()) {
+                            event.preventDefault()
+                            event.stopPropagation()
+                        }
+
+                        form.classList.add('was-validated')
+                    }, false)
+                })
+        })()
+    </script>
+}

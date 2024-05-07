@@ -143,17 +143,7 @@ namespace OgrenciAidatSistemi.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize(Roles = Configurations.Constants.userRoles.SiteAdmin)]
-        public async Task<IActionResult> Create(
-            [Bind(
-                "EmailAddress",
-                "Password",
-                "PasswordVerify",
-                "SchoolId",
-                "FirstName",
-                "LastName"
-            )]
-                StudentView studentView
-        )
+        public async Task<IActionResult> Create(StudentView studentView)
         {
             ViewBag.Schools = _dbContext.Schools;
             UserViewValidationResult validationResult = studentView.ValidateFieldsCreate(
@@ -242,6 +232,35 @@ namespace OgrenciAidatSistemi.Controllers
             // Succes state remove schools from viewbag
             ViewBag.Schools = null;
             return RedirectToAction("List");
+        }
+
+        [Authorize(Roles = Configurations.Constants.userRoles.SiteAdmin)]
+        public async Task<IActionResult> Details(int? id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            if (_dbContext.Students == null)
+            {
+                _dbContext.Students = _dbContext.Set<Student>();
+            }
+
+            var student = await _dbContext
+                .Students.Include(s => s.School)
+                .Include(s => s.Payments)
+                .Include(s => s.Grades)
+                .Include(s => s.ContactInfo)
+                .Where(e => e.Id == id)
+                .FirstOrDefaultAsync();
+
+            if (student == null)
+            {
+                return NotFound();
+            }
+
+            return View(student.ToView());
         }
 
         [Authorize(Roles = Configurations.Constants.userRoles.SiteAdmin)]

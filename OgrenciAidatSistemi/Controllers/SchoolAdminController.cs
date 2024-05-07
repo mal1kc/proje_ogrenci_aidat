@@ -145,23 +145,14 @@ namespace OgrenciAidatSistemi.Controllers
         public IActionResult Create()
         {
             ViewBag.Schools = _dbContext.Schools;
-            return View();
+            var scAdminView = new SchoolAdminView { ContactInfo = new ContactInfoView() };
+            return View(scAdminView);
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize(Roles = Configurations.Constants.userRoles.SiteAdmin)]
-        public async Task<IActionResult> Create(
-            [Bind(
-                "EmailAddress",
-                "Password",
-                "PasswordVerify",
-                "SchoolId",
-                "FirstName",
-                "LastName"
-            )]
-                SchoolAdminView scAdminView
-        )
+        public async Task<IActionResult> Create(SchoolAdminView scAdminView)
         {
             ViewBag.Schools = _dbContext.Schools;
             UserViewValidationResult validationResult = scAdminView.ValidateFieldsCreate(
@@ -218,6 +209,12 @@ namespace OgrenciAidatSistemi.Controllers
                     School = school,
                     CreatedAt = DateTime.Now,
                     UpdatedAt = DateTime.Now
+                };
+                newSchAdmin.ContactInfo = new ContactInfo
+                {
+                    Email = newSchAdmin.EmailAddress,
+                    PhoneNumber = scAdminView.ContactInfo.PhoneNumber,
+                    Addresses = scAdminView.ContactInfo.Addresses
                 };
                 _logger.LogDebug("User {0} created", scAdminView.EmailAddress);
                 if (_dbContext.SchoolAdmins == null)
@@ -301,6 +298,7 @@ namespace OgrenciAidatSistemi.Controllers
                 return NotFound();
             var siteAdmin = await _dbContext
                 .SchoolAdmins.Include(sa => sa.School)
+                .Include(sa => sa.ContactInfo)
                 .Where(sa => sa.Id == id)
                 .FirstOrDefaultAsync();
             if (siteAdmin == null)

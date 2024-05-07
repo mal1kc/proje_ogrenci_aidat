@@ -8,7 +8,7 @@ namespace OgrenciAidatSistemi.Models
     {
         public int Id { get; set; }
         public String? PhoneNumber { get; set; }
-        public ISet<String>? Addresses { get; set; }
+        public IList<String>? Addresses { get; set; }
         public required string Email { get; set; }
         public DateTime CreatedAt { get; set; }
         public DateTime UpdatedAt { get; set; }
@@ -30,6 +30,29 @@ namespace OgrenciAidatSistemi.Models
             string regex = Constants.PhoneNumberRegEx;
             return Regex.IsMatch(phoneNumber, regex);
         }
+
+        public ContactInfoView ToView()
+        {
+            return new ContactInfoView
+            {
+                Id = Id,
+                PhoneNumber = PhoneNumber,
+                Addresses = Addresses,
+                Email = Email,
+                CreatedAt = CreatedAt,
+                UpdatedAt = UpdatedAt
+            };
+        }
+    }
+
+    public class ContactInfoView : IBaseDbModelView
+    {
+        public int Id { get; set; }
+        public String? PhoneNumber { get; set; }
+        public IList<String>? Addresses { get; set; }
+        public string? Email { get; set; }
+        public DateTime CreatedAt { get; set; }
+        public DateTime UpdatedAt { get; set; }
     }
 
     public class ContactSearchConfig

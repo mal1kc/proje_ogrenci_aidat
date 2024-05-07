@@ -130,7 +130,6 @@ namespace OgrenciAidatSistemi.Data
                     entity.School = dbSchool;
                 }
                 entity.School.UpdatedAt = DateTime.Now;
-                await _context.Schools.AddAsync(entity.School);
             }
             await _context.SchoolAdmins.AddAsync(entity);
             _seedCount++;

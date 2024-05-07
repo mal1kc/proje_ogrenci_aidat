@@ -53,22 +53,28 @@ namespace OgrenciAidatSistemi.Data
         {
             if (_verboseLogging)
             {
-                Console.WriteLine("StudentDBSeeder: AfterSeedDataAsync");
-                Console.WriteLine("We have seed data:");
-                foreach (var student in _seedData)
-                {
-                    Console.WriteLine(
-                        $"StudentDBSeeder: AfterSeedDataAsync StudentId: {student.StudentId}"
-                    );
-                }
+                var students = await _context
+                    .Students.Where(s => s.CreatedAt > DateTime.Now.AddMinutes(-3))
+                    .ToListAsync();
+                Console.WriteLine(
+                    $"StudentDBSeeder: AfterSeedDataAsync students: \n we have {students.Count} added in last 3 minutes"
+                );
             }
 
             foreach (var student in _seedData)
             {
-                if (!await _context.Students.AnyAsync(s => s.StudentId == student.StudentId))
+                // check they are in the db by name , lastname and gradlevel
+                // not email and studentid because they are generated randomly
+                var dbStudent = await _context.Students.FirstOrDefaultAsync(s =>
+                    s.FirstName == student.FirstName
+                    && s.LastName == student.LastName
+                    && s.GradLevel == student.GradLevel
+                );
+
+                if (dbStudent == null)
                 {
                     throw new Exception(
-                        $"StudentDBSeeder: AfterSeedDataAsync StudentId: {student.StudentId} not found"
+                        $"StudentDBSeeder: AfterSeedDataAsync student: {student.FirstName} {student.LastName} {student.GradLevel} not found in db"
                     );
                 }
             }

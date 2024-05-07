@@ -53,6 +53,8 @@ namespace OgrenciAidatSistemi.Models
                 EmailAddress = this.EmailAddress,
                 CreatedAt = this.CreatedAt,
                 UpdatedAt = this.UpdatedAt,
+                ContactInfo =
+                    this.ContactInfo?.ToView() ?? new ContactInfoView { Email = this.EmailAddress }
             };
         }
     }
@@ -61,6 +63,8 @@ namespace OgrenciAidatSistemi.Models
     {
         public SchoolView? SchoolView { get; set; }
         public int SchoolId { get; set; }
+
+        public ContactInfoView ContactInfo { get; set; }
 
         public override bool CheckUserExists(AppDbContext dbctx)
         {

@@ -5,9 +5,6 @@ using OgrenciAidatSistemi.Models;
 namespace OgrenciAidatSistemi.Data.DBSeeders
 {
 #warning "PaymentDBSeeder is not fully implemented"
-    // TODO: impelement GetSeedData, SeedDataAsync, SeedRandomDataAsync
-    // TODO: rewrite dependent dbseeders to some of seeders must have dependencies to other seeders to generate data
-
     public class PaymentDBSeeder : DbSeeder<AppDbContext, Payment>
     {
         public PaymentDBSeeder(AppDbContext context, IConfiguration configuration, ILogger logger)

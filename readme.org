@@ -32,10 +32,70 @@
     + [ ] add payment panel for student
     + [ ] crete paymentperiod service for auto create payments for students and save to db 
     + [ ] add workyear management panel for sch admin
-    + [ ] add paymentperiod management panel for sch admin (create, edit, delete)
+    + [ ] add paymentperiod management panel for sch admin (create, edit, delete) ++
+    + [ ] add all models to delete , edit , create panel for site admin (some of them must be debug only) +++
+        > [ ] student
+            > [ ] create
+            > [ ] edit
+            > [ ] delete
+            > [X] detail
+            > [X] list
+        > [ ] payment
+            > [ ] create
+            > [ ] edit
+            > [ ] detail
+            > [ ] delete
+            > [x] list
+        > [ ] paymentperiod
+            > [ ] create
+            > [ ] edit
+            > [ ] delete
+            > [ ] detail
+            > [x] list
+        > [ ] workyear
+            > [ ] create
+            > [ ] edit
+            > [ ] delete
+            > [ ] detail
+            > [ ] list
+        > [ ] student
+            > [ ] create
+            > [ ] edit
+            > [ ] delete
+            > [ ] detail
+            > [x] list
+        > [ ] school
+            > [ ] create
+            > [ ] edit
+            > [ ] delete
+            > [ ] detail
+            > [x] list
+        > [ ] schooladmin
+            > [x] create
+            > [ ] edit
+            > [x] delete
+            > [X] detail
+            > [x] list
+        > [ ] contactınfo
+            > [ ] create
+            > [ ] edit
+            > [ ] delete
+            > [ ] detail
+            > [ ] list
+        > [ ] filepath
+            > [ ] create
+            > [ ] edit
+            > [ ] delete
+            > [ ] detail
+            > [ ] list
+        > [X] grade not necessary
+
+ 
 
 * todo , maybe list
 
+    + [ ] move partial views to shared folder + add partial views for all possible models,
+            \ add them to partialview controller or their model controller
     + [ ] öğrenci id ile giriş yapma 
     + [ ] student email generator
     + [ ] add predefined search filters linq queries and save as search config ( rewrite most of ModelQueryableHelper)

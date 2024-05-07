@@ -18,7 +18,7 @@ namespace OgrenciAidatSistemi.Data
 
         protected static ILogger _logger;
 
-        protected int _maxSeedCount = 100;
+        protected int _maxSeedCount = 10;
 
         protected int _seedCount = 0; // to keep track of the number of entities seeded
 

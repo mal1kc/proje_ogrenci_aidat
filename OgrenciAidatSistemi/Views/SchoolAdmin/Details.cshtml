@@ -42,6 +42,18 @@
             <dt class="col-sm-3">Updated At:</dt>
             <dd class="col-sm-9">@Model.UpdatedAt</dd>
         </dl>
+        <dt class="col-sm-3">Contact Info:</dt>
+        <dd class="col-sm-9"> 
+            @if (Model.ContactInfo != null)
+            {
+                <partial name="_ContactInfoPartial" model="Model.ContactInfo" />
+            }
+            else
+            {
+                <p>Contact Info not available</p>
+            }
+        </dd>
+
         <hr>
 
         <!-- Edit and Delete buttons -->
