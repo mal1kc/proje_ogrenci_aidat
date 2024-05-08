@@ -471,5 +471,21 @@ namespace OgrenciAidatSistemi.Controllers
         {
             return _dbContext.Students.Any(e => e.Id == id);
         }
+
+        // _StudentDetailPartial with IEnumarable<StudentView>
+        public IActionResult _StudentDetailPartial(IEnumerable<StudentView?>? model)
+        {
+            return PartialView("_StudentDetailPartial", model);
+        }
+
+        // _StudentDetailPartial with IEnumarable<Student>
+        public IActionResult _StudentDetailPartial(IEnumerable<Student?>? model)
+        {
+            if (model == null)
+            {
+                return PartialView("_StudentDetailPartial", null);
+            }
+            return PartialView("_StudentDetailPartial", model.Select(s => s?.ToView()));
+        }
     }
 }

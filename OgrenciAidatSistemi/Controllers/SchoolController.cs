@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using OgrenciAidatSistemi.Data;
 using OgrenciAidatSistemi.Helpers;
 using OgrenciAidatSistemi.Models;
@@ -66,8 +67,49 @@ namespace OgrenciAidatSistemi.Controllers
         [Authorize(Roles = Configurations.Constants.userRoles.SiteAdmin)]
         public IActionResult Create()
         {
-            ViewBag.Schools = _dbContext.Schools;
             return View();
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [Authorize(Roles = Configurations.Constants.userRoles.SiteAdmin)]
+        public async Task<IActionResult> Create(SchoolView schoolView)
+        {
+            if (ModelState.IsValid)
+            {
+                if (schoolView == null)
+                {
+                    _logger.LogError("SchoolView is null");
+                    return NotFound();
+                }
+
+                if (schoolView.Name == null)
+                {
+                    _logger.LogError("SchoolView.Name is null");
+                    ViewData["Error"] = "School name cannot be empty";
+                    return RedirectToAction("Create");
+                }
+
+                if (_dbContext.Schools == null)
+                {
+                    _logger.LogError("Schools table is null");
+                    _dbContext.Schools = _dbContext.Set<School>();
+                }
+
+                var school = new School
+                {
+                    Name = schoolView.Name,
+                    Students = new HashSet<Student>(),
+                    CreatedAt = DateTime.Now,
+                    UpdatedAt = DateTime.Now
+                };
+                _dbContext.Schools.Add(school);
+                await _dbContext.SaveChangesAsync();
+
+                return RedirectToAction("List");
+            }
+
+            return View(schoolView);
         }
 
         [
@@ -104,7 +146,6 @@ namespace OgrenciAidatSistemi.Controllers
 
 
 
-#warning This method is not tested
         [Authorize(
             Roles = Configurations.Constants.userRoles.SchoolAdmin
                 + ","
@@ -114,14 +155,9 @@ namespace OgrenciAidatSistemi.Controllers
         {
             if (id == null || id == 0 || _dbContext.Schools == null)
                 return NotFound();
-
-            if (id == null || id == 0 || _dbContext.Schools == null)
-                return NotFound();
-
             // if is schadmin check schadmin's school then continue
             // else if site admin continue
             // else return unauthorized
-            //
             School? school = null;
 
             var signedUser = await _userService.GetCurrentUser();
@@ -130,20 +166,31 @@ namespace OgrenciAidatSistemi.Controllers
 
             _logger.LogInformation("Signed user: {0}, {1}", signedUser.Id, signedUser.Role);
 
+            // TODO: fix repeated code
+
             switch (signedUser.Role)
             {
                 case UserRole.SchoolAdmin:
-                    school = await _dbContext.Schools.Where(s => s.Id == id).FirstOrDefaultAsync();
+                    school = await _dbContext
+                        .Schools.Include(s => s.Students)
+                        .Include(s => s.SchoolAdmins)
+                        .Where(s => s.Id == id)
+                        .FirstOrDefaultAsync();
                     if (school == null)
                         return NotFound();
                     if (school.Id != id)
                         return Unauthorized();
                     break;
                 case UserRole.SiteAdmin:
-                    school = await _dbContext.Schools.Where(s => s.Id == id).FirstOrDefaultAsync();
+                    school = await _dbContext
+                        .Schools.Include(s => s.Students)
+                        .Include(s => s.SchoolAdmins)
+                        .Where(s => s.Id == id)
+                        .FirstOrDefaultAsync();
                     if (school == null)
                         return NotFound();
                     break;
+                // other roles are not allowed
                 default:
                     return Unauthorized();
             }

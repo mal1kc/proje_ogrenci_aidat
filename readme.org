@@ -34,12 +34,6 @@
     + [ ] add workyear management panel for sch admin
     + [ ] add paymentperiod management panel for sch admin (create, edit, delete) ++
     + [ ] add all models to delete , edit , create panel for site admin (some of them must be debug only) +++
-        > [ ] student
-            > [ ] create
-            > [ ] edit
-            > [ ] delete
-            > [X] detail
-            > [X] list
         > [ ] payment
             > [ ] create
             > [ ] edit
@@ -62,13 +56,13 @@
             > [ ] create
             > [ ] edit
             > [ ] delete
-            > [ ] detail
+            > [x] detail
             > [x] list
         > [ ] school
-            > [ ] create
+            > [x] create
             > [ ] edit
             > [ ] delete
-            > [ ] detail
+            > [x] detail
             > [x] list
         > [ ] schooladmin
             > [x] create

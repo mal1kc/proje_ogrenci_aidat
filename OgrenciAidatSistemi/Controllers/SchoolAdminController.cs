@@ -1,3 +1,4 @@
+using System.Collections;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -304,6 +305,30 @@ namespace OgrenciAidatSistemi.Controllers
             if (siteAdmin == null)
                 return NotFound();
             return View(siteAdmin.ToView());
+        }
+
+        // partial _SchoolAdminList
+        //  only accessible by site admin, school admin
+        [Authorize(
+            Roles = Configurations.Constants.userRoles.SiteAdmin
+                + ","
+                + Configurations.Constants.userRoles.SchoolAdmin
+        )]
+        public IActionResult _SchoolAdminListPartial(IEnumerable<SchoolAdminView>? schoolAdmins)
+        {
+            return PartialView(schoolAdmins);
+        }
+
+        // partial _SchoolAdminList
+        [Authorize(
+            Roles = Configurations.Constants.userRoles.SiteAdmin
+                + ","
+                + Configurations.Constants.userRoles.SchoolAdmin
+        )]
+        public IActionResult _SchoolAdminListPartial(IEnumerable<SchoolAdmin>? schoolAdmins)
+        {
+            var schoolAdminViews = schoolAdmins?.Select(sa => sa.ToView()).AsEnumerable();
+            return PartialView(schoolAdminViews);
         }
     }
 }

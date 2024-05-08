@@ -49,7 +49,7 @@ namespace OgrenciAidatSistemi.Models
                 Id = this.Id,
                 FirstName = this.FirstName,
                 LastName = this.LastName,
-                SchoolView = ignoreBidirectNav ? null : this.School.ToView(ignoreBidirectNav: true),
+                School = ignoreBidirectNav ? null : this.School.ToView(ignoreBidirectNav: true),
                 EmailAddress = this.EmailAddress,
                 CreatedAt = this.CreatedAt,
                 UpdatedAt = this.UpdatedAt,
@@ -61,7 +61,7 @@ namespace OgrenciAidatSistemi.Models
 
     public class SchoolAdminView : UserView
     {
-        public SchoolView? SchoolView { get; set; }
+        public SchoolView? School { get; set; }
         public int SchoolId { get; set; }
 
         public ContactInfoView ContactInfo { get; set; }

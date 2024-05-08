@@ -1,0 +1,113 @@
+@model StudentView
+
+<div class="container mt-5">
+    <div class="card">
+        <div class="card-body">
+            <h5 class="card-title bg-light p-2">Student</h5>
+
+            <dl class="row">
+                <dt class="col-sm-2 text-nowrap">
+                    @Html.DisplayNameFor(model => model.Id)
+                </dt>
+                <dd class="col-sm-10">
+                    @Html.DisplayFor(model => model.Id)
+                </dd>
+
+                <dt class="col-sm-2 text-nowrap">
+                    @Html.DisplayNameFor(model => model.StudentId)
+                </dt>
+                <dd class="col-sm-10">
+                    @Html.DisplayFor(model => model.StudentId)
+                </dd>
+
+
+                <dt class="col-sm-2 text-nowrap">
+                    @Html.DisplayNameFor(model => model.FirstName)
+                </dt>
+                <dd class="col-sm-10">
+                    @Html.DisplayFor(model => model.FirstName)
+                </dd>
+
+                <dt class="col-sm-2 text-nowrap">
+                    @Html.DisplayNameFor(model => model.LastName)
+                </dt>
+                <dd class="col-sm-10">
+                    @Html.DisplayFor(model => model.LastName)
+                </dd>
+
+            </dl>
+
+                @if (Model.School != null)
+                {
+            <h4 class="mt-5">School</h4>
+            <div class="mt-3">
+                    <dd class="col-sm-10 text-muted">
+                        @Html.DisplayFor(model => model.School.Name)
+                    </dd>
+            </div>
+                }
+                
+
+
+            @if (Model.Payments != null)
+            {
+                <h4 class="mt-5">Payments</h4>
+                <div class="mt-3">
+                    <dd>
+                        student has
+                        @if (Model.Payments != null)
+                        {
+                            <b> @Model.Payments.Count()</b>
+                            <p> payments in total last payment is created at </p> <b> @Model.Payments.Last().CreatedAt</b>
+                            <b> @Model.Payments.Last().CreatedAt</b>
+                        }
+                    </dd>
+
+                </div>
+            }
+
+
+                                @if (Model.Grades != null)
+                    {
+    <h4 class="mt-5">Grades</h4>
+                <div class="mt-3">
+
+                        <dd>
+                            student has
+                            @if (Model.Grades != null)
+                            {
+                                <b> @Model.Grades.Count()</b>
+                                <p> grades in total. </p>
+                            }
+                        </dd>
+
+                </div>
+                    }
+
+                                        @if (Model.ContactInfo != null)
+                        {
+    <h4 class="mt-5">Contact Info</h4>
+                <div class="mt-3">
+                    <dd>
+
+                        <dt> @Html.DisplayNameFor(model => model.ContactInfo.PhoneNumber)</dt>
+                        <dd> @Html.DisplayFor(model => model.ContactInfo.PhoneNumber)</dd>
+                        <br>
+                        <dt> @Html.DisplayNameFor(model => model.ContactInfo.Email)</dt>
+                        <dd> @Html.DisplayFor(model => model.ContactInfo.Email)</dd>
+
+                    </dd>
+                </div>
+                        }
+                        
+
+
+            </div>
+        </div>
+
+
+
+        <p class="mt-5">
+            <a href="@Url.Action("List", "Student")" class="btn btn-primary">Show All Students</a>
+        </p>
+    </div>

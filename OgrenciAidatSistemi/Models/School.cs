@@ -31,6 +31,9 @@ namespace OgrenciAidatSistemi.Models
                     : this
                         .SchoolAdmins?.Select(sa => sa.ToView(ignoreBidirectNav: true))
                         .ToHashSet(),
+                Students = ignoreBidirectNav
+                    ? null
+                    : this.Students?.Select(s => s.ToView(ignoreBidirectNav: true)).ToHashSet(),
                 CreatedAt = this.CreatedAt,
                 UpdatedAt = this.UpdatedAt
             };
@@ -42,8 +45,16 @@ namespace OgrenciAidatSistemi.Models
         public int Id { get; set; }
         public string? Name { get; set; }
         public ISet<SchoolAdminView>? SchoolAdmins { get; set; }
+
+        public ISet<StudentView>? Students { get; set; }
         public DateTime CreatedAt { get; set; }
         public DateTime UpdatedAt { get; set; }
+
+        public School ToModel(bool ignoreBidirectNav = false)
+        {
+            // TODO: Implement ToModel to all view models for more manageable code
+            throw new NotImplementedException();
+        }
     }
 
     public static class SchoolSearchConfig

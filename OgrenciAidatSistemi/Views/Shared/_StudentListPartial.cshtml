@@ -1,0 +1,24 @@
+@model IEnumerable<StudentView?>?
+
+@{
+    int showcount = ViewBag.showCount ?? 5;
+    int counter = 0;
+}
+
+@if (Model != null)
+{
+    @foreach (var item in Model)
+    {
+        if (counter > showcount)
+            break;
+        if (item == null)
+            continue;
+
+        <partial name="_StudentDetailPartial" model="item" />
+        counter++;
+    }
+}
+else
+{
+    <p> cannot get the students</p>
+}

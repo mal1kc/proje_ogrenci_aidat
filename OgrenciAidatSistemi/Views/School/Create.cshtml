@@ -1,0 +1,60 @@
+@model SchoolView
+@{
+    ViewData["Title"] = "Create School Admin";
+}
+
+@using OgrenciAidatSistemi.Models
+
+<h1 class="mb-4">Create School</h1>
+
+<partial name="_ValidationScriptsPartial" />
+
+<form asp-action="Create" method="post" class="needs-validation" novalidate>
+    @Html.AntiForgeryToken() <!-- Add anti-forgery token -->
+
+    <div class="mb-3">
+        <div class="mb-3">
+            <label asp-for="Name" class="form-label">Name</label>
+            <input asp-for="Name" class="form-control" />
+            <div class="invalid-feedback">
+                Please enter a name.
+            </div>
+        </div>
+
+        @if (!ViewData.ModelState.IsValid)
+
+        {
+            <div class="alert alert-danger" role="alert">
+                <strong>Error:</strong> Please fix the errors above.
+            </div>
+        }
+
+
+        <button type="submit" class="btn btn-primary me-2">Create</button>
+        <a asp-action="List" class="btn btn-secondary">Return to List</a>
+</form>
+
+@section Scripts {
+    <script>
+        // Bootstrap 5 form validation script
+        (function () {
+            'use strict'
+
+            // Fetch all the forms we want to apply custom Bootstrap validation styles to
+            var forms = document.querySelectorAll('.needs-validation')
+
+            // Loop over them and prevent submission
+            Array.prototype.slice.call(forms)
+                .forEach(function (form) {
+                    form.addEventListener('submit', function (event) {
+                        if (!form.checkValidity()) {
+                            event.preventDefault()
+                            event.stopPropagation()
+                        }
+
+                        form.classList.add('was-validated')
+                    }, false)
+                })
+        })()
+    </script>
+}

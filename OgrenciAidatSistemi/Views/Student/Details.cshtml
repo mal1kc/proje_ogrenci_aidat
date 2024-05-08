@@ -8,14 +8,14 @@
             <h4 class="card-title">Student</h4>
             <hr />
             <dl class="row">
-                <dt class="col-sm-2">
+                <dt class="col-sm-2 text-nowrap">
                     @Html.DisplayNameFor(model => model.Id)
                 </dt>
                 <dd class="col-sm-10">
                     @Html.DisplayFor(model => model.Id)
                 </dd>
 
-                <dt class="col-sm-2">
+                <dt class="col-sm-2 text-nowrap">
                     @Html.DisplayNameFor(model => model.StudentId)
                 </dt>
                 <dd class="col-sm-10">
@@ -23,14 +23,14 @@
                 </dd>
 
 
-                <dt class="col-sm-2">
+                <dt class="col-sm-2 text-nowrap">
                     @Html.DisplayNameFor(model => model.FirstName)
                 </dt>
                 <dd class="col-sm-10">
                     @Html.DisplayFor(model => model.FirstName)
                 </dd>
 
-                <dt class="col-sm-2">
+                <dt class="col-sm-2 text-nowrap">
                     @Html.DisplayNameFor(model => model.LastName)
                 </dt>
                 <dd class="col-sm-10">
@@ -42,51 +42,60 @@
     </div>
 
     <h4 class="mt-5">School</h4>
-    @if (Model.School != null)
-    {
-        <partial name="_SchoolViewPartial" model="Model.School" />
-    }
-    else
-    {
-        <p>
-            School not available
-        </p>
-    }
+    <div class="mt-3">
+        @if (Model.School != null)
+        {
+            <partial name="_SchoolViewPartial" model="Model.School" />
+        }
+        else
+        {
+            <p>
+                School not available
+            </p>
+        }
+    </div>
+
     <h4 class="mt-5">Payments</h4>
-    @if (Model.Payments != null)
-    {
-        <partial name="_PaymentHistoryPartial" model="Model.Payments" />
-    }
-    else
-    {
-        <p>
-            Payments not available
-        </p>
-    }
+    <div class="mt-3">
+        @if (Model.Payments != null)
+        {
+            <partial name="_PaymentHistoryPartial" model="Model.Payments" />
+        }
+        else
+        {
+            <p>
+                Payments not available
+            </p>
+        }
+    </div>
     
     <h4 class="mt-5">Grades</h4>
-    @if (Model.Grades != null)
-    {
-        <partial name="_GradesPartial" model="Model.Grades" />
-    }
-    else
-    {
-        <p>
-            Grades not available
-        </p>
-    }
+    <div class="mt-3">
+        @if (Model.Grades != null)
+        {
+            <partial name="_GradesPartial" model="Model.Grades" />
+        }
+        else
+        {
+            <p>
+                Grades not available
+            </p>
+        }
+    </div>
 
     <h4 class="mt-5">Contact Info</h4>
-    @if (Model.ContactInfo != null)
-    {
-        <partial name="_ContactInfoPartial" model="Model.ContactInfo" />
-    }
-    else
-    {
-        <p>
-            Contact Info not available
-        </p>
-    }
+    <div class="mt-3">
+        @if (Model.ContactInfo != null)
+        {
+            <partial name="_ContactInfoPartial" model="Model.ContactInfo" />
+        }
+        else
+        {
+            <p>
+                Contact Info not available
+            </p>
+        }
+    </div>
 
     <p class="mt-5">
         <a href="@Url.Action("Index", "Student")" class="btn btn-primary">Back to List</a>
