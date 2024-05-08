@@ -46,13 +46,22 @@
                     <div class="col-md-6 border-start">
                         <h3 class="mt-5">School Admins</h3>
                         @if (Model.SchoolAdmins == null || Model.SchoolAdmins.Count == 0)
+
+
+
                         {
                             <div class="alert alert-info" role="alert">
                                 No school admins found.
                             </div>
 
                         }
+
+
+
                         else
+
+
+
                         {
                             <div class="table-responsive">
                                 <partial name="_SchoolAdminListPartial" model="Model.SchoolAdmins" />

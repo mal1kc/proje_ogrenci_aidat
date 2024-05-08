@@ -20,6 +20,8 @@
 
                     @if (ViewData["CurrentSearchField"] != null)
 
+
+
                     {
                         <option value='@ViewData["CurrentSearchField"]' selected>@ViewData["CurrentSearchField"]</option>
                     }
@@ -60,6 +62,8 @@
     <tbody>
         @foreach (var item in Model)
 
+
+
         {
             <tr>
                 <td>
@@ -93,9 +97,15 @@
     <ul class="pagination">
         @if (ViewData["CurrentPageIndex"] != null)
 
+
+
         {
 
+
+
             int currentPageIndex = (int)ViewData["CurrentPageIndex"];
+
+
 
             int totalPages = (int)ViewData["TotalPages"];
 
@@ -107,6 +117,8 @@
             </li>
 
             @for (int i = 1; i <= totalPages; i++)
+
+
 
             {
                 <li class="page-item @(i == currentPageIndex ? "active" : "")">

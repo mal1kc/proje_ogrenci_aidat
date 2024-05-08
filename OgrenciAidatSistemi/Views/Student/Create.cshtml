@@ -20,48 +20,49 @@
             }
         </select>
         <div class="invalid-feedback">
-        @Html.ValidationMessageFor(model => model.SchoolId)
-    </div>
-    <div class="mb-3">
-        <label for="FirstName" class="form-label">First Name</label>
-        <input asp-for="FirstName" class="form-control" id="FirstName" required>
-        <div class="invalid-feedback">
-            @Html.ValidationMessageFor(model => model.FirstName)
+            @Html.ValidationMessageFor(model => model.SchoolId)
         </div>
-    </div>
-    <div class="mb-3">        <label for="LastName" class="form-label">Last Name</label>
-        <input asp-for="LastName" class="form-control" id="LastName" required>
-        <div class="invalid-feedback">
-            @Html.ValidationMessageFor(model => model.LastName)
+        <div class="mb-3">
+            <label for="FirstName" class="form-label">First Name</label>
+            <input asp-for="FirstName" class="form-control" id="FirstName" required>
+            <div class="invalid-feedback">
+                @Html.ValidationMessageFor(model => model.FirstName)
+            </div>
         </div>
-    </div>
-    <div class="mb-3">
-        <label for="EmailAddress" class="form-label">Email Address</label>
-        <input asp-for="EmailAddress" class="form-control" id="EmailAddress" required>
-        <div class="invalid-feedback">            @Html.ValidationMessageFor(model => model.EmailAddress)
+        <div class="mb-3"> <label for="LastName" class="form-label">Last Name</label>
+            <input asp-for="LastName" class="form-control" id="LastName" required>
+            <div class="invalid-feedback">
+                @Html.ValidationMessageFor(model => model.LastName)
+            </div>
         </div>
-    </div>
-    <div class="mb-3">
-        <label for="Password" class="form-label">Password</label>
-        <input asp-for="Password" type="password" class="form-control" id="Password" required>
-        <div class="invalid-feedback">
-            @Html.ValidationMessageFor(model => model.Password)
+        <div class="mb-3">
+            <label for="EmailAddress" class="form-label">Email Address</label>
+            <input asp-for="EmailAddress" class="form-control" id="EmailAddress" required>
+            <div class="invalid-feedback"> @Html.ValidationMessageFor(model => model.EmailAddress)
+            </div>
         </div>
-    </div>
-    <div class="mb-3">
-        <label for="PasswordVerify" class="form-label">Verify Password</label>
-        <input asp-for="PasswordVerify" type="password" class="form-control" id="PasswordVerify" required>
-        <div class="invalid-feedback">
-            @Html.ValidationMessageFor(model => model.PasswordVerify)
+        <div class="mb-3">
+            <label for="Password" class="form-label">Password</label>
+            <input asp-for="Password" type="password" class="form-control" id="Password" required>
+            <div class="invalid-feedback">
+                @Html.ValidationMessageFor(model => model.Password)
+            </div>
         </div>
-    </div>
-    
-    @if (!ViewData.ModelState.IsValid)
-    {
-        <div class="alert alert-danger" role="alert"> 
-            <p> <strong>Error:</strong> Please fix the errors above.  </p>
+        <div class="mb-3">
+            <label for="PasswordVerify" class="form-label">Verify Password</label>
+            <input asp-for="PasswordVerify" type="password" class="form-control" id="PasswordVerify" required>
+            <div class="invalid-feedback">
+                @Html.ValidationMessageFor(model => model.PasswordVerify)
+            </div>
         </div>
-    }
-    <button type="submit" class="btn btn-primary">Create</button>
+
+        @if (!ViewData.ModelState.IsValid)
+
+        {
+            <div class="alert alert-danger" role="alert">
+                <p> <strong>Error:</strong> Please fix the errors above. </p>
+            </div>
+        }
+        <button type="submit" class="btn btn-primary">Create</button>
     </div>
 </form>

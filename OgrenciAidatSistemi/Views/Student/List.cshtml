@@ -17,8 +17,9 @@
             <div class="input-group mb-3">
                 <span class="input-group-text">in</span>
                 <select class="form-select" name="searchField">
-                    @if(ViewData["CurrentSearchField"] != null){
-                    <option value='@ViewData["CurrentSearchField"]' selected>@ViewData["CurrentSearchField"]</option>
+                    @if (ViewData["CurrentSearchField"] != null)
+                    {
+                        <option value='@ViewData["CurrentSearchField"]' selected>@ViewData["CurrentSearchField"]</option>
                     }
                     <option value="">All</option>
                     <option value="StudentId">StudentId</option>
@@ -38,25 +39,32 @@
     <thead>
         <tr>
             <th>
-            <a asp-action="List" asp-route-sortOrder="@ViewData["StudentIdSortParam"]" asp-route-searchString="@ViewData["CurrentSearchString"]" >StudentId</a>
+                <a asp-action="List" asp-route-sortOrder="@ViewData["StudentIdSortParam"]"
+                    asp-route-searchString="@ViewData["CurrentSearchString"]">StudentId</a>
             </th>
             <th>
-            <a asp-action="List" asp-route-sortOrder="@ViewData["SchoolSortParam"]" asp-route-searchString="@ViewData["CurrentSearchString"]" >School</a>
+                <a asp-action="List" asp-route-sortOrder="@ViewData["SchoolSortParam"]"
+                    asp-route-searchString="@ViewData["CurrentSearchString"]">School</a>
             </th>
             <th>
-                <a asp-action="List" asp-route-sortOrder="@ViewData["FirstNameSortParam"]" asp-route-searchString="@ViewData["CurrentSearchString"]" >First Name</a>
+                <a asp-action="List" asp-route-sortOrder="@ViewData["FirstNameSortParam"]"
+                    asp-route-searchString="@ViewData["CurrentSearchString"]">First Name</a>
             </th>
             <th>
-                <a asp-action="List" asp-route-sortOrder="@ViewData["LastNameSortParam"]"  asp-route-searchString="@ViewData["CurrentSearchString"]" >Last Name</a>
+                <a asp-action="List" asp-route-sortOrder="@ViewData["LastNameSortParam"]"
+                    asp-route-searchString="@ViewData["CurrentSearchString"]">Last Name</a>
             </th>
             <th>
-                <a asp-action="List" asp-route-sortOrder="@ViewData["EmailAddressSortParam"]" asp-route-searchString="@ViewData["CurrentSearchString"]" >Email Address</a>
+                <a asp-action="List" asp-route-sortOrder="@ViewData["EmailAddressSortParam"]"
+                    asp-route-searchString="@ViewData["CurrentSearchString"]">Email Address</a>
             </th>
             <th>
-                <a asp-action="List" asp-route-sortOrder="@ViewData["CreatedAtSortParam"]" asp-route-searchString="@ViewData["CurrentSearchString"]" >Created At</a>
+                <a asp-action="List" asp-route-sortOrder="@ViewData["CreatedAtSortParam"]"
+                    asp-route-searchString="@ViewData["CurrentSearchString"]">Created At</a>
             </th>
             <th>
-                <a asp-action="List" asp-route-sortOrder="@ViewData["UpdatedAtSortParam"]" asp-route-searchString="@ViewData["CurrentSearchString"]" >Updated At</a>
+                <a asp-action="List" asp-route-sortOrder="@ViewData["UpdatedAtSortParam"]"
+                    asp-route-searchString="@ViewData["CurrentSearchString"]">Updated At</a>
             </th>
             <!-- Add more columns as needed -->
             <th></th> <!-- column for buttons edit | details | delete -->
@@ -64,6 +72,7 @@
     </thead>
     <tbody>
         @foreach (var item in Model)
+
         {
 
             <tr>
@@ -71,16 +80,16 @@
                     @Html.DisplayFor(modelItem => item.StudentId)
                 </td>
                 <td>
-                @if (item.School != null)
-                {
-                    <partial name="_SchoolViewPartial" model="item.School.ToView()" />
-                }
-                else
-                {
-                    <p>
-                        School not avaliable
-                    </p>
-                }
+                    @if (item.School != null)
+                    {
+                        <partial name="_SchoolViewPartial" model="item.School.ToView()" />
+                    }
+                    else
+                    {
+                        <p>
+                            School not avaliable
+                        </p>
+                    }
                 </td>
                 <td>
                     @Html.DisplayFor(modelItem => item.FirstName)
@@ -115,8 +124,11 @@
 <nav aria-label="Page navigation">
     <ul class="pagination">
         @if (ViewData["CurrentPageIndex"] != null)
+
         {
+
             int currentPageIndex = (int)ViewData["CurrentPageIndex"];
+
             int totalPages = (int)ViewData["TotalPages"];
 
             <li class="page-item @(currentPageIndex <= 1 ? "disabled" : "")">
@@ -127,6 +139,7 @@
             </li>
 
             @for (int i = 1; i <= totalPages; i++)
+
             {
                 <li class="page-item @(i == currentPageIndex ? "active" : "")">
                     <a class="page-link" asp-action="List" asp-route-pageIndex="@i">@i</a>

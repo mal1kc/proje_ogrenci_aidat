@@ -67,7 +67,7 @@ myInput.onkeyup = function () {
   }
 
   // Validate numbers
-    if (myInput.value.match(numbers)) {
+  if (myInput.value.match(numbers)) {
     number.classList.remove("invalid");
     number.classList.add("valid");
   } else {
@@ -116,12 +116,13 @@ function showInvalidAlert() {
 
   let isValid = checkPasswordValidity();
   let passwordInvalid = createPasswordInvalidAlert()
-  if (!isValid){
+  if (!isValid) {
     messageDiv.append(passwordInvalid);
     messageDiv.style.display = "block";
   }
-  else{
-    deletePasswordInvalidAlert();}
+  else {
+    deletePasswordInvalidAlert();
+  }
   return isValid;
 }
 
@@ -135,14 +136,13 @@ function createPasswordInvalidAlert() {
     pp.innerText = "password is invalid";
     return pp;
   }
-  else{ return p};
+  else { return p };
 
 }
 
 function deletePasswordInvalidAlert() {
   let p = document.getElementById("passwordInvalid");
-  if (p != null)
-  {
+  if (p != null) {
     messageDiv.removeChild(p);
   }
 }

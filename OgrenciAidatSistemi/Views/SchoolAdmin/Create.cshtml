@@ -20,6 +20,8 @@
                 <option value="">Select School</option>
                 @foreach (var School in ViewBag.Schools)
 
+
+
                 {
                     <option value="@School.Id">@School.Name</option>
                 }
@@ -71,6 +73,8 @@
 
         @if (!ViewData.ModelState.IsValid)
 
+
+
         {
             <div class="alert alert-danger" role="alert">
                 <strong>Error:</strong> Please fix the errors above.
@@ -116,20 +120,20 @@
 
 @section Scripts {
     <script>
-  $(document).ready(function () {
+        $(document).ready(function () {
             var addressIndex = 1;
 
             $('#addAddress').click(function () {
                 $('#addressContainer').append(`
-                    <div class="mb-3">
-                        <label class="form-label">Address ${addressIndex + 1}</label>
-                        <input name="Addresses[${addressIndex}]" class="form-control" required />
-                        <button type="button" class="btn btn-danger btn-sm removeAddress float-end">Remove</button>
-                        <div class="invalid-feedback">
-                            Please enter a valid address.
+                        <div class="mb-3">
+                            <label class="form-label">Address ${addressIndex + 1}</label>
+                            <input name="Addresses[${addressIndex}]" class="form-control" required />
+                            <button type="button" class="btn btn-danger btn-sm removeAddress float-end">Remove</button>
+                            <div class="invalid-feedback">
+                                Please enter a valid address.
+                            </div>
                         </div>
-                    </div>
-                `);
+                    `);
 
                 addressIndex++;
                 updateLabels();
@@ -148,25 +152,25 @@
         })
     </script>
     <script>
-        // Bootstrap 5 form validation script
-        (function () {
-            'use strict'
+            // Bootstrap 5 form validation script
+            (function () {
+                'use strict'
 
-            // Fetch all the forms we want to apply custom Bootstrap validation styles to
-            var forms = document.querySelectorAll('.needs-validation')
+                // Fetch all the forms we want to apply custom Bootstrap validation styles to
+                var forms = document.querySelectorAll('.needs-validation')
 
-            // Loop over them and prevent submission
-            Array.prototype.slice.call(forms)
-                .forEach(function (form) {
-                    form.addEventListener('submit', function (event) {
-                        if (!form.checkValidity()) {
-                            event.preventDefault()
-                            event.stopPropagation()
-                        }
+                // Loop over them and prevent submission
+                Array.prototype.slice.call(forms)
+                    .forEach(function (form) {
+                        form.addEventListener('submit', function (event) {
+                            if (!form.checkValidity()) {
+                                event.preventDefault()
+                                event.stopPropagation()
+                            }
 
-                        form.classList.add('was-validated')
-                    }, false)
-                })
-        })()
+                            form.classList.add('was-validated')
+                        }, false)
+                    })
+            })()
     </script>
 }

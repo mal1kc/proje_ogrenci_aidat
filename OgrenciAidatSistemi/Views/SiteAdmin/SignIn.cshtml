@@ -1,27 +1,29 @@
 @{
     Layout = "/Views/Shared/SiteAdmin/_adminLayout.cshtml";
+
     ViewData["Title"] = "SignIn";
 }
 @model OgrenciAidatSistemi.Models.SiteAdminView
 
 <div class="text-right">
 
-    @using (Html.BeginForm("SignInPost", "SiteAdmin", FormMethod.Post,new { @onsubmit = "return checkOnSubmit()" } ) )
-    {   <div id="message">
-        @if (TempData["CantSignIn"] != null)
-        {
-            <div class="alert alert-danger" role="alert">
-                password or username is <b>wrong</b> !
-            </div>
-        }
+    @using (Html.BeginForm("SignInPost", "SiteAdmin", FormMethod.Post, new { @onsubmit = "return checkOnSubmit()" }))
+
+    {
+        <div id="message">
+            @if (TempData["CantSignIn"] != null)
+
+            {
+                <div class="alert alert-danger" role="alert">
+                    password or username is <b>wrong</b> !
+                </div>
+            }
         </div>
         <div class="form-group">
             <label class="control-label" for="username">Username</label>
-            <input class="form-control text-box single-line" data-val="true"
-                data-val-required="username" id="username" name="username" type="username"
-                value="">
-            <span class="text-danger field-validation-valid" data-valmsg-for="username"
-                data-valmsg-replace="true"></span>
+            <input class="form-control text-box single-line" data-val="true" data-val-required="username" id="username"
+                name="username" type="username" value="">
+            <span class="text-danger field-validation-valid" data-valmsg-for="username" data-valmsg-replace="true"></span>
         </div>
         <div class="form-group">
             <label class="control-label" for="Password">Password</label>
