@@ -9,8 +9,8 @@ namespace OgrenciAidatSistemi.Models
         public DateTime UpdatedAt { get; set; }
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }
-        public ISet<PaymentPeriode>? PaymentPeriods { get; set; }
-        public School School { get; set; }
+        public ISet<PaymentPeriod>? PaymentPeriods { get; set; }
+        public School? School { get; set; }
         public ModelSearchConfig SearchConfig =>
             new ModelSearchConfig(
                 WorkYearSearchConfig.AllowedFieldsForSearch,
@@ -21,6 +21,22 @@ namespace OgrenciAidatSistemi.Models
         {
             return PaymentPeriods?.Sum(pp => pp.TotalAmount) ?? 0;
         }
+
+        public WorkYearView ToView(bool ignoreBidirectNav = false)
+        {
+            return new WorkYearView
+            {
+                Id = Id,
+                StartDate = StartDate,
+                EndDate = EndDate,
+                PaymentPeriods = ignoreBidirectNav
+                    ? null
+                    : PaymentPeriods?.Select(pp => pp.ToView(true)).ToHashSet(),
+                School = ignoreBidirectNav ? null : School?.ToView(true),
+                CreatedAt = CreatedAt,
+                UpdatedAt = UpdatedAt
+            };
+        }
     }
 
     public class WorkYearView : IBaseDbModelView
@@ -28,8 +44,8 @@ namespace OgrenciAidatSistemi.Models
         public int Id { get; set; }
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }
-        public ISet<PaymentPeriodeView>? PaymentPeriods { get; set; }
-        public ISet<SchoolView>? Schools { get; set; }
+        public ISet<PaymentPeriodView>? PaymentPeriods { get; set; }
+        public SchoolView? School { get; set; }
         public DateTime CreatedAt { get; set; }
         public DateTime UpdatedAt { get; set; }
     }

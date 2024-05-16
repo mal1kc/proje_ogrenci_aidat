@@ -1,5 +1,3 @@
-using System.Text.Json;
-using System.Text.Json.Serialization;
 using OgrenciAidatSistemi.Models.Interfaces;
 
 namespace OgrenciAidatSistemi.Models
@@ -12,24 +10,23 @@ namespace OgrenciAidatSistemi.Models
         Daily
     }
 
-    public class PaymentPeriode : IBaseDbModel, ISearchableModel
+    public class PaymentPeriod : IBaseDbModel, ISearchableModel
     {
         public int Id { get; set; }
 
-        public Student Student { get; set; }
+        public Student? Student { get; set; }
         public DateTime CreatedAt { get; set; }
         public DateTime UpdatedAt { get; set; }
 
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }
         public decimal TotalAmount { get; set; }
-
-        // public required School School { get; set; } is already linked via Payment and WorkYear
         public required ISet<Payment> Payments { get; set; }
-        public required WorkYear WorkYear { get; set; }
+
+        public required WorkYear? WorkYear { get; set; }
         public Occurrence Occurrence { get; set; }
 
-        public PaymentPeriode()
+        public PaymentPeriod()
         {
             CreatedAt = DateTime.Now;
             UpdatedAt = DateTime.Now;
@@ -38,25 +35,49 @@ namespace OgrenciAidatSistemi.Models
 
         public static ModelSearchConfig SearchConfig =>
             new ModelSearchConfig(
-                PaymentPeriodeSearchConfig.AllowedFieldsForSearch,
-                PaymentPeriodeSearchConfig.AllowedFieldsForSort
+                PaymentPeriodSearchConfig.AllowedFieldsForSearch,
+                PaymentPeriodSearchConfig.AllowedFieldsForSort
             );
-    }
 
-    public class PaymentPeriodeView
-    {
-        public DateTime StartDate { get; set; }
-        public DateTime EndDate { get; set; }
-        public decimal Amount { get; set; }
-        public Occurrence Occurence { get; set; }
-
-        public PaymentPeriodeView(PaymentPeriode periode)
+        public PaymentPeriodView ToView(bool ignoreBidirectNav = false)
         {
-            throw new NotImplementedException("Not implemented yet");
+            return new PaymentPeriodView
+            {
+                Id = Id,
+
+                CreatedAt = CreatedAt,
+                UpdatedAt = UpdatedAt,
+                StartDate = StartDate,
+                EndDate = EndDate,
+                TotalAmount = TotalAmount,
+                Occurrence = Occurrence,
+                Student = ignoreBidirectNav ? null : Student?.ToView(true),
+                Payments = ignoreBidirectNav
+                    ? null
+                    : Payments?.Select(p => p.ToView(true)).ToHashSet(),
+                WorkYear = ignoreBidirectNav ? null : WorkYear?.ToView(true),
+            };
         }
     }
 
-    public static class PaymentPeriodeSearchConfig
+    public class PaymentPeriodView : IBaseDbModelView
+    {
+        public int Id { get; set; }
+
+        public StudentView? Student { get; set; }
+
+        public ISet<PaymentView>? Payments { get; set; }
+
+        public WorkYearView? WorkYear { get; set; }
+        public DateTime CreatedAt { get; set; }
+        public DateTime UpdatedAt { get; set; }
+        public DateTime StartDate { get; set; }
+        public DateTime EndDate { get; set; }
+        public decimal TotalAmount { get; set; }
+        public Occurrence Occurrence { get; set; }
+    }
+
+    public static class PaymentPeriodSearchConfig
     {
         public static readonly string[] AllowedFieldsForSearch = new string[]
         {

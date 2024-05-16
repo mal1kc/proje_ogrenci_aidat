@@ -11,11 +11,11 @@ namespace OgrenciAidatSistemi.Models
     public class Student : User, ISearchableModel
     {
         public string StudentId { get; set; }
-        public required School School { get; set; }
+        public School? School { get; set; }
         public int GradLevel { get; set; }
         public bool IsGraduated { get; set; }
         public ICollection<Payment>? Payments { get; set; }
-        public ICollection<PaymentPeriode>? PaymentPeriods { get; set; }
+        public ICollection<PaymentPeriod>? PaymentPeriods { get; set; }
         public ICollection<Grade>? Grades { get; set; }
         public override DateTime CreatedAt { get; set; }
         public override DateTime UpdatedAt { get; set; }
@@ -31,19 +31,21 @@ namespace OgrenciAidatSistemi.Models
         {
             return new StudentView()
             {
-                Id = this.Id,
-                StudentId = this.StudentId,
-                FirstName = this.FirstName,
-                LastName = this.LastName,
-                School = ignoreBidirectNav ? null : this.School.ToView(ignoreBidirectNav: true),
-                GradLevel = this.GradLevel,
-                IsGraduated = this.IsGraduated,
-                EmailAddress = this.EmailAddress,
-                CreatedAt = this.CreatedAt,
-                UpdatedAt = this.UpdatedAt,
-                Payments = ignoreBidirectNav ? null : this.Payments?.ToHashSet(),
-                Grades = ignoreBidirectNav ? null : this.Grades?.ToHashSet(),
-                ContactInfo = ContactInfo?.ToView(),
+                Id = Id,
+                StudentId = StudentId,
+                FirstName = FirstName,
+                LastName = LastName,
+                School = ignoreBidirectNav ? null : School?.ToView(ignoreBidirectNav: true),
+                GradLevel = GradLevel,
+                IsGraduated = IsGraduated,
+                EmailAddress = EmailAddress,
+                CreatedAt = CreatedAt,
+                UpdatedAt = UpdatedAt,
+                Payments = ignoreBidirectNav ? null : Payments?.ToHashSet(),
+                Grades = ignoreBidirectNav ? null : Grades?.ToHashSet(),
+                ContactInfo = ignoreBidirectNav
+                    ? null
+                    : ContactInfo?.ToView(ignoreBidirectNav: true),
             };
         }
 
@@ -64,21 +66,14 @@ namespace OgrenciAidatSistemi.Models
             }
 
             // Get the school id
-
-            int schoolId = this.School.Id;
+            int schoolId = School.Id;
             int studentCount = 0;
 
-            if (this.School.Students == null)
-            {
-                studentCount = dbctx
-                    .Schools.Include(s => s.Students)
-                    .Where(s => s.Id == schoolId)
-                    .FirstOrDefault()
-                    .Students.Count;
-            }
-
-            // Get the count of students in the school
-            studentCount = this.School.Students.Count;
+            if (School.Students == null)
+                studentCount = dbctx.Students.Count(s => s.School.Name == School.Name);
+            // Name is unique like Id but id is autoincremented so it is not reliable
+            else
+                studentCount = School.Students.Count;
 
             var uuid = Guid.NewGuid().ToString().Replace("-", "").Substring(0, 5);
 
@@ -122,7 +117,7 @@ namespace OgrenciAidatSistemi.Models
         public ICollection<Payment>? Payments { get; set; }
         public ICollection<Grade>? Grades { get; set; }
 
-        public ICollection<PaymentPeriodeView>? PaymentPeriods { get; set; }
+        public ICollection<PaymentPeriodView>? PaymentPeriods { get; set; }
 
         public override bool CheckUserExists(AppDbContext dbctx)
         {

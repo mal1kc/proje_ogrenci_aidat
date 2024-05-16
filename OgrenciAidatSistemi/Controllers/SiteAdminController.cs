@@ -35,9 +35,9 @@ namespace OgrenciAidatSistemi.Controllers
         }
 
         [HttpGet(Configurations.Constants.AdminAuthenticationLoginPath)]
-        public ActionResult SignIn()
+        public async Task<IActionResult> SignIn()
         {
-            if (_userService.IsUserSignedIn())
+            if (await _userService.IsUserSignedIn())
             {
                 return RedirectToAction("Index", "Home");
             }

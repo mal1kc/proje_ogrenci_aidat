@@ -6,7 +6,75 @@ namespace OgrenciAidatSistemi.Data
     public class SiteAdminDBSeeder : DbSeeder<AppDbContext, SiteAdmin>
     {
         public SiteAdminDBSeeder(AppDbContext context, IConfiguration configuration, ILogger logger)
-            : base(context, configuration, logger) { }
+            : base(context, configuration, logger)
+        {
+            _verboseLogging = configuration
+                .GetSection("SeedData")
+                .GetValue("VerboseLogging", false);
+
+            //  objects with is like this
+            // {
+            //      "SeedAdmins": true| false
+            //      "SeedDB": true| false // doesn't matter if SeedAdmins is true
+            //     "SiteAdmins":
+            //     [
+            //        {
+            //          # if DEBUG
+            //             "Password" : "axad",
+            //           # else
+            //              "PasswordHash" : "axad",
+            //          # endif
+            //              "Username" : "someusername" ,
+            //              "email" : "somemeail" } , { }
+            //      ]
+            // }
+
+            _is_seeding =
+                configuration.GetSection("SeedData").GetValue("SeedAdmins", false)
+                || configuration.GetSection("SeedData").GetValue("SeedDB", false);
+
+            var seedData = configuration.GetSection("SeedData").GetSection("SiteAdmins");
+
+            _is_seeding = seedData.Exists() || _is_seeding; // seedData exists or SeedAdmins is true
+
+            if (seedData.Exists())
+            {
+                _seedData.Clear(); // clear any previous data
+                foreach (var siteAdmin in seedData.GetChildren())
+                {
+                    var username =
+                        siteAdmin["Username"]
+                        ?? throw new Exception("SiteAdminDBSeeder: Username is required");
+                    var email =
+                        siteAdmin["Email"]
+                        ?? throw new Exception("SiteAdminDBSeeder: Email is required");
+                    var firstName = siteAdmin["FirstName"] ?? "";
+                    _seedData.Add(
+                        new SiteAdmin
+                        {
+                            Username = username,
+                            FirstName = firstName,
+                            LastName = siteAdmin["LastName"] ?? "",
+                            EmailAddress = email,
+#if DEBUG
+                            PasswordHash = SiteAdmin.ComputeHash(
+                                siteAdmin["Password"]
+                                    ?? throw new Exception(
+                                        "SiteAdminDBSeeder: Password is required"
+                                    )
+                            )
+#else
+                            PasswordHash =
+                                siteAdmin["PasswordHash"]
+                                ?? throw new Exception(
+                                    "SiteAdminDBSeeder: PasswordHash is required"
+                                )
+#endif
+                        }
+                    );
+                }
+            }
+        }
 
         protected override async Task SeedDataAsync()
         {
@@ -77,11 +145,9 @@ namespace OgrenciAidatSistemi.Data
                         a.EmailAddress == siteAdmin.EmailAddress
                     )
                 )
-                {
                     throw new Exception(
                         $"SiteAdminDBSeeder: AfterSeedDataAsync {siteAdmin.EmailAddress} not found"
                     );
-                }
             }
         }
 
@@ -101,18 +167,14 @@ namespace OgrenciAidatSistemi.Data
         public override IEnumerable<SiteAdmin> GetSeedData(bool randomSeed = false)
         {
             if (randomSeed)
-            {
                 return Enumerable.Range(0, 10).Select(i => CreateRandomModel());
-            }
             return _seedData;
         }
 
         protected override async Task SeedEntityAsync(SiteAdmin entity)
         {
             if (await _context.SiteAdmins.AnyAsync(a => a.EmailAddress == entity.EmailAddress))
-            {
                 return;
-            }
 
             entity.CreatedAt = DateTime.Now;
             entity.UpdatedAt = DateTime.Now;
@@ -121,7 +183,7 @@ namespace OgrenciAidatSistemi.Data
             _seedCount++;
         }
 
-        private readonly List<SiteAdmin> _seedData = new List<SiteAdmin>
+        private List<SiteAdmin> _seedData = new List<SiteAdmin>
         {
             new SiteAdmin
             {

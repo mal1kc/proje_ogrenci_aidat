@@ -1,11 +1,9 @@
-using System.Collections;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using OgrenciAidatSistemi.Data;
 using OgrenciAidatSistemi.Helpers;
 using OgrenciAidatSistemi.Models;
-using OgrenciAidatSistemi.Models.Interfaces;
 using OgrenciAidatSistemi.Services;
 
 namespace OgrenciAidatSistemi.Controllers
@@ -35,9 +33,9 @@ namespace OgrenciAidatSistemi.Controllers
             return View();
         }
 
-        public IActionResult SignIn()
+        public async Task<IActionResult> SignIn()
         {
-            if (_userService.IsUserSignedIn())
+            if (await _userService.IsUserSignedIn())
             {
                 return RedirectToAction("Index", "Home");
             }

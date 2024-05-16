@@ -7,6 +7,8 @@ namespace OgrenciAidatSistemi.Models
     public class ContactInfo : IBaseDbModel, ISearchableModel
     {
         public int Id { get; set; }
+
+        public User? User { get; set; }
         public String? PhoneNumber { get; set; }
         public IList<String>? Addresses { get; set; }
         public required string Email { get; set; }
@@ -31,7 +33,7 @@ namespace OgrenciAidatSistemi.Models
             return Regex.IsMatch(phoneNumber, regex);
         }
 
-        public ContactInfoView ToView()
+        public ContactInfoView ToView(bool ignoreBidirectNav = false)
         {
             return new ContactInfoView
             {

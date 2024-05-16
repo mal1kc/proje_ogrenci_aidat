@@ -29,7 +29,6 @@
                     <option value="PaymentPeriodId">Payment Period</option>
                     <option value="Amount">Amount</option>
                     <option value="Status">Status</option>
-
                     <!-- Add more search fields as needed -->
                 </select>
                 <button type="submit" class="btn btn-primary">Search</button>
@@ -71,6 +70,7 @@
                 <a asp-action="List" asp-route-sortOrder="@(ViewData["IsVerifiedSortParm"]?.ToString())"
                     asp-route-searchString="@(ViewData["CurrentSearchString"]?.ToString())">Is Verified</a>
             </th>
+            <th></th> <!-- column for buttons edit | details | delete -->
             <!-- Add other fields as needed -->
         </tr>
     </thead>
@@ -85,6 +85,15 @@
                 <td>@Html.DisplayFor(modelItem => item.Amount)</td>
                 <td>@Html.DisplayFor(modelItem => item.Status)</td>
                 <td>@Html.DisplayFor(modelItem => item.IsVerified)</td>
+                <td>
+                    <a href="@Url.Action("Edit", new { id = item.Id})">Edit</a>
+                    |
+                    <a href="@Url.Action("Details", new { id = item.Id})">Details</a>
+                    @if (ViewBag.IsDebug)
+                    {
+                        <a href="@Url.Action("Delete", new { id = item.Id })">Delete</a>
+                    }
+                </td>
                 <!-- Add other fields as needed -->
             </tr>
         }

@@ -12,25 +12,6 @@ namespace OgrenciAidatSistemi.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
-                name: "Contacts",
-                columns: table => new
-                {
-                    Id = table
-                        .Column<int>(type: "INTEGER", nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
-                    PhoneNumber = table.Column<string>(type: "TEXT", nullable: true),
-                    Addresses = table.Column<string>(type: "TEXT", nullable: true),
-                    Email = table.Column<string>(type: "TEXT", nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "TEXT", nullable: false),
-                    UpdatedAt = table.Column<DateTime>(type: "TEXT", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Contacts", x => x.Id);
-                }
-            );
-
-            migrationBuilder.CreateTable(
                 name: "Schools",
                 columns: table => new
                 {
@@ -78,7 +59,7 @@ namespace OgrenciAidatSistemi.Migrations
                     CreatedAt = table.Column<DateTime>(type: "TEXT", nullable: false),
                     UpdatedAt = table.Column<DateTime>(type: "TEXT", nullable: false),
                     Name = table.Column<string>(type: "TEXT", nullable: false),
-                    SchoolId = table.Column<int>(type: "INTEGER", nullable: false),
+                    SchoolId = table.Column<int>(type: "INTEGER", nullable: true),
                     GradeLevel = table.Column<int>(type: "INTEGER", nullable: false)
                 },
                 constraints: table =>
@@ -105,7 +86,7 @@ namespace OgrenciAidatSistemi.Migrations
                     UpdatedAt = table.Column<DateTime>(type: "TEXT", nullable: false),
                     StartDate = table.Column<DateTime>(type: "TEXT", nullable: false),
                     EndDate = table.Column<DateTime>(type: "TEXT", nullable: false),
-                    SchoolId = table.Column<int>(type: "INTEGER", nullable: false)
+                    SchoolId = table.Column<int>(type: "INTEGER", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -121,29 +102,46 @@ namespace OgrenciAidatSistemi.Migrations
             );
 
             migrationBuilder.CreateTable(
-                name: "FilePaths",
+                name: "Contacts",
                 columns: table => new
                 {
                     Id = table
                         .Column<int>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
-                    Path = table.Column<string>(type: "TEXT", nullable: false),
-                    Name = table.Column<string>(type: "TEXT", nullable: false),
-                    Extension = table.Column<string>(type: "TEXT", nullable: false),
-                    ContentType = table.Column<string>(type: "TEXT", nullable: false),
-                    Size = table.Column<long>(type: "INTEGER", nullable: false),
-                    Description = table.Column<string>(type: "TEXT", nullable: false),
-                    CreatedById = table.Column<int>(type: "INTEGER", nullable: false),
-                    FileHash = table.Column<string>(type: "TEXT", nullable: false),
+                    UserId = table.Column<int>(type: "INTEGER", nullable: true),
+                    PhoneNumber = table.Column<string>(type: "TEXT", nullable: true),
+                    Addresses = table.Column<string>(type: "TEXT", nullable: true),
+                    Email = table.Column<string>(type: "TEXT", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "TEXT", nullable: false),
                     UpdatedAt = table.Column<DateTime>(type: "TEXT", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_FilePaths", x => x.Id);
+                    table.PrimaryKey("PK_Contacts", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_FilePaths_Users_CreatedById",
-                        column: x => x.CreatedById,
+                        name: "FK_Contacts_Users_UserId",
+                        column: x => x.UserId,
+                        principalTable: "Users",
+                        principalColumn: "Id"
+                    );
+                }
+            );
+
+            migrationBuilder.CreateTable(
+                name: "SiteAdmins",
+                columns: table => new
+                {
+                    Id = table
+                        .Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    Username = table.Column<string>(type: "TEXT", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_SiteAdmins", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_SiteAdmins_Users_Id",
+                        column: x => x.Id,
                         principalTable: "Users",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade
@@ -189,28 +187,6 @@ namespace OgrenciAidatSistemi.Migrations
             );
 
             migrationBuilder.CreateTable(
-                name: "SiteAdmins",
-                columns: table => new
-                {
-                    Id = table
-                        .Column<int>(type: "INTEGER", nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
-                    Username = table.Column<string>(type: "TEXT", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_SiteAdmins", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_SiteAdmins_Users_Id",
-                        column: x => x.Id,
-                        principalTable: "Users",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade
-                    );
-                }
-            );
-
-            migrationBuilder.CreateTable(
                 name: "Students",
                 columns: table => new
                 {
@@ -218,7 +194,7 @@ namespace OgrenciAidatSistemi.Migrations
                         .Column<int>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
                     StudentId = table.Column<string>(type: "TEXT", nullable: false),
-                    SchoolId = table.Column<int>(type: "INTEGER", nullable: false),
+                    SchoolId = table.Column<int>(type: "INTEGER", nullable: true),
                     GradLevel = table.Column<int>(type: "INTEGER", nullable: false),
                     IsGraduated = table.Column<bool>(type: "INTEGER", nullable: false),
                     ContactInfoId = table.Column<int>(type: "INTEGER", nullable: true)
@@ -283,13 +259,13 @@ namespace OgrenciAidatSistemi.Migrations
                     Id = table
                         .Column<int>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
-                    StudentId = table.Column<int>(type: "INTEGER", nullable: false),
+                    StudentId = table.Column<int>(type: "INTEGER", nullable: true),
                     CreatedAt = table.Column<DateTime>(type: "TEXT", nullable: false),
                     UpdatedAt = table.Column<DateTime>(type: "TEXT", nullable: false),
                     StartDate = table.Column<DateTime>(type: "TEXT", nullable: false),
                     EndDate = table.Column<DateTime>(type: "TEXT", nullable: false),
                     TotalAmount = table.Column<decimal>(type: "TEXT", nullable: false),
-                    WorkYearId = table.Column<int>(type: "INTEGER", nullable: false),
+                    WorkYearId = table.Column<int>(type: "INTEGER", nullable: true),
                     Occurrence = table.Column<int>(type: "INTEGER", nullable: false)
                 },
                 constraints: table =>
@@ -300,14 +276,14 @@ namespace OgrenciAidatSistemi.Migrations
                         column: x => x.StudentId,
                         principalTable: "Students",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade
+                        onDelete: ReferentialAction.SetNull
                     );
                     table.ForeignKey(
                         name: "FK_PaymentPeriods_WorkYears_WorkYearId",
                         column: x => x.WorkYearId,
                         principalTable: "WorkYears",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade
+                        onDelete: ReferentialAction.SetNull
                     );
                 }
             );
@@ -324,11 +300,9 @@ namespace OgrenciAidatSistemi.Migrations
                     StudentId = table.Column<int>(type: "INTEGER", nullable: true),
                     PaymentDate = table.Column<DateTime>(type: "TEXT", nullable: false),
                     PaymentMethod = table.Column<int>(type: "INTEGER", nullable: false),
-                    PaymentPeriodeId = table.Column<int>(type: "INTEGER", nullable: true),
                     PaymentPeriodId = table.Column<int>(type: "INTEGER", nullable: false),
                     Amount = table.Column<decimal>(type: "TEXT", nullable: false),
                     Status = table.Column<int>(type: "INTEGER", nullable: false),
-                    ReceiptId = table.Column<int>(type: "INTEGER", nullable: true),
                     PaymentType = table.Column<string>(
                         type: "TEXT",
                         maxLength: 13,
@@ -345,19 +319,6 @@ namespace OgrenciAidatSistemi.Migrations
                     CheckNumber = table.Column<string>(type: "TEXT", nullable: true),
                     BankName = table.Column<string>(type: "TEXT", nullable: true),
                     BranchCode = table.Column<string>(type: "TEXT", nullable: true),
-                    CreditCardPayment_CardNumber = table.Column<string>(
-                        type: "TEXT",
-                        nullable: true
-                    ),
-                    CreditCardPayment_CardHolderName = table.Column<string>(
-                        type: "TEXT",
-                        nullable: true
-                    ),
-                    CreditCardPayment_ExpiryDate = table.Column<string>(
-                        type: "TEXT",
-                        nullable: true
-                    ),
-                    CreditCardPayment_CVC = table.Column<string>(type: "TEXT", nullable: true),
                     CardNumber = table.Column<string>(type: "TEXT", nullable: true),
                     CardHolderName = table.Column<string>(type: "TEXT", nullable: true),
                     ExpiryDate = table.Column<string>(type: "TEXT", nullable: true),
@@ -367,16 +328,11 @@ namespace OgrenciAidatSistemi.Migrations
                 {
                     table.PrimaryKey("PK_Payments", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Payments_FilePaths_ReceiptId",
-                        column: x => x.ReceiptId,
-                        principalTable: "FilePaths",
-                        principalColumn: "Id"
-                    );
-                    table.ForeignKey(
-                        name: "FK_Payments_PaymentPeriods_PaymentPeriodeId",
-                        column: x => x.PaymentPeriodeId,
+                        name: "FK_Payments_PaymentPeriods_PaymentPeriodId",
+                        column: x => x.PaymentPeriodId,
                         principalTable: "PaymentPeriods",
-                        principalColumn: "Id"
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.SetNull
                     );
                     table.ForeignKey(
                         name: "FK_Payments_Students_StudentId",
@@ -386,6 +342,51 @@ namespace OgrenciAidatSistemi.Migrations
                         onDelete: ReferentialAction.SetNull
                     );
                 }
+            );
+
+            migrationBuilder.CreateTable(
+                name: "FilePaths",
+                columns: table => new
+                {
+                    Id = table
+                        .Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    Path = table.Column<string>(type: "TEXT", nullable: false),
+                    Name = table.Column<string>(type: "TEXT", nullable: false),
+                    Extension = table.Column<string>(type: "TEXT", nullable: false),
+                    ContentType = table.Column<string>(type: "TEXT", nullable: false),
+                    Size = table.Column<long>(type: "INTEGER", nullable: false),
+                    Description = table.Column<string>(type: "TEXT", nullable: false),
+                    CreatedById = table.Column<int>(type: "INTEGER", nullable: false),
+                    FileHash = table.Column<string>(type: "TEXT", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "TEXT", nullable: false),
+                    UpdatedAt = table.Column<DateTime>(type: "TEXT", nullable: false),
+                    PaymentId = table.Column<int>(type: "INTEGER", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_FilePaths", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_FilePaths_Payments_PaymentId",
+                        column: x => x.PaymentId,
+                        principalTable: "Payments",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.SetNull
+                    );
+                    table.ForeignKey(
+                        name: "FK_FilePaths_Users_CreatedById",
+                        column: x => x.CreatedById,
+                        principalTable: "Users",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade
+                    );
+                }
+            );
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Contacts_UserId",
+                table: "Contacts",
+                column: "UserId"
             );
 
             migrationBuilder.CreateIndex(
@@ -398,6 +399,13 @@ namespace OgrenciAidatSistemi.Migrations
                 name: "IX_FilePaths_Path",
                 table: "FilePaths",
                 column: "Path",
+                unique: true
+            );
+
+            migrationBuilder.CreateIndex(
+                name: "IX_FilePaths_PaymentId",
+                table: "FilePaths",
+                column: "PaymentId",
                 unique: true
             );
 
@@ -426,15 +434,9 @@ namespace OgrenciAidatSistemi.Migrations
             );
 
             migrationBuilder.CreateIndex(
-                name: "IX_Payments_PaymentPeriodeId",
+                name: "IX_Payments_PaymentPeriodId",
                 table: "Payments",
-                column: "PaymentPeriodeId"
-            );
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Payments_ReceiptId",
-                table: "Payments",
-                column: "ReceiptId"
+                column: "PaymentPeriodId"
             );
 
             migrationBuilder.CreateIndex(
@@ -519,17 +521,17 @@ namespace OgrenciAidatSistemi.Migrations
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropTable(name: "GradeStudent");
+            migrationBuilder.DropTable(name: "FilePaths");
 
-            migrationBuilder.DropTable(name: "Payments");
+            migrationBuilder.DropTable(name: "GradeStudent");
 
             migrationBuilder.DropTable(name: "SchoolAdmins");
 
             migrationBuilder.DropTable(name: "SiteAdmins");
 
-            migrationBuilder.DropTable(name: "Grades");
+            migrationBuilder.DropTable(name: "Payments");
 
-            migrationBuilder.DropTable(name: "FilePaths");
+            migrationBuilder.DropTable(name: "Grades");
 
             migrationBuilder.DropTable(name: "PaymentPeriods");
 
@@ -539,9 +541,9 @@ namespace OgrenciAidatSistemi.Migrations
 
             migrationBuilder.DropTable(name: "Contacts");
 
-            migrationBuilder.DropTable(name: "Users");
-
             migrationBuilder.DropTable(name: "Schools");
+
+            migrationBuilder.DropTable(name: "Users");
         }
     }
 }

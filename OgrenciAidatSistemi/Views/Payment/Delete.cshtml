@@ -1,0 +1,115 @@
+@model PaymentView
+
+@{
+    ViewData["Title"] = "Delete Payment";
+}
+
+
+<div class="container mt-5">
+    <div class="card">
+        <div class="card-body">
+            <h5 class="card-title bg-light p-2">Payment</h5>
+
+            <dl class="row">
+                <dt class="col-sm-2 text-nowrap">
+                    @Html.DisplayNameFor(model => model.Id)
+                </dt>
+                <dd class="col-sm-10">
+                    @Html.DisplayFor(model => model.Id)
+                </dd>
+
+                <dt class="col-sm-2 text-nowrap">
+                    @Html.DisplayNameFor(model => model.PaymentDate)
+                </dt>
+
+                <dd class="col-sm-10">
+                    @Html.DisplayFor(model => model.PaymentDate)
+                </dd>
+
+                <dt class="col-sm-2 text-nowrap">
+                    @Html.DisplayNameFor(model => model.PaymentMethod)
+                </dt>
+                <dd class="col-sm-10">
+                    @Html.DisplayFor(model => model.PaymentMethod)
+                </dd>
+
+                <dt class="col-sm-2 text-nowrap">
+                    @Html.DisplayNameFor(model => model.Amount)
+                </dt>
+                <dd class="col-sm-10">
+                    @Html.DisplayFor(model => model.Amount)
+                </dd>
+
+                @*
+                diffrent concrate paymentview classes have different properties, so we need to check if field is exist
+                or not
+                we will check via for loop
+                *@
+
+                @foreach (var field in PaymentMethodSpecificFields.GetFields(Model.PaymentMethod))
+                {
+                    try
+                    {
+                        var value = Model.GetType().GetProperty(field)?.GetValue(Model, null);
+                        if (value != null)
+                        {
+                            <dt class="col-sm-2 text-nowrap">
+                                @Html.DisplayName(field)
+                            </dt>
+                            <dd class="col-sm-10">
+                                @Html.Display(field)
+                            </dd>
+                        }
+                        else
+                        {
+                            <dt class="col-sm-2 text-nowrap">
+                                @Html.DisplayName(field)
+                            </dt>
+                            <dd class="col-sm-10">
+                                @Html.DisplayName(field) is not exist
+                            </dd>
+
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        <dt class="col-sm-2 text-nowrap">
+                            @Html.DisplayName(field)
+                        </dt>
+                        <dd class="col-sm-10">
+                            <partial name="_ErrorPartial" model="ex.Message" />
+                        </dd>
+                    }
+                }
+
+
+
+                @if (Model.Student != null)
+                {
+                    <h4 class="mt-5">Student</h4>
+                    <div class="mt-3">
+                        <dd class="col-sm-10 text-muted">
+                            @Html.DisplayFor(model => model.Student.StudentId)
+                        </dd>
+                    </div>
+                }
+                else
+                {
+                    <dd class="col-sm-10 text-muted">
+                        not find any student
+                    </dd>
+                }
+
+            </dl>
+
+        </div>
+    </div>
+
+
+    <form asp-action="DeleteConfirmed" asp-route-id="@Model.Id" method="post">
+        <input type="submit" value="Delete" class="btn btn-danger" />
+        <p class="mt-5">
+            <a asp-action="List" asp-controller="Payment" class="btn btn-primary">Show All Payments</a>
+        </p>
+    </form>
+</div>

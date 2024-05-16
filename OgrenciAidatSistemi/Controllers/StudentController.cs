@@ -39,9 +39,9 @@ namespace OgrenciAidatSistemi.Controllers
             return View(student.ToView());
         }
 
-        public IActionResult SignIn()
+        public async Task<IActionResult> SignIn()
         {
-            if (_userService.IsUserSignedIn())
+            if (await _userService.IsUserSignedIn())
             {
                 return RedirectToAction("Index");
             }
@@ -264,6 +264,7 @@ namespace OgrenciAidatSistemi.Controllers
         }
 
         [Authorize(Roles = Configurations.Constants.userRoles.SiteAdmin)]
+        // TODO: implement school admin access
         public IActionResult Delete(int? id)
         {
             if (id == null)
@@ -276,9 +277,9 @@ namespace OgrenciAidatSistemi.Controllers
                 _dbContext.Students = _dbContext.Set<Student>();
             }
 
-            var siteAdmin = _dbContext.Students.Where(e => e.Id == id).FirstOrDefault();
+            var student = _dbContext.Students.Where(e => e.Id == id).FirstOrDefault();
 
-            if (siteAdmin == null)
+            if (student == null)
             {
                 return NotFound();
             }
@@ -295,21 +296,18 @@ namespace OgrenciAidatSistemi.Controllers
                 return RedirectToAction("List");
             }
 
-            return View(siteAdmin);
+            return View(student.ToView());
         }
 
         [
             HttpPost,
-            ActionName("DeleteConfirmed"),
             ValidateAntiForgeryToken,
             Authorize(Roles = Configurations.Constants.userRoles.SiteAdmin)
         ]
         public async Task<IActionResult> DeleteConfirmed(int? id)
         {
             if (id == null)
-            {
                 return NotFound();
-            }
             bool isUserDeleted = await _userService.DeleteUser((int)id);
             if (!isUserDeleted)
                 ViewData["Message"] = "Error while deleting user";
@@ -319,8 +317,7 @@ namespace OgrenciAidatSistemi.Controllers
         [Authorize]
         public async Task<PartialViewResult> SchoolViewPartial(int? id)
         {
-            if (_dbContext.Schools == null)
-                _dbContext.Schools = _dbContext.Set<School>();
+            _dbContext.Schools ??= _dbContext.Set<School>();
             if (id == null)
             {
                 return PartialView("_SchoolViewPartial", null);

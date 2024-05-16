@@ -1,6 +1,6 @@
-@model IQueryable<PaymentPeriode>
+@model IQueryable<PaymentPeriod>
 @{
-    ViewData["Title"] = "PaymentPeriodes";
+    ViewData["Title"] = "PaymentPeriods";
 }
 
 <h2>@ViewData["Title"] <a asp-action="Create" class="btn btn-sm btn-primary float-end">Create New</a></h2>
@@ -72,9 +72,9 @@
                 <td>@Html.DisplayFor(modelItem => item.EndDate)</td>
                 <td>@Html.DisplayFor(modelItem => item.TotalAmount)</td>
                 <td>
-                    <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
-                    <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
-                    <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
+                    <a asp-action="PeriodEdit" asp-route-id="@item.Id">Edit</a> |
+                    <a asp-action="PeriodDetails" asp-route-id="@item.Id">Details</a> |
+                    <a asp-action="PeriodDelete" asp-route-id="@item.Id">Delete</a>
                 </td>
             </tr>
         }

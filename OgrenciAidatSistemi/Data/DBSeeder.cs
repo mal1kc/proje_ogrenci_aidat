@@ -13,6 +13,7 @@ namespace OgrenciAidatSistemi.Data
     public abstract class DbSeeder<TContext, TEntity> : IDbSeeder<TContext>
         where TContext : DbContext
     {
+        protected bool _is_seeding;
         protected readonly TContext _context;
         protected readonly IConfiguration _configuration;
 
@@ -50,10 +51,15 @@ namespace OgrenciAidatSistemi.Data
                 "SeedData:VerboseLogging",
                 defaultValue: true
             );
+
+            _is_seeding = configuration.GetSection("SeedData").GetValue("SeedDB", false);
         }
 
         public async Task SeedAsync(bool randomSeed = false)
         {
+            if (!_is_seeding)
+                return;
+
             if (!_context.Database.CanConnect())
             {
                 throw new InvalidOperationException("Database connection is not available.");
@@ -73,6 +79,9 @@ namespace OgrenciAidatSistemi.Data
 
         public async Task AfterSeedAsync()
         {
+            if (!_is_seeding)
+                return;
+
             if (!_context.Database.CanConnect())
             {
                 throw new InvalidOperationException("Database connection is not available.");

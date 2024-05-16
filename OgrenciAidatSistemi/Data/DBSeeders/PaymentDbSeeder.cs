@@ -20,7 +20,6 @@ namespace OgrenciAidatSistemi.Data.DBSeeders
         {
             var paymentMethod = (PaymentMethod)
                 random.Next(Enum.GetNames(typeof(PaymentMethod)).Length);
-            Payment payment;
 
             // TODO: write better generator of connected items like that
 
@@ -53,10 +52,9 @@ namespace OgrenciAidatSistemi.Data.DBSeeders
             student.EmailAddress = student.StudentId + $"@mail.school.com";
             student.ContactInfo.Email = student.EmailAddress;
             student.School.Students.Add(student);
-            student.School.Id = _context.Schools.Count() + 1;
 
             var school = student.School;
-            PaymentPeriode paymentPeriode = new PaymentPeriode
+            PaymentPeriod paymentperiod = new PaymentPeriod
             {
                 Payments = new HashSet<Payment>(),
                 Student = student,
@@ -70,68 +68,52 @@ namespace OgrenciAidatSistemi.Data.DBSeeders
                 CreatedAt = DateTime.Now,
                 UpdatedAt = DateTime.Now,
             };
-
-            switch (paymentMethod)
+            Payment payment = paymentMethod switch
             {
-                case PaymentMethod.Cash:
-                    payment = new CashPayment
+                PaymentMethod.Cash
+                    => new CashPayment
                     {
                         Student = student,
                         CashierName = "cashier 1",
                         ReceiptNumber = random.NextInt64(1, 111111).ToString(),
                         ReceiptIssuer = "issuer 1",
                         ReceiptDate = DateTime.UtcNow,
-                        PaymentPeriode = paymentPeriode,
-                    };
-                    break;
-                case PaymentMethod.Bank:
-                    payment = new BankPayment
+                        PaymentPeriod = paymentperiod,
+                    },
+                PaymentMethod.Bank
+                    => new BankPayment
                     {
                         Student = student,
-                        PaymentPeriode = paymentPeriode,
+                        PaymentPeriod = paymentperiod,
                         BankName = "Bank1",
                         AccountNumber = random.NextInt64(1, 111111).ToString(),
                         BranchCode = random.NextInt64(1, 111111).ToString(),
                         // iban length is 26
                         IBAN = genIban(),
-                    };
-                    break;
-                case PaymentMethod.CreditCard:
-                    payment = new CreditCardPayment
+                    },
+                PaymentMethod.DebitCard
+                    => new DebitCardPayment
                     {
                         Student = student,
-                        PaymentPeriode = paymentPeriode,
-                        CardNumber = random.NextInt64(1, 111111).ToString(),
+                        PaymentPeriod = paymentperiod,
+                        CardNumber = random
+                            .NextInt64(1111111111111111, 9999999999999999)
+                            .ToString(),
                         CardHolderName = "cardholder 1",
                         ExpiryDate = DateTime.UtcNow.ToString(),
-                        CVC = random.NextInt64(1, 111111).ToString(),
-                    };
-                    break;
-                case PaymentMethod.DebitCard:
-                    payment = new DebitCardPayment
+                        CVC = [.. random.Next(100, 999).ToString()],
+                    },
+                PaymentMethod.Check
+                    => new CheckPayment()
                     {
                         Student = student,
-                        PaymentPeriode = paymentPeriode,
-                        CardNumber = random.NextInt64(1, 111111).ToString(),
-                        CardHolderName = "cardholder 1",
-                        ExpiryDate = DateTime.UtcNow.ToString(),
-                        CVC = random.NextInt64(1, 111111).ToString(),
-                    };
-                    break;
-                case PaymentMethod.Check:
-                    payment = new CheckPayment()
-                    {
-                        Student = student,
-                        PaymentPeriode = paymentPeriode,
+                        PaymentPeriod = paymentperiod,
                         CheckNumber = random.NextInt64(1, 111111).ToString(),
                         BankName = "Bank1",
                         BranchCode = random.NextInt64(1, 111111).ToString(),
-                    };
-                    break;
-                default:
-                    throw new Exception("Invalid payment method");
-            }
-
+                    },
+                _ => throw new Exception("Invalid payment method"),
+            };
             payment.CreatedAt = DateTime.Now;
             payment.UpdatedAt = DateTime.Now;
             payment.PaymentDate = DateTime.Now;
@@ -245,10 +227,6 @@ namespace OgrenciAidatSistemi.Data.DBSeeders
                 .BankPayments.Where(p => p.CreatedAt > tenminutesago)
                 .ToListAsync();
 
-            ICollection<CreditCardPayment> dbCreditCardPayments = await _context
-                .CreditCardPayments.Where(p => p.CreatedAt > tenminutesago)
-                .ToListAsync();
-
             ICollection<DebitCardPayment> dbDebitCardPayments = await _context
                 .DebitCardPayments.Where(p => p.CreatedAt > tenminutesago)
                 .ToListAsync();
@@ -261,7 +239,6 @@ namespace OgrenciAidatSistemi.Data.DBSeeders
             [
                 .. dbCashPayments,
                 .. dbBankPayments,
-                .. dbCreditCardPayments,
                 .. dbDebitCardPayments,
                 .. dbCheckPayments
             ];
@@ -294,25 +271,25 @@ namespace OgrenciAidatSistemi.Data.DBSeeders
             if (entity.Student == null)
                 throw new Exception("PaymentDBSeeder: SeedEntityAsync entity.Student is null");
 
-            if (entity.PaymentPeriode == null)
+            if (entity.PaymentPeriod == null)
                 throw new Exception(
-                    "PaymentDBSeeder: SeedEntityAsync entity.PaymentPeriode is null"
+                    "PaymentDBSeeder: SeedEntityAsync entity.paymentperiod is null"
                 );
 
             if (entity.Receipt == null)
                 throw new Exception("PaymentDBSeeder: SeedEntityAsync entity.Receipt is null");
 
-            entity.PaymentPeriode.WorkYear.School = entity.Student.School;
-            entity.PaymentPeriode.WorkYear.PaymentPeriods = new HashSet<PaymentPeriode>
+            entity.PaymentPeriod.WorkYear.School = entity.Student.School;
+            entity.PaymentPeriod.WorkYear.PaymentPeriods = new HashSet<PaymentPeriod>
             {
-                entity.PaymentPeriode
+                entity.PaymentPeriod
             };
 
-            entity.PaymentPeriode.WorkYear.CreatedAt = DateTime.Now;
-            entity.PaymentPeriode.WorkYear.UpdatedAt = DateTime.Now;
-            entity.PaymentPeriode.Occurrence = Occurrence.Monthly;
-            entity.PaymentPeriode.CreatedAt = DateTime.Now;
-            entity.PaymentPeriode.UpdatedAt = DateTime.Now;
+            entity.PaymentPeriod.WorkYear.CreatedAt = DateTime.Now;
+            entity.PaymentPeriod.WorkYear.UpdatedAt = DateTime.Now;
+            entity.PaymentPeriod.Occurrence = Occurrence.Monthly;
+            entity.PaymentPeriod.CreatedAt = DateTime.Now;
+            entity.PaymentPeriod.UpdatedAt = DateTime.Now;
             if (entity.Receipt.Path == null)
             {
                 // try to find not used path
@@ -413,17 +390,7 @@ protected override Payment CreateRandomModel()
 
     switch (paymentMethod)
     {
-        case PaymentMethod.CreditCard:
-            payment = new CreditCardPayment()
-            {
-                Student = student,
-                CardNumber = random.NextInt64(1, 111111).ToString(),
-                CardHolderName = "cardholder 1",
-                ExpiryDate = DateTime.UtcNow.ToString(),
-                CVC = random.NextInt64(1, 111111).ToString(),
-            };
-            break;
-        case PaymentMethod.Check:
+       case PaymentMethod.Check:
             payment = new CheckPayment()
             {
                 School = school,

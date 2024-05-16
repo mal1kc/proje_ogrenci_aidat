@@ -28,68 +28,73 @@
 
 * todo
     + [X] studentid generator
+    + [ ] add Message tempdata for all views
     + [ ] add payment verification panel for sch admin
     + [ ] add payment panel for student
     + [ ] crete paymentperiod service for auto create payments for students and save to db 
     + [ ] add workyear management panel for sch admin
     + [ ] add paymentperiod management panel for sch admin (create, edit, delete) ++
     + [ ] add all models to delete , edit , create panel for site admin (some of them must be debug only) +++
-        > [ ] payment
-            > [ ] create
-            > [ ] edit
-            > [ ] detail
-            > [ ] delete
-            > [x] list
-        > [ ] paymentperiod
-            > [ ] create
-            > [ ] edit
-            > [ ] delete
-            > [ ] detail
-            > [x] list
-        > [ ] workyear
-            > [ ] create
-            > [ ] edit
-            > [ ] delete
-            > [ ] detail
-            > [ ] list
-        > [ ] student
-            > [ ] create
-            > [ ] edit
-            > [ ] delete
-            > [x] detail
-            > [x] list
-        > [ ] school
-            > [x] create
-            > [ ] edit
-            > [ ] delete
-            > [x] detail
-            > [x] list
-        > [ ] schooladmin
-            > [x] create
-            > [ ] edit
-            > [x] delete
-            > [X] detail
-            > [x] list
-        > [ ] contactınfo
-            > [ ] create
-            > [ ] edit
-            > [ ] delete
-            > [ ] detail
-            > [ ] list
-        > [ ] filepath
-            > [ ] create
-            > [ ] edit
-            > [ ] delete
-            > [ ] detail
-            > [ ] list
-        > [X] grade not necessary
+        + [ ] payment
+            + [ ] edit (only school admin (only payment verification))
+            + [ ] create (only student)
+            + [x] detail
+            + [x] delete (only site admin (debug only))
+            + [x] list
+        + [ ] paymentperiod (only school admin, site admin)
+            + [ ] edit  
+            + [ ] create
+            + [ ] delete
+            + [ ] detail
+            + [x] list
+        + [ ] workyear  (only school admin, site admin)
+            + [ ] edit  
+            + [ ] create
+            + [ ] delete
+            + [ ] detail
+            + [ ] list  
+        + [ ] student  (only school admin, site admin)
+            + [ ] edit
+            + [X] create
+            + [X] delete
+            + [x] detail
+            + [x] list 
+        + [ ] school (only school admin, site admin)
+            + [ ] edit
+            + [x] create   (only site admin)
+            + [x] delete (only site admin)
+            + [x] detail
+            + [x] list (only site admin)
+        + [ ] schooladmin (only school admin, site admin)
+            + [ ] edit
+            + [x] create 
+            + [x] delete
+            + [X] detail
+            + [x] list
+        + [ ] contactınfo (all , but student can only see their own)
+            + [ ] edit
+            + [ ] create
+            + [ ] delete
+            + [ ] detail
+            + [ ] list
+        + [ ] filepath (all , but student can only see their own)
+            + [ ] edit
+            + [ ] create
+            + [ ] delete
+            + [ ] detail
+            + [ ] list
+        + [X] grade not necessary
 
- 
-
-* todo , maybe list
+* todo , maybe
 
     + [ ] move partial views to shared folder + add partial views for all possible models,
             \ add them to partialview controller or their model controller
     + [ ] öğrenci id ile giriş yapma 
     + [ ] student email generator
     + [ ] add predefined search filters linq queries and save as search config ( rewrite most of ModelQueryableHelper)
+
+* todo , maybe fix issues
+  
+    + [X] ( possible fix at [[./OgrenciAidatSistemi/Services/UserService.cs:220]] ) if a user is deleted, or not exist in db , if it is logged in, its still logged in, fix this
+        + in this condition, user related panels but novbar is not shown , logged status is not shown ( not easylly detectable)
+    + [ ] list view links does not carry search parameters or sort parameters to next page (prob easy fix)

@@ -217,12 +217,20 @@ namespace OgrenciAidatSistemi.Services
             return await GetUserById(int.Parse(userId));
         }
 
-        public bool IsUserSignedIn()
+        public async Task<bool> IsUserSignedIn()
         {
             if (HttpContext == null)
                 return false;
             if (HttpContext.User.Identity == null)
                 return false;
+
+            var currentUserId = HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (_dbContext.Users == null && HttpContext.User.Identity.IsAuthenticated)
+                await SignOutUser();
+            if (currentUserId == null)
+                return false;
+            if (await GetUserById(int.Parse(currentUserId)) == null)
+                await SignOutUser();
 
             return HttpContext.User.Identity.IsAuthenticated;
         }

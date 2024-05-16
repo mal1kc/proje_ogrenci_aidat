@@ -1,7 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using OgrenciAidatSistemi.Data;
 using OgrenciAidatSistemi.Helpers;
 using OgrenciAidatSistemi.Models;
@@ -112,45 +111,7 @@ namespace OgrenciAidatSistemi.Controllers
             return View(schoolView);
         }
 
-        [
-            HttpPost,
-            ActionName("DeleteConfirmed"),
-            ValidateAntiForgeryToken,
-            Authorize(Roles = Configurations.Constants.userRoles.SiteAdmin)
-        ]
-        public async Task<IActionResult> DeleteConfirmed(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            if (_dbContext.Schools == null)
-            {
-                _logger.LogError("Schools table is null");
-                _dbContext.Schools = _dbContext.Set<School>();
-            }
-
-            var school = await _dbContext.Schools.FindAsync(id);
-            if (school == null)
-            {
-                return NotFound();
-            }
-            _dbContext.Schools.Remove(school);
-
-            return RedirectToAction("List");
-        }
-
-        // HTTP GET: School/Details/5
-        // can be accessed by school admin, site admin
-
-
-
-        [Authorize(
-            Roles = Configurations.Constants.userRoles.SchoolAdmin
-                + ","
-                + Configurations.Constants.userRoles.SiteAdmin
-        )]
+        [Authorize(Roles = Configurations.Constants.userRoles.SiteAdmin)]
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null || id == 0 || _dbContext.Schools == null)
@@ -196,6 +157,73 @@ namespace OgrenciAidatSistemi.Controllers
             }
 
             return View(school.ToView());
+        }
+
+        // HTTP GET: School/Delete/5
+
+        [Authorize(Roles = Configurations.Constants.userRoles.SiteAdmin)]
+        public async Task<IActionResult> Delete(int? id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            if (_dbContext.Schools == null)
+            {
+                _logger.LogError("Schools table is null");
+                _dbContext.Schools = _dbContext.Set<School>();
+            }
+
+            var school = await _dbContext.Schools.FindAsync(id);
+            if (school == null)
+            {
+                return NotFound();
+            }
+
+            return View(school.ToView());
+        }
+
+        // HTTP POST: School/DeleteConfirmed/5
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [Authorize(Roles = Configurations.Constants.userRoles.SiteAdmin)]
+        public async Task<IActionResult> DeleteConfirmed(int id)
+        {
+            if (_dbContext.Schools == null)
+            {
+                _logger.LogError("Schools table is null");
+                _dbContext.Schools = _dbContext.Set<School>();
+            }
+
+            var school = await _dbContext.Schools.FindAsync(id);
+            if (school == null)
+                return NotFound();
+
+            try
+            {
+                // TODO: implement backup
+                // create backup of all related data before deleting
+                School? related = _dbContext.Schools.Where(s => s.Id == id).FirstOrDefault();
+
+                if (related == null)
+                    return NotFound();
+
+                _dbContext.Schools.Remove(related);
+
+                await _dbContext.SaveChangesAsync();
+            }
+            catch (Exception e)
+            {
+                _logger.LogError("Error while deleting school: {0}", e.Message);
+                if (e.InnerException != null)
+                    _logger.LogError("Inner exception: {0}", e.InnerException.Message);
+                TempData["Error"] = "Error while deleting school";
+                return RedirectToAction("Delete", new { id });
+            }
+
+            return RedirectToAction("List");
         }
     }
 }

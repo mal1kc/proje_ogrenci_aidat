@@ -11,7 +11,7 @@ using OgrenciAidatSistemi.Data;
 namespace OgrenciAidatSistemi.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20240506134629_init_mgrt")]
+    [Migration("20240516180720_init_mgrt")]
     partial class init_mgrt
     {
         /// <inheritdoc />
@@ -57,7 +57,12 @@ namespace OgrenciAidatSistemi.Migrations
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("TEXT");
 
+                    b.Property<int?>("UserId")
+                        .HasColumnType("INTEGER");
+
                     b.HasKey("Id");
+
+                    b.HasIndex("UserId");
 
                     b.ToTable("Contacts");
                 });
@@ -98,6 +103,9 @@ namespace OgrenciAidatSistemi.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
+                    b.Property<int?>("PaymentId")
+                        .HasColumnType("INTEGER");
+
                     b.Property<long>("Size")
                         .HasColumnType("INTEGER");
 
@@ -109,6 +117,9 @@ namespace OgrenciAidatSistemi.Migrations
                     b.HasIndex("CreatedById");
 
                     b.HasIndex("Path")
+                        .IsUnique();
+
+                    b.HasIndex("PaymentId")
                         .IsUnique();
 
                     b.ToTable("FilePaths");
@@ -130,7 +141,7 @@ namespace OgrenciAidatSistemi.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
-                    b.Property<int>("SchoolId")
+                    b.Property<int?>("SchoolId")
                         .HasColumnType("INTEGER");
 
                     b.Property<DateTime>("UpdatedAt")
@@ -164,16 +175,10 @@ namespace OgrenciAidatSistemi.Migrations
                     b.Property<int>("PaymentPeriodId")
                         .HasColumnType("INTEGER");
 
-                    b.Property<int?>("PaymentPeriodeId")
-                        .HasColumnType("INTEGER");
-
                     b.Property<string>("PaymentType")
                         .IsRequired()
                         .HasMaxLength(13)
                         .HasColumnType("TEXT");
-
-                    b.Property<int?>("ReceiptId")
-                        .HasColumnType("INTEGER");
 
                     b.Property<int>("Status")
                         .HasColumnType("INTEGER");
@@ -186,9 +191,7 @@ namespace OgrenciAidatSistemi.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("PaymentPeriodeId");
-
-                    b.HasIndex("ReceiptId");
+                    b.HasIndex("PaymentPeriodId");
 
                     b.HasIndex("StudentId");
 
@@ -199,7 +202,7 @@ namespace OgrenciAidatSistemi.Migrations
                     b.UseTphMappingStrategy();
                 });
 
-            modelBuilder.Entity("OgrenciAidatSistemi.Models.PaymentPeriode", b =>
+            modelBuilder.Entity("OgrenciAidatSistemi.Models.PaymentPeriod", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -217,7 +220,7 @@ namespace OgrenciAidatSistemi.Migrations
                     b.Property<DateTime>("StartDate")
                         .HasColumnType("TEXT");
 
-                    b.Property<int>("StudentId")
+                    b.Property<int?>("StudentId")
                         .HasColumnType("INTEGER");
 
                     b.Property<decimal>("TotalAmount")
@@ -226,7 +229,7 @@ namespace OgrenciAidatSistemi.Migrations
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("TEXT");
 
-                    b.Property<int>("WorkYearId")
+                    b.Property<int?>("WorkYearId")
                         .HasColumnType("INTEGER");
 
                     b.HasKey("Id");
@@ -316,7 +319,7 @@ namespace OgrenciAidatSistemi.Migrations
                     b.Property<DateTime>("EndDate")
                         .HasColumnType("TEXT");
 
-                    b.Property<int>("SchoolId")
+                    b.Property<int?>("SchoolId")
                         .HasColumnType("INTEGER");
 
                     b.Property<DateTime>("StartDate")
@@ -405,44 +408,6 @@ namespace OgrenciAidatSistemi.Migrations
                     b.HasDiscriminator().HasValue("Check");
                 });
 
-            modelBuilder.Entity("OgrenciAidatSistemi.Models.CreditCardPayment", b =>
-                {
-                    b.HasBaseType("OgrenciAidatSistemi.Models.Payment");
-
-                    b.Property<string>("CVC")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("CardHolderName")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("CardNumber")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("ExpiryDate")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.ToTable("Payments", t =>
-                        {
-                            t.Property("CVC")
-                                .HasColumnName("CreditCardPayment_CVC");
-
-                            t.Property("CardHolderName")
-                                .HasColumnName("CreditCardPayment_CardHolderName");
-
-                            t.Property("CardNumber")
-                                .HasColumnName("CreditCardPayment_CardNumber");
-
-                            t.Property("ExpiryDate")
-                                .HasColumnName("CreditCardPayment_ExpiryDate");
-                        });
-
-                    b.HasDiscriminator().HasValue("CreditCard");
-                });
-
             modelBuilder.Entity("OgrenciAidatSistemi.Models.DebitCardPayment", b =>
                 {
                     b.HasBaseType("OgrenciAidatSistemi.Models.Payment");
@@ -507,7 +472,7 @@ namespace OgrenciAidatSistemi.Migrations
                     b.Property<bool>("IsGraduated")
                         .HasColumnType("INTEGER");
 
-                    b.Property<int>("SchoolId")
+                    b.Property<int?>("SchoolId")
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("StudentId")
@@ -539,6 +504,15 @@ namespace OgrenciAidatSistemi.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("OgrenciAidatSistemi.Models.ContactInfo", b =>
+                {
+                    b.HasOne("OgrenciAidatSistemi.Models.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId");
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("OgrenciAidatSistemi.Models.FilePath", b =>
                 {
                     b.HasOne("OgrenciAidatSistemi.Models.User", "CreatedBy")
@@ -547,7 +521,14 @@ namespace OgrenciAidatSistemi.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("OgrenciAidatSistemi.Models.Payment", "Payment")
+                        .WithOne("Receipt")
+                        .HasForeignKey("OgrenciAidatSistemi.Models.FilePath", "PaymentId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
                     b.Navigation("CreatedBy");
+
+                    b.Navigation("Payment");
                 });
 
             modelBuilder.Entity("OgrenciAidatSistemi.Models.Grade", b =>
@@ -555,47 +536,40 @@ namespace OgrenciAidatSistemi.Migrations
                     b.HasOne("OgrenciAidatSistemi.Models.School", "School")
                         .WithMany("Grades")
                         .HasForeignKey("SchoolId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.Cascade);
 
                     b.Navigation("School");
                 });
 
             modelBuilder.Entity("OgrenciAidatSistemi.Models.Payment", b =>
                 {
-                    b.HasOne("OgrenciAidatSistemi.Models.PaymentPeriode", "PaymentPeriode")
+                    b.HasOne("OgrenciAidatSistemi.Models.PaymentPeriod", "PaymentPeriod")
                         .WithMany("Payments")
-                        .HasForeignKey("PaymentPeriodeId");
-
-                    b.HasOne("OgrenciAidatSistemi.Models.FilePath", "Receipt")
-                        .WithMany()
-                        .HasForeignKey("ReceiptId");
+                        .HasForeignKey("PaymentPeriodId")
+                        .OnDelete(DeleteBehavior.SetNull)
+                        .IsRequired();
 
                     b.HasOne("OgrenciAidatSistemi.Models.Student", "Student")
                         .WithMany("Payments")
                         .HasForeignKey("StudentId")
                         .OnDelete(DeleteBehavior.SetNull);
 
-                    b.Navigation("PaymentPeriode");
-
-                    b.Navigation("Receipt");
+                    b.Navigation("PaymentPeriod");
 
                     b.Navigation("Student");
                 });
 
-            modelBuilder.Entity("OgrenciAidatSistemi.Models.PaymentPeriode", b =>
+            modelBuilder.Entity("OgrenciAidatSistemi.Models.PaymentPeriod", b =>
                 {
                     b.HasOne("OgrenciAidatSistemi.Models.Student", "Student")
                         .WithMany("PaymentPeriods")
                         .HasForeignKey("StudentId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.SetNull);
 
                     b.HasOne("OgrenciAidatSistemi.Models.WorkYear", "WorkYear")
                         .WithMany("PaymentPeriods")
                         .HasForeignKey("WorkYearId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.SetNull);
 
                     b.Navigation("Student");
 
@@ -607,8 +581,7 @@ namespace OgrenciAidatSistemi.Migrations
                     b.HasOne("OgrenciAidatSistemi.Models.School", "School")
                         .WithMany("WorkYears")
                         .HasForeignKey("SchoolId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.Cascade);
 
                     b.Navigation("School");
                 });
@@ -662,15 +635,19 @@ namespace OgrenciAidatSistemi.Migrations
                     b.HasOne("OgrenciAidatSistemi.Models.School", "School")
                         .WithMany("Students")
                         .HasForeignKey("SchoolId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.Cascade);
 
                     b.Navigation("ContactInfo");
 
                     b.Navigation("School");
                 });
 
-            modelBuilder.Entity("OgrenciAidatSistemi.Models.PaymentPeriode", b =>
+            modelBuilder.Entity("OgrenciAidatSistemi.Models.Payment", b =>
+                {
+                    b.Navigation("Receipt");
+                });
+
+            modelBuilder.Entity("OgrenciAidatSistemi.Models.PaymentPeriod", b =>
                 {
                     b.Navigation("Payments");
                 });

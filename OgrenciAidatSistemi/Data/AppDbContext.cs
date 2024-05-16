@@ -5,8 +5,8 @@ namespace OgrenciAidatSistemi.Data
 {
     public class AppDbContext : DbContext
     {
-        // TODO make users table for only refrence in other tables
-        public DbSet<User>? Users { get; set; } // must be ıd table of users
+        // TODO make users table for only reference in other tables
+        public DbSet<User>? Users { get; set; } // must be id table of users
         public DbSet<SiteAdmin>? SiteAdmins { get; set; }
 
         public DbSet<SchoolAdmin>? SchoolAdmins { get; set; }
@@ -16,12 +16,11 @@ namespace OgrenciAidatSistemi.Data
         public DbSet<ContactInfo>? Contacts { get; set; }
 
         public DbSet<Payment>? Payments { get; set; }
-        public DbSet<PaymentPeriode>? PaymentPeriods { get; set; }
+        public DbSet<PaymentPeriod>? PaymentPeriods { get; set; }
 
         public DbSet<CashPayment>? CashPayments { get; set; }
 
         public DbSet<BankPayment>? BankPayments { get; set; }
-        public DbSet<CreditCardPayment>? CreditCardPayments { get; set; }
         public DbSet<DebitCardPayment>? DebitCardPayments { get; set; }
 
         public DbSet<CheckPayment>? CheckPayments { get; set; }
@@ -31,7 +30,7 @@ namespace OgrenciAidatSistemi.Data
 
         public DbSet<FilePath>? FilePaths { get; set; }
 
-        // TODO: needs to be change in devlopment and production use
+        // TODO: needs to be changed in development and production use
 
         protected override void OnConfiguring(DbContextOptionsBuilder options) =>
             options.UseSqlite("DataSource = app_.db; Cache=Shared");
@@ -40,7 +39,6 @@ namespace OgrenciAidatSistemi.Data
         {
             modelBuilder.Entity<CashPayment>().HasBaseType<Payment>();
             modelBuilder.Entity<BankPayment>().HasBaseType<Payment>();
-            modelBuilder.Entity<CreditCardPayment>().HasBaseType<Payment>();
             modelBuilder.Entity<CheckPayment>().HasBaseType<Payment>();
             modelBuilder.Entity<DebitCardPayment>().HasBaseType<Payment>();
 
@@ -52,7 +50,6 @@ namespace OgrenciAidatSistemi.Data
                 .HasDiscriminator<string>("PaymentType")
                 .HasValue<CashPayment>("Cash")
                 .HasValue<BankPayment>("Bank")
-                .HasValue<CreditCardPayment>("CreditCard")
                 .HasValue<DebitCardPayment>("DebitCard")
                 .HasValue<CheckPayment>("Check");
 
@@ -91,10 +88,7 @@ namespace OgrenciAidatSistemi.Data
             modelBuilder.Entity<SchoolAdmin>().HasOne(s => s.School);
 
             modelBuilder.Entity<Payment>().HasOne(p => p.Student);
-            modelBuilder
-                .Entity<Payment>()
-                .HasOne(p => p.PaymentPeriode)
-                .WithMany(pp => pp.Payments);
+            modelBuilder.Entity<Payment>().HasOne(p => p.PaymentPeriod).WithMany(pp => pp.Payments);
             modelBuilder.Entity<Payment>().HasOne(p => p.Receipt);
             modelBuilder
                 .Entity<Payment>()
@@ -108,23 +102,89 @@ namespace OgrenciAidatSistemi.Data
                 .WithOne(pp => pp.WorkYear);
             modelBuilder.Entity<WorkYear>().HasOne(wy => wy.School).WithMany(s => s.WorkYears);
 
-            modelBuilder.Entity<PaymentPeriode>().HasOne(pp => pp.WorkYear);
+            modelBuilder.Entity<PaymentPeriod>().HasOne(pp => pp.WorkYear);
 
             modelBuilder.Entity<FilePath>().HasIndex(fp => fp.Path).IsUnique();
 
             modelBuilder.Entity<ContactInfo>().Property(c => c.Email).IsRequired();
 
+            // delete rules
+
+            // if school deleted delete all related models to school
+            modelBuilder
+                .Entity<School>()
+                .HasMany(s => s.Students)
+                .WithOne(s => s.School)
+                .OnDelete(DeleteBehavior.Cascade); // delete all students of school
+
+            modelBuilder
+                .Entity<School>()
+                .HasMany(s => s.SchoolAdmins)
+                .WithOne(sa => sa.School)
+                .OnDelete(DeleteBehavior.Cascade); // delete all school admins of school
+
+            modelBuilder
+                .Entity<School>()
+                .HasMany(s => s.WorkYears)
+                .WithOne(wy => wy.School)
+                .OnDelete(DeleteBehavior.Cascade); // delete all work years of school
+
+            modelBuilder
+                .Entity<School>()
+                .HasMany(s => s.Grades)
+                .WithOne(g => g.School)
+                .OnDelete(DeleteBehavior.Cascade); // delete all grades of school
+
+            modelBuilder
+                .Entity<WorkYear>()
+                .HasMany(wy => wy.PaymentPeriods)
+                .WithOne(pp => pp.WorkYear)
+                .OnDelete(DeleteBehavior.SetNull); // if work year deleted set null to work year field of payment period
+
+            // set others (not cascaded ones) of school to null if school deleted
+
+            modelBuilder
+                .Entity<Student>()
+                .HasMany(s => s.Payments)
+                .WithOne(p => p.Student)
+                .OnDelete(DeleteBehavior.SetNull); // if student deleted set null to student field of payment
+
+            modelBuilder
+                .Entity<Student>()
+                .HasMany(s => s.PaymentPeriods)
+                .WithOne(pp => pp.Student)
+                .OnDelete(DeleteBehavior.SetNull); // if student deleted set null to student field of payment period
+
+            // when we delete a payment set null to payment period field of payment
+            modelBuilder
+                .Entity<Payment>()
+                .HasOne(p => p.PaymentPeriod)
+                .WithMany(pp => pp.Payments)
+                .OnDelete(DeleteBehavior.SetNull); // if payment deleted set null to payment period field of payment
+
+            // when we delete a payment period set null to work year field of payment period
+            modelBuilder
+                .Entity<PaymentPeriod>()
+                .HasOne(pp => pp.WorkYear)
+                .WithMany(wy => wy.PaymentPeriods)
+                .OnDelete(DeleteBehavior.SetNull); // if payment period deleted set null to work year field of payment period
+
+            // if we delete payment we don't want to delete receipt
+            modelBuilder
+                .Entity<Payment>()
+                .HasOne(p => p.Receipt)
+                .WithOne(r => r.Payment)
+                .OnDelete(DeleteBehavior.SetNull); // if payment deleted set null to payment field of receipt
+
+            // if we delete a payment set null to receipt field of receipt
+            modelBuilder
+                .Entity<FilePath>()
+                .HasOne(r => r.Payment)
+                .WithOne(p => p.Receipt)
+                .OnDelete(DeleteBehavior.SetNull); // if receipt deleted set null to payment field of receipt
+
             base.OnModelCreating(modelBuilder);
         }
-
-        /* public override DbSet<TEntity> Set<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.NonPublicConstructors | DynamicallyAccessedMemberTypes.PublicFields | DynamicallyAccessedMemberTypes.NonPublicFields | DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.NonPublicProperties | DynamicallyAccessedMemberTypes.Interfaces)] TEntity>() */
-        /* { */
-        /*     return typeof(TEntity) switch */
-        /*     { */
-        /*         _ => base.Set<TEntity>() */
-        /*     }; */
-        /* } */
-        /**/
 
         public override int SaveChanges()
         {
@@ -137,8 +197,8 @@ namespace OgrenciAidatSistemi.Data
                 }
                 else if (entry.State == EntityState.Modified)
                     entry.Property("UpdatedAt").CurrentValue = DateTime.Now;
-                // if entity is payment periode update total amount
-                if (entry.Entity is PaymentPeriode pp)
+                // if entity is payment period update total amount
+                if (entry.Entity is PaymentPeriod pp)
                 {
                     pp.TotalAmount = pp.Payments.Sum(p => p.Amount);
                 }

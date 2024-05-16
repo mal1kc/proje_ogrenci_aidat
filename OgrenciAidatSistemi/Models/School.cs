@@ -12,7 +12,7 @@ namespace OgrenciAidatSistemi.Models
         public ISet<Grade>? Grades { get; set; }
         public ISet<WorkYear>? WorkYears { get; set; }
 
-        public required ISet<Student> Students { get; set; }
+        public required ISet<Student?>? Students { get; set; }
 
         public ModelSearchConfig SearchConfig =>
             new ModelSearchConfig(

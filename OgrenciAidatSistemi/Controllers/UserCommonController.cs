@@ -30,10 +30,7 @@ namespace OgrenciAidatSistemi.Controllers
 
         public async Task<IActionResult> SignOutUser()
         {
-            // if user is not signed in, redirect to home page
-            // else sign out user and redirect to home page with logged out message
-
-            if (_userService.IsUserSignedIn())
+            if (await _userService.IsUserSignedIn())
             {
                 _logger.LogInformation("SignOutUser() -> user is signed in, signing out");
                 await _userService.SignOutUser();

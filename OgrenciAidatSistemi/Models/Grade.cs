@@ -8,7 +8,7 @@ namespace OgrenciAidatSistemi.Models
         public DateTime CreatedAt { get; set; }
         public DateTime UpdatedAt { get; set; }
         public required string Name { get; set; }
-        public required School School { get; set; }
+        public School? School { get; set; }
         public int GradeLevel { get; set; }
         public ISet<Student>? Students { get; set; }
         public static ModelSearchConfig SearchConfig =>

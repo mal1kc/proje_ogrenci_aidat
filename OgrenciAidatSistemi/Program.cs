@@ -78,21 +78,27 @@ internal class Program
                 throw new Exception("AppDbContext is null");
             }
 
+            var logger = app.Services.GetRequiredService<ILogger<Program>>();
+
+            if (configuration.GetSection("SeedData").GetValue("SeedSiteAdmin", true) == true)
+            {
+                var siteAdminSeeder = new SiteAdminDBSeeder(
+                    context: ctx,
+                    configuration: configuration,
+                    logger: logger
+                );
+
+                await siteAdminSeeder.SeedAsync();
+            }
+
             if (configuration.GetSection("SeedData").GetValue("SeedDB", true) == true)
             {
                 var _verbs = configuration.GetSection("SeedData").GetValue("VerboseLogging", false);
                 Console.WriteLine("Seeding Database");
 
-                var logger = app.Services.GetRequiredService<ILogger<Program>>();
-
                 List<IDbSeeder<AppDbContext>> DBseeders =
                     new()
                     {
-                        new SiteAdminDBSeeder(
-                            context: ctx,
-                            configuration: configuration,
-                            logger: logger
-                        ),
                         new SchoolAdminDBSeeder(
                             context: ctx,
                             configuration: configuration,
@@ -152,7 +158,11 @@ internal class Program
 
         // builder.Environment.ContentRootPath = Directory.GetCurrentDirectory() + "wwwroot";
         builder.Configuration.AddJsonFile(
+#if DEBUG
+            "appsettings.Development.json",
+#else
             "appsettings.json",
+#endif
             optional: false,
             reloadOnChange: false
         );
@@ -162,6 +172,14 @@ internal class Program
         RegisterServices(builder.Services, builder.Configuration);
         WebApplication app = builder.Build();
         await ConfigureAppAsync(app);
+
+        #region "some pre-run validations"
+        if (OgrenciAidatSistemi.Models.PaymentMethodSpecificFields.ValidateFields() == false)
+        {
+            throw new Exception("PaymentMethodSpecificFields is not valid");
+        }
+
+        #endregion
 
         app.Run();
     }
