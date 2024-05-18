@@ -45,7 +45,7 @@ namespace OgrenciAidatSistemi.Models
         public FilePath? Receipt { get; set; }
 
         public static ModelSearchConfig SearchConfig =>
-            new ModelSearchConfig(
+            new(
                 PaymentSearchConfig.AllowedFieldsForSearch,
                 PaymentSearchConfig.AllowedFieldsForSort
             );

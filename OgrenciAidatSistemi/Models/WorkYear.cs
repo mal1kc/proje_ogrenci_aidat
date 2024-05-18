@@ -11,8 +11,8 @@ namespace OgrenciAidatSistemi.Models
         public DateTime EndDate { get; set; }
         public ISet<PaymentPeriod>? PaymentPeriods { get; set; }
         public School? School { get; set; }
-        public ModelSearchConfig SearchConfig =>
-            new ModelSearchConfig(
+        public static ModelSearchConfig SearchConfig =>
+            new(
                 WorkYearSearchConfig.AllowedFieldsForSearch,
                 WorkYearSearchConfig.AllowedFieldsForSort
             );
@@ -34,7 +34,8 @@ namespace OgrenciAidatSistemi.Models
                     : PaymentPeriods?.Select(pp => pp.ToView(true)).ToHashSet(),
                 School = ignoreBidirectNav ? null : School?.ToView(true),
                 CreatedAt = CreatedAt,
-                UpdatedAt = UpdatedAt
+                UpdatedAt = UpdatedAt,
+                TotalAmount = PaymentPeriods?.Sum(pp => pp.TotalAmount) ?? null
             };
         }
     }
@@ -46,8 +47,12 @@ namespace OgrenciAidatSistemi.Models
         public DateTime EndDate { get; set; }
         public ISet<PaymentPeriodView>? PaymentPeriods { get; set; }
         public SchoolView? School { get; set; }
+
+        public int? SchoolId { get; set; }
         public DateTime CreatedAt { get; set; }
         public DateTime UpdatedAt { get; set; }
+
+        public decimal? TotalAmount { get; set; }
     }
 
     public static class WorkYearSearchConfig

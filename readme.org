@@ -49,10 +49,10 @@
             + [x] list
         + [ ] workyear  (only school admin, site admin)
             + [ ] edit  
-            + [ ] create
-            + [ ] delete
-            + [ ] detail
-            + [ ] list  
+            + [ ] create (needs relook)
+            + [X] delete
+            + [X] detail
+            + [X] list  
         + [ ] student  (only school admin, site admin)
             + [ ] edit
             + [X] create
@@ -84,6 +84,10 @@
             + [ ] detail
             + [ ] list
         + [X] grade not necessary
+    
+    + [ ] add services for retrieving related data for students and school admins - (studentService, schoolAdminService)
+
+
 
 * todo , maybe
 

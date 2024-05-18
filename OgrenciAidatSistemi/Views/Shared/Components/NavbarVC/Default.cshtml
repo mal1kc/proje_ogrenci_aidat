@@ -22,6 +22,9 @@
              @{
               switch(User.GetType().Name)
               {
+                @* 
+                case var UserTypeName when UserTypeName == "SiteAdmin" || UserTypeName == "SchoolAdmin":
+                *@
                 case "SiteAdmin":
                     <li class="nav-item">
                         <a class="nav-link" asp-area="" asp-controller="SiteAdmin" asp-action="List">SiteAdmins</a>
@@ -40,6 +43,9 @@
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" asp-area="" asp-controller="Payment" asp-action="PeriodList">PaymentPeriods</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" asp-area="" asp-controller="WorkYear" asp-action="List">WorkYears</a>
                     </li>
                     break;
               }

@@ -1,3 +1,4 @@
+using System.Security.Cryptography;
 using Microsoft.EntityFrameworkCore;
 using OgrenciAidatSistemi.Models;
 
@@ -198,9 +199,19 @@ namespace OgrenciAidatSistemi.Data
                 else if (entry.State == EntityState.Modified)
                     entry.Property("UpdatedAt").CurrentValue = DateTime.Now;
                 // if entity is payment period update total amount
+
                 if (entry.Entity is PaymentPeriod pp)
                 {
-                    pp.TotalAmount = pp.Payments.Sum(p => p.Amount);
+                    pp.TotalAmount = 0;
+                    if (pp.Payments == null)
+                        continue;
+                    for (int i = 0; i < pp.Payments.Count; i++)
+                    {
+                        if (pp.Payments.ElementAt(i) != null)
+                        {
+                            pp.TotalAmount += pp.Payments.ElementAt(i).Amount;
+                        }
+                    }
                 }
             }
 
