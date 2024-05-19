@@ -42,32 +42,32 @@
     <thead>
         <tr>
             <th>
-                <a asp-action="List" asp-route-sortOrder="@(ViewData["IdSortParm"]?.ToString())"
+                <a asp-action="List" asp-route-sortOrder="@(ViewData["IdSortParam"]?.ToString())"
                     asp-route-searchString="@ViewData["CurrentSearchString"]?.ToString()">Payment Id</a>
 
             </th>
             <th>
-                <a asp-action="List" asp-route-sortOrder="@(ViewData["DateSortParm"]?.ToString())"
+                <a asp-action="List" asp-route-sortOrder="@(ViewData["DateSortParam"]?.ToString())"
                     asp-route-searchString="@ViewData["CurrentSearchString"]?.ToString()">Payment Date</a>
             </th>
             <th>
-                <a asp-action="List" asp-route-sortOrder="@(ViewData["MethodSortParm"]?.ToString())"
+                <a asp-action="List" asp-route-sortOrder="@(ViewData["MethodSortParam"]?.ToString())"
                     asp-route-searchString="@ViewData["CurrentSearchString"]?.ToString()">Payment Method</a>
             </th>
             <th>
-                <a asp-action="List" asp-route-sortOrder="@(ViewData["PeriodSortParm"]?.ToString())"
+                <a asp-action="List" asp-route-sortOrder="@(ViewData["PeriodSortParam"]?.ToString())"
                     asp-route-searchString="@ViewData["CurrentSearchString"]?.ToString()">Payment Period</a>
             </th>
             <th>
-                <a asp-action="List" asp-route-sortOrder="@(ViewData["AmountSortParm"]?.ToString())"
+                <a asp-action="List" asp-route-sortOrder="@(ViewData["AmountSortParam"]?.ToString())"
                     asp-route-searchString="@ViewData["CurrentSearchString"]?.ToString()">Amount</a>
             </th>
             <th>
-                <a asp-action="List" asp-route-sortOrder="@(ViewData["StatusSortParm"]?.ToString())"
+                <a asp-action="List" asp-route-sortOrder="@(ViewData["StatusSortParam"]?.ToString())"
                     asp-route-searchString="@ViewData["CurrentSearchString"]?.ToString()">Status</a>
             </th>
             <th>
-                <a asp-action="List" asp-route-sortOrder="@(ViewData["IsVerifiedSortParm"]?.ToString())"
+                <a asp-action="List" asp-route-sortOrder="@(ViewData["IsVerifiedSortParam"]?.ToString())"
                     asp-route-searchString="@(ViewData["CurrentSearchString"]?.ToString())">Is Verified</a>
             </th>
             <th></th> <!-- column for buttons edit | details | delete -->

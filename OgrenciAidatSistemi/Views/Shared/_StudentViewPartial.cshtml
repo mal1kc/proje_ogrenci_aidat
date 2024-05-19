@@ -1,0 +1,45 @@
+@model StudentView
+
+<div class="card-body">
+    <dl class="col">
+        <a asp-controller="Student"  asp-action="Details" asp-route-id="@Model.Id" class="btn btn-primary float-end">🔗</a>
+
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.StudentId)
+        </dd>
+
+        @if (Model.School != null)
+        {
+            <dt class="col-sm-2 text-nowrap">
+                @Html.DisplayNameFor(model => model.School.Name) :
+            </dt>
+
+            <dd class="col-sm-10 text-muted">
+                @Html.DisplayFor(model => model.School.Name) 
+            </dd>
+        }
+
+
+
+        @if (Model.Payments != null)
+        {
+            <dt class="col-sm-2 text-nowrap">
+                @Html.DisplayNameFor(model => model.Payments) :
+            </dt>
+
+            <dd>
+                student has
+                @if (Model.Payments != null)
+                {
+                    <b> @Model.Payments.Count()</b>
+                    <p> payments in total last payment is created at </p> <b> @Model.Payments.Last().CreatedAt</b>
+                    <b> @Model.Payments.Last().CreatedAt</b>
+                }
+            </dd>
+
+        }
+
+    </dl>
+
+
+</div>

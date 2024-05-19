@@ -1,0 +1,18 @@
+<div class="mb-3">
+
+    @if (TempData["MultipleErros"] != null)
+    {
+        @if (TempData["MultipleErros"] is List<string> errors && errors.Count > 1)
+        {
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                <ul>
+                    @foreach (var error in errors)
+                    {
+                        <li>@error</li>
+                    }
+                </ul>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        }
+    }
+</div>

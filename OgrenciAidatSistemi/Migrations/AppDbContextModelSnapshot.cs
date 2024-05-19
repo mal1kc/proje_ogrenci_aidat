@@ -214,6 +214,9 @@ namespace OgrenciAidatSistemi.Migrations
                     b.Property<int>("Occurrence")
                         .HasColumnType("INTEGER");
 
+                    b.Property<decimal>("PerPaymentAmount")
+                        .HasColumnType("TEXT");
+
                     b.Property<DateTime>("StartDate")
                         .HasColumnType("TEXT");
 

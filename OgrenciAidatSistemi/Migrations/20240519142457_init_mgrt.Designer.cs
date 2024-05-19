@@ -11,7 +11,7 @@ using OgrenciAidatSistemi.Data;
 namespace OgrenciAidatSistemi.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20240516180720_init_mgrt")]
+    [Migration("20240519142457_init_mgrt")]
     partial class init_mgrt
     {
         /// <inheritdoc />
@@ -216,6 +216,9 @@ namespace OgrenciAidatSistemi.Migrations
 
                     b.Property<int>("Occurrence")
                         .HasColumnType("INTEGER");
+
+                    b.Property<decimal>("PerPaymentAmount")
+                        .HasColumnType("TEXT");
 
                     b.Property<DateTime>("StartDate")
                         .HasColumnType("TEXT");

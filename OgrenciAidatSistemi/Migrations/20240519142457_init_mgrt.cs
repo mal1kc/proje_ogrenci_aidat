@@ -264,6 +264,7 @@ namespace OgrenciAidatSistemi.Migrations
                     UpdatedAt = table.Column<DateTime>(type: "TEXT", nullable: false),
                     StartDate = table.Column<DateTime>(type: "TEXT", nullable: false),
                     EndDate = table.Column<DateTime>(type: "TEXT", nullable: false),
+                    PerPaymentAmount = table.Column<decimal>(type: "TEXT", nullable: false),
                     TotalAmount = table.Column<decimal>(type: "TEXT", nullable: false),
                     WorkYearId = table.Column<int>(type: "INTEGER", nullable: true),
                     Occurrence = table.Column<int>(type: "INTEGER", nullable: false)

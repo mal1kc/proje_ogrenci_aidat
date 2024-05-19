@@ -20,7 +20,9 @@ namespace OgrenciAidatSistemi.Models
 
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }
+        public decimal PerPaymentAmount { get; set; }
         public decimal TotalAmount { get; set; }
+
         public required ISet<Payment> Payments { get; set; }
 
         public required WorkYear? WorkYear { get; set; }
@@ -56,6 +58,7 @@ namespace OgrenciAidatSistemi.Models
                     ? null
                     : Payments?.Select(p => p.ToView(true)).ToHashSet(),
                 WorkYear = ignoreBidirectNav ? null : WorkYear?.ToView(true),
+                PerPaymentAmount = PerPaymentAmount,
             };
         }
     }
@@ -73,23 +76,28 @@ namespace OgrenciAidatSistemi.Models
         public DateTime UpdatedAt { get; set; }
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }
+
+        public decimal PerPaymentAmount { get; set; }
         public decimal TotalAmount { get; set; }
         public Occurrence Occurrence { get; set; }
+
+        public int? WorkYearId { get; set; }
+        public int? StudentId { get; set; }
     }
 
     public static class PaymentPeriodSearchConfig
     {
-        public static readonly string[] AllowedFieldsForSearch = new string[]
-        {
-            "id",
-            "StartDate",
-            "EndDate"
-        };
+        public static readonly string[] AllowedFieldsForSearch = new string[] { "id", };
         public static readonly string[] AllowedFieldsForSort = new string[]
         {
             "id",
+            "Id",
             "StartDate",
-            "EndDate"
+            "EndDate",
+            "TotalAmount",
+            "PerPaymentAmount",
+            "CreatedAt",
+            "UpdatedAt",
         };
     }
 }

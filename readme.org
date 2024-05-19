@@ -28,10 +28,9 @@
 
 * todo
     + [X] studentid generator
-    + [ ] add Message tempdata for all views
+    + [x] add Message tempdata for all views
     + [ ] add payment verification panel for sch admin
     + [ ] add payment panel for student
-    + [ ] crete paymentperiod service for auto create payments for students and save to db 
     + [ ] add workyear management panel for sch admin
     + [ ] add paymentperiod management panel for sch admin (create, edit, delete) ++
     + [ ] add all models to delete , edit , create panel for site admin (some of them must be debug only) +++
@@ -43,9 +42,9 @@
             + [x] list
         + [ ] paymentperiod (only school admin, site admin)
             + [ ] edit  
-            + [ ] create
-            + [ ] delete
-            + [ ] detail
+            + [x] create
+            + [X] delete
+            + [X] detail
             + [x] list
         + [ ] workyear  (only school admin, site admin)
             + [ ] edit  
@@ -86,7 +85,11 @@
         + [X] grade not necessary
     
     + [ ] add services for retrieving related data for students and school admins - (studentService, schoolAdminService)
+    + [ ] crete paymentperiod service for auto create payments for students and save to db 
+    + [ ] try to add school id as claim for school admin and student , and for site admin it should be 0 or null
 
+    + [ ] add type check before search in ModelQueryableHelper (for security) (only allow string and int types)
+        + [ ] update all searchconfig of models to use only string and int types
 
 
 * todo , maybe

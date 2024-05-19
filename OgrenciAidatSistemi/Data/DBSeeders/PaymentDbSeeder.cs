@@ -287,6 +287,7 @@ namespace OgrenciAidatSistemi.Data.DBSeeders
 
             entity.PaymentPeriod.WorkYear.CreatedAt = DateTime.Now;
             entity.PaymentPeriod.WorkYear.UpdatedAt = DateTime.Now;
+            entity.PaymentPeriod.PerPaymentAmount = entity.Amount;
             entity.PaymentPeriod.Occurrence = Occurrence.Monthly;
             entity.PaymentPeriod.CreatedAt = DateTime.Now;
             entity.PaymentPeriod.UpdatedAt = DateTime.Now;
