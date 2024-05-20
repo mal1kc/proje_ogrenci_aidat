@@ -19,13 +19,22 @@ namespace OgrenciAidatSistemi.Services
 
         private HttpContext? HttpContext => _httpContextAccessor.HttpContext;
 
-        public async Task<User?> GetUserById(int userId)
+        public async Task<User?> GetUserByIdaAsync(int userId)
         {
             if (userId == 0)
                 return null;
             if (_dbContext.Users == null)
                 return null;
             return await _dbContext.Users.FindAsync(userId);
+        }
+
+        public User? GetUserById(int userId)
+        {
+            if (userId == 0)
+                return null;
+            if (_dbContext.Users == null)
+                return null;
+            return _dbContext.Users.Find(userId);
         }
 
         public async Task<SiteAdmin?> GetSAdminByUsername(string username)
@@ -55,8 +64,7 @@ namespace OgrenciAidatSistemi.Services
                 // You may want to hash the password before storing it
                 user.PasswordHash = User.ComputeHash(user.PasswordHash);
                 user.CreatedAt = DateTime.UtcNow;
-                if (_dbContext.Users == null)
-                    _dbContext.Users = _dbContext.Set<User>();
+                _dbContext.Users ??= _dbContext.Set<User>();
 
                 _dbContext.Users.Add(user);
                 await _dbContext.SaveChangesAsync();
@@ -160,27 +168,12 @@ namespace OgrenciAidatSistemi.Services
         // </summary>
 
 
-        public async Task SignInUser(User user)
+        public async Task<bool> SignInUserAsync(User user)
         {
-            var claims = new List<Claim>
-            {
-                new Claim(ClaimTypes.Email, user.EmailAddress),
-                new Claim(ClaimTypes.Role, UserRoleExtensions.GetRoleString(user.Role)),
-                new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
-            };
-            var claimsIdentity = new ClaimsIdentity(
-                claims,
-                CookieAuthenticationDefaults.AuthenticationScheme
-            );
-            if (HttpContext == null)
-                return;
-            await HttpContext.SignInAsync(
-                CookieAuthenticationDefaults.AuthenticationScheme,
-                new ClaimsPrincipal(claimsIdentity)
-            );
+            return await SignInUser(user, user.Role);
         }
 
-        public async Task SignInUser(User user, UserRole role)
+        public async Task<bool> SignInUser(User user, UserRole role)
         {
             var claims = new List<Claim>
             {
@@ -188,16 +181,58 @@ namespace OgrenciAidatSistemi.Services
                 new Claim(ClaimTypes.Role, UserRoleExtensions.GetRoleString(role)),
                 new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
             };
+            switch (user.Role)
+            {
+                case UserRole.Student:
+                    // check School then add the claim as school.id to GroupSid
+                    var student = await _dbContext
+                        .Students.Where(s => s.Id == user.Id)
+                        .Include(s => s.School)
+                        .FirstOrDefaultAsync();
+                    ;
+                    if (student != null)
+                    {
+                        claims.Add(new Claim(ClaimTypes.GroupSid, student.School.Id.ToString()));
+                    }
+                    else
+                    {
+                        _logger.LogWarning("Student not found");
+                        return false;
+                    }
+                    break;
+                case UserRole.SchoolAdmin:
+                    //  check School then add the claim as school.id to GroupSid
+                    var schoolAdmin = await _dbContext
+                        .SchoolAdmins.Where(s => s.Id == user.Id)
+                        .Include(s => s.School)
+                        .FirstOrDefaultAsync();
+                    if (schoolAdmin != null)
+                    {
+                        claims.Add(
+                            new Claim(ClaimTypes.GroupSid, schoolAdmin.School.Id.ToString())
+                        );
+                    }
+                    else
+                    {
+                        _logger.LogWarning("SchoolAdmin not found");
+                        return false;
+                    }
+                    break;
+                default:
+                    break;
+            }
+
             var claimsIdentity = new ClaimsIdentity(
                 claims,
                 CookieAuthenticationDefaults.AuthenticationScheme
             );
             if (HttpContext == null)
-                return;
+                return false;
             await HttpContext.SignInAsync(
                 CookieAuthenticationDefaults.AuthenticationScheme,
                 new ClaimsPrincipal(claimsIdentity)
             );
+            return true;
         }
 
         public async Task SignOutUser()
@@ -207,14 +242,56 @@ namespace OgrenciAidatSistemi.Services
             await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
         }
 
-        public async Task<User?> GetCurrentUser()
+        public async Task<User?> GetCurrentUserAsync()
         {
             if (HttpContext == null)
                 return null;
             var userId = HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             if (userId == null)
                 return null;
-            return await GetUserById(int.Parse(userId));
+            return await GetUserByIdaAsync(int.Parse(userId));
+        }
+
+        public int? GetCurrentUserID()
+        {
+            if (HttpContext == null)
+                return null;
+            var userId = HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (userId == null)
+                return null;
+            return int.Parse(userId);
+        }
+
+        public async Task<(UserRole? Role, int? SchoolId)> GetUserRoleAndSchoolId()
+        {
+            var user = await GetCurrentUserAsync();
+            if (user == null || HttpContext == null || HttpContext.User == null)
+            {
+                _logger.LogWarning("User is not signed in");
+                return (null, null);
+            }
+
+            UserRole? role = null;
+            if (HttpContext.User.HasClaim(c => c.Type == ClaimTypes.Role))
+            {
+                var roleValue = HttpContext.User.FindFirst(ClaimTypes.Role)?.Value;
+                if (roleValue != null)
+                {
+                    role = UserRoleExtensions.GetRoleFromString(roleValue);
+                }
+            }
+
+            int? schoolId = null;
+            if (HttpContext.User.HasClaim(c => c.Type == ClaimTypes.GroupSid))
+            {
+                var schoolIdValue = HttpContext.User.FindFirst(ClaimTypes.GroupSid)?.Value;
+                if (schoolIdValue != null)
+                {
+                    schoolId = int.Parse(schoolIdValue);
+                }
+            }
+
+            return (role, schoolId);
         }
 
         public async Task<bool> IsUserSignedIn()
@@ -229,7 +306,7 @@ namespace OgrenciAidatSistemi.Services
                 await SignOutUser();
             if (currentUserId == null)
                 return false;
-            if (await GetUserById(int.Parse(currentUserId)) == null)
+            if (await GetUserByIdaAsync(int.Parse(currentUserId)) == null)
                 await SignOutUser();
 
             return HttpContext.User.Identity.IsAuthenticated;

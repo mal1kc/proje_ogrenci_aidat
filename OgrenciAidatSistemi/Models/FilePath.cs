@@ -3,11 +3,11 @@ using OgrenciAidatSistemi.Models.Interfaces;
 
 namespace OgrenciAidatSistemi.Models
 {
-    public class FilePath : IBaseDbModel, ISearchableModel
+    public class FilePath : IBaseDbModel
     {
         public int Id { get; set; }
 
-        public string Path { get; set; }
+        public string? Path { get; set; }
         public string Name { get; set; }
         public string Extension { get; set; }
         public string ContentType { get; set; }
@@ -19,9 +19,6 @@ namespace OgrenciAidatSistemi.Models
 
         public DateTime CreatedAt { get; set; }
         public DateTime UpdatedAt { get; set; }
-
-        public Payment Payment { get; set; }
-        public int? PaymentId { get; set; }
 
         public FilePath(
             string path,
@@ -41,12 +38,6 @@ namespace OgrenciAidatSistemi.Models
             CreatedAt = DateTime.Now;
             UpdatedAt = DateTime.Now;
         }
-
-        public static ModelSearchConfig SearchConfig =>
-            new ModelSearchConfig(
-                new string[] { "Name", "Description", "Extension", "ContentType" },
-                new string[] { "Name", "Description", "Extension", "ContentType" }
-            );
 
         // get safely data of file asynchrously
         public async Task<byte[]> GetDataAsync()

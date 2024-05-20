@@ -29,7 +29,7 @@ namespace OgrenciAidatSistemi.Data
         public DbSet<WorkYear>? WorkYears { get; set; }
         public DbSet<Grade>? Grades { get; set; }
 
-        public DbSet<FilePath>? FilePaths { get; set; }
+        public DbSet<Receipt>? Receipts { get; set; }
 
         // TODO: needs to be changed in development and production use
 
@@ -105,7 +105,7 @@ namespace OgrenciAidatSistemi.Data
 
             modelBuilder.Entity<PaymentPeriod>().HasOne(pp => pp.WorkYear);
 
-            modelBuilder.Entity<FilePath>().HasIndex(fp => fp.Path).IsUnique();
+            modelBuilder.Entity<Receipt>().HasIndex(fp => fp.Path).IsUnique();
 
             modelBuilder.Entity<ContactInfo>().Property(c => c.Email).IsRequired();
 
@@ -179,7 +179,7 @@ namespace OgrenciAidatSistemi.Data
 
             // if we delete a payment set null to receipt field of receipt
             modelBuilder
-                .Entity<FilePath>()
+                .Entity<Receipt>()
                 .HasOne(r => r.Payment)
                 .WithOne(p => p.Receipt)
                 .OnDelete(DeleteBehavior.SetNull); // if receipt deleted set null to payment field of receipt

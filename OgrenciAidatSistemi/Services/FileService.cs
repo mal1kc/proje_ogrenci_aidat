@@ -1,4 +1,5 @@
 using System.Security.Cryptography;
+using Microsoft.AspNetCore.Mvc;
 using OgrenciAidatSistemi.Data;
 using OgrenciAidatSistemi.Models;
 
@@ -21,7 +22,7 @@ namespace OgrenciAidatSistemi.Services
             _environment = environment;
         }
 
-        public async Task<string> UploadFileAsync(IFormFile file, User createdBy)
+        public async Task<FilePath> UploadFileAsync(IFormFile file, User createdBy)
         {
             if (
                 file == null
@@ -46,79 +47,43 @@ namespace OgrenciAidatSistemi.Services
                 await file.CopyToAsync(stream);
             }
 
-            var fileModel = new FilePath(
+            var filepath = new FilePath(
                 path: filePath,
                 name: uniqueFileName,
                 extension: Path.GetExtension(file.FileName),
                 contentType: file.ContentType,
                 size: file.Length,
                 description: "Uploaded file"
-            );
-
-            fileModel.CreatedBy = createdBy;
+            )
+            {
+                CreatedBy = createdBy
+            };
 
             try
             {
-                fileModel.FileHash = ComputeHash(filePath);
+                filepath.FileHash = ComputeHash(filePath);
             }
             catch (Exception e)
             {
                 _logger.LogError(e, "Error while calculating hash");
                 throw new InvalidOperationException("Error while calculating hash");
             }
-
-            if (_dbContext.FilePaths == null)
-            {
-                _logger.LogWarning("No file paths found in the database");
-                _dbContext.FilePaths = _dbContext.Set<FilePath>();
-                if (_dbContext.FilePaths == null)
-                {
-                    throw new InvalidOperationException("No file paths found in the database");
-                }
-            }
-            try
-            {
-                _dbContext.FilePaths.Add(fileModel);
-                await _dbContext.SaveChangesAsync();
-            }
-            catch (Exception e)
-            {
-                _logger.LogError(e, "Error while saving file path to the database");
-                throw new InvalidOperationException("Error while saving file path to the database");
-            }
-            return filePath;
+            return filepath;
         }
 
-        public async Task<byte[]> DownloadFileAsync(int fileId)
+        public async Task<byte[]> DownloadFileAsync(FilePath file)
         {
-            if (fileId <= 0)
+            if (file == null)
             {
-                throw new ArgumentException("Invalid file id");
+                throw new ArgumentNullException(nameof(file));
             }
 
-            if (_dbContext.FilePaths == null)
+            if (!File.Exists(file.Path))
             {
-                _logger.LogWarning("No file paths found in the database");
-                _dbContext.FilePaths = _dbContext.Set<FilePath>();
-                if (_dbContext.FilePaths == null)
-                {
-                    throw new InvalidOperationException("No file paths found in the database");
-                }
+                throw new FileNotFoundException("File not found", file.Path);
             }
 
-            var fileModel = await _dbContext.FilePaths.FindAsync(fileId);
-            if (fileModel == null)
-            {
-                throw new ArgumentException("File not found");
-            }
-
-            using (var stream = new FileStream(fileModel.Path, FileMode.Open))
-            {
-                var memory = new MemoryStream();
-                await stream.CopyToAsync(memory);
-                memory.Position = 0;
-                return memory.ToArray();
-            }
+            return await file.GetDataAsync();
         }
 
         private string ComputeHash(string filePath)

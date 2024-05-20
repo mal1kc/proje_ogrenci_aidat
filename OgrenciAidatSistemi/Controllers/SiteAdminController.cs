@@ -54,11 +54,7 @@ namespace OgrenciAidatSistemi.Controllers
             }
 
             var givenPasswordHash = SiteAdmin.ComputeHash(adminView.Password);
-            if (_appDbContext.SiteAdmins == null)
-            {
-                _logger.LogError("SiteAdmins table is null");
-                _appDbContext.SiteAdmins = _appDbContext.Set<SiteAdmin>();
-            }
+            _appDbContext.SiteAdmins ??= _appDbContext.Set<SiteAdmin>();
             SiteAdmin? admin = _appDbContext
                 .SiteAdmins.Where(_admin =>
                     _admin.Username == adminView.Username
@@ -76,7 +72,11 @@ namespace OgrenciAidatSistemi.Controllers
 
             try
             {
-                await _userService.SignInUser(admin, UserRole.SiteAdmin);
+                if (!await _userService.SignInUserAsync(admin))
+                {
+                    TempData["CantSignIn"] = true;
+                    return RedirectToAction("SignIn");
+                }
             }
             catch (Exception ex)
             {
@@ -101,11 +101,9 @@ namespace OgrenciAidatSistemi.Controllers
             int pageSize = 20
         )
         {
-            if (_appDbContext.SiteAdmins == null)
-            {
-                _logger.LogError("SiteAdmins table is null");
-                _appDbContext.SiteAdmins = _appDbContext.Set<SiteAdmin>();
-            }
+            // ??= is a null-coalescing assignment operator
+            // it assigns the right-hand value to the left-hand variable only if the left-hand variable is null
+            _appDbContext.SiteAdmins ??= _appDbContext.Set<SiteAdmin>();
 
             var modelHelper = new QueryableModelHelper<SiteAdmin>(
                 _appDbContext.SiteAdmins.AsQueryable(),
@@ -181,11 +179,8 @@ namespace OgrenciAidatSistemi.Controllers
                     CreatedAt = DateTime.Now,
                     UpdatedAt = DateTime.Now
                 };
-                if (_appDbContext.SiteAdmins == null)
-                {
-                    _logger.LogError("SiteAdmins table is null");
-                    _appDbContext.SiteAdmins = _appDbContext.Set<SiteAdmin>();
-                }
+                _appDbContext.SiteAdmins ??= _appDbContext.Set<SiteAdmin>();
+
                 try
                 {
                     _appDbContext.SiteAdmins.Add(newSiteAdmin);
@@ -216,12 +211,7 @@ namespace OgrenciAidatSistemi.Controllers
                 return Task.FromResult<IActionResult>(NotFound());
             }
 
-            if (_appDbContext.SiteAdmins == null)
-            {
-                _logger.LogError("SiteAdmins table is null");
-                _appDbContext.SiteAdmins = _appDbContext.Set<SiteAdmin>();
-            }
-
+            _appDbContext.SiteAdmins ??= _appDbContext.Set<SiteAdmin>();
             var siteAdmin = _appDbContext.SiteAdmins.Where(e => e.Id == id).FirstOrDefault();
 
             if (siteAdmin == null)

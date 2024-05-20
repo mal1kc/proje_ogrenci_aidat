@@ -78,10 +78,8 @@ namespace OgrenciAidatSistemi.Data
 
         protected override async Task SeedDataAsync()
         {
-            if (_context.SiteAdmins == null)
-            {
-                throw new Exception("SiteAdminDBSeeder: SeedDataAsync _context.SiteAdmins is null");
-            }
+            _context.SiteAdmins ??= _context.Set<SiteAdmin>();
+
             var dbCount = await _context.SiteAdmins.CountAsync();
             if (dbCount >= _maxSeedCount)
                 return;
@@ -99,10 +97,7 @@ namespace OgrenciAidatSistemi.Data
 
         protected override async Task SeedRandomDataAsync()
         {
-            if (_context.SiteAdmins == null)
-                throw new Exception(
-                    "SiteAdminDBSeeder: SeedRandomDataAsync _context.SiteAdmins is null"
-                );
+            _context.SiteAdmins ??= _context.Set<SiteAdmin>();
 
             var dbCount = await _context.SiteAdmins.CountAsync();
             if (dbCount >= _maxSeedCount)

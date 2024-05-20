@@ -44,11 +44,7 @@ namespace OgrenciAidatSistemi.Controllers
             int pageSize = 20
         )
         {
-            if (_dbContext.Schools == null)
-            {
-                _logger.LogError("Schools table is null");
-                _dbContext.Schools = _dbContext.Set<School>();
-            }
+            _dbContext.Schools ??= _dbContext.Set<School>();
 
             var modelList = new QueryableModelHelper<School>(
                 _dbContext.Schools.AsQueryable(),
@@ -89,11 +85,7 @@ namespace OgrenciAidatSistemi.Controllers
                     return RedirectToAction("Create");
                 }
 
-                if (_dbContext.Schools == null)
-                {
-                    _logger.LogError("Schools table is null");
-                    _dbContext.Schools = _dbContext.Set<School>();
-                }
+                _dbContext.Schools ??= _dbContext.Set<School>();
 
                 var school = new School
                 {
@@ -121,7 +113,7 @@ namespace OgrenciAidatSistemi.Controllers
             // else return unauthorized
             School? school = null;
 
-            var signedUser = await _userService.GetCurrentUser();
+            var signedUser = await _userService.GetCurrentUserAsync();
             if (signedUser == null)
                 return Unauthorized();
 
@@ -172,7 +164,7 @@ namespace OgrenciAidatSistemi.Controllers
             if (_dbContext.Schools == null)
             {
                 _logger.LogError("Schools table is null");
-                _dbContext.Schools = _dbContext.Set<School>();
+                return NotFound();
             }
 
             var school = await _dbContext.Schools.FindAsync(id);
@@ -194,7 +186,7 @@ namespace OgrenciAidatSistemi.Controllers
             if (_dbContext.Schools == null)
             {
                 _logger.LogError("Schools table is null");
-                _dbContext.Schools = _dbContext.Set<School>();
+                return NotFound();
             }
 
             var school = await _dbContext.Schools.FindAsync(id);

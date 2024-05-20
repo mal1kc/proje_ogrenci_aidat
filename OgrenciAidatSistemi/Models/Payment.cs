@@ -42,7 +42,9 @@ namespace OgrenciAidatSistemi.Models
 
         public PaymentStatus Status { get; set; }
 
-        public FilePath? Receipt { get; set; }
+        public Receipt? Receipt { get; set; }
+
+        public School? School { get; set; }
 
         public static ModelSearchConfig SearchConfig =>
             new(

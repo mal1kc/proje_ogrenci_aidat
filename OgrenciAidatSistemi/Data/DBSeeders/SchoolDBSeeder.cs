@@ -11,8 +11,8 @@ namespace OgrenciAidatSistemi.Data
 
         protected override async Task SeedDataAsync()
         {
-            if (_context.Schools == null)
-                throw new NullReferenceException("SchoolDBSeeder: _context.Schools is null");
+            _context.Schools ??= _context.Set<School>();
+
             var dbCount = await _context.Schools.CountAsync();
             if (dbCount >= _maxSeedCount)
                 return;
@@ -29,8 +29,8 @@ namespace OgrenciAidatSistemi.Data
 
         protected override async Task SeedRandomDataAsync()
         {
-            if (_context.Schools == null)
-                throw new NullReferenceException("SchoolDBSeeder: _context.Schools is null");
+            _context.Schools ??= _context.Set<School>();
+
             var dbCount = await _context.Schools.CountAsync();
             if (dbCount >= _maxSeedCount)
                 return;

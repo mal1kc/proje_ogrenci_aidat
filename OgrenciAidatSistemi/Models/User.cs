@@ -10,6 +10,9 @@ namespace OgrenciAidatSistemi.Models
 {
     public enum UserRole
     {
+        [Description(Constants.userRoles.None)]
+        None,
+
         [Description(Constants.userRoles.SchoolAdmin)]
         SiteAdmin,
 

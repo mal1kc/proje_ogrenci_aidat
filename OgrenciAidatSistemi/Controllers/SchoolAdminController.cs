@@ -68,11 +68,8 @@ namespace OgrenciAidatSistemi.Controllers
 
             // check if user exists
             var passwordHash = _userService.HashPassword(scAdminView.Password);
-            if (_dbContext.SchoolAdmins == null)
-            {
-                _logger.LogWarning("SchoolAdmins table is came null from dbcontext");
-                _dbContext.SchoolAdmins = _dbContext.Set<SchoolAdmin>();
-            }
+
+            _dbContext.SchoolAdmins ??= _dbContext.Set<SchoolAdmin>();
             var schAdmin = _dbContext
                 .SchoolAdmins.Where(u =>
                     u.EmailAddress == scAdminView.EmailAddress && u.PasswordHash == passwordHash
@@ -87,7 +84,15 @@ namespace OgrenciAidatSistemi.Controllers
                 _logger.LogDebug("User {0} signed in", schAdmin.EmailAddress);
                 try
                 {
-                    await _userService.SignInUser(schAdmin, UserRole.SchoolAdmin);
+                    if (!await _userService.SignInUser(schAdmin, UserRole.SchoolAdmin))
+                    {
+                        TempData["CantSignIn"] = true;
+                        TempData["Error"] = "Error while signing in";
+                    }
+                    else
+                    {
+                        TempData["Message"] = "Signed in successfully";
+                    }
                 }
                 catch (Exception ex)
                 {
@@ -120,15 +125,7 @@ namespace OgrenciAidatSistemi.Controllers
             int pageSize = 20
         )
         {
-            // TODO improve modelSearchConfig add
-            // 1. viewdata keys ; sortorder, searchstring, currentfield
-            // TODO improve QueryableModelHelper do sortig and searching in one method with given config
-            // ++ improve logics for searching and sorting
-            if (_dbContext.SchoolAdmins == null)
-            {
-                _logger.LogError("SchoolAdmins table is null");
-                _dbContext.SchoolAdmins = _dbContext.Set<SchoolAdmin>();
-            }
+            _dbContext.SchoolAdmins ??= _dbContext.Set<SchoolAdmin>();
 
             var modelList = new QueryableModelHelper<SchoolAdmin>(
                 _dbContext.SchoolAdmins.Include(sa => sa.School).AsQueryable(),
@@ -216,10 +213,7 @@ namespace OgrenciAidatSistemi.Controllers
                     Addresses = scAdminView.ContactInfo.Addresses
                 };
                 _logger.LogDebug("User {0} created", scAdminView.EmailAddress);
-                if (_dbContext.SchoolAdmins == null)
-                {
-                    _dbContext.SchoolAdmins = _dbContext.Set<SchoolAdmin>();
-                }
+                _dbContext.SchoolAdmins ??= _dbContext.Set<SchoolAdmin>();
                 _dbContext.SchoolAdmins.Add(newSchAdmin);
                 await _dbContext.SaveChangesAsync();
             }

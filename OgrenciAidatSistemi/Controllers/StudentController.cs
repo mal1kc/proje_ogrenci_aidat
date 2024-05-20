@@ -72,8 +72,7 @@ namespace OgrenciAidatSistemi.Controllers
                 return View(studentView);
             }
 
-            if (_dbContext.Students == null)
-                _dbContext.Students = _dbContext.Set<Student>();
+            _dbContext.Students ??= _dbContext.Set<Student>();
 
             var passwordHash = _userService.HashPassword(studentView.Password);
             var dbStudent = _dbContext
@@ -93,7 +92,16 @@ namespace OgrenciAidatSistemi.Controllers
 
             try
             {
-                await _userService.SignInUser(dbStudent, UserRole.Student);
+                if (!await _userService.SignInUser(dbStudent, UserRole.Student))
+                {
+                    TempData["Error"] = "Error while signing in user";
+                    return RedirectToAction("SignIn");
+                }
+                else
+                {
+                    TempData["Message"] =
+                        "hello, " + dbStudent.FirstName + " " + dbStudent.LastName + "!";
+                }
             }
             catch (Exception ex)
             {
@@ -117,11 +125,7 @@ namespace OgrenciAidatSistemi.Controllers
             int pageSize = 20
         )
         {
-            if (_dbContext.Students == null)
-            {
-                _logger.LogError("Students table is null");
-                _dbContext.Students = _dbContext.Set<Student>();
-            }
+            _dbContext.Students ??= _dbContext.Set<Student>();
 
             var modelList = new QueryableModelHelper<Student>(
                 _dbContext.Students.Include(s => s.School).AsQueryable(),
@@ -205,10 +209,7 @@ namespace OgrenciAidatSistemi.Controllers
                 _logger.LogDebug("User {0} created", studentView.EmailAddress);
                 _logger.LogDebug("User id generated: {0}", newStdnt.Id);
                 _logger.LogDebug("saving user {0} to db", studentView.EmailAddress);
-                if (_dbContext.Students == null)
-                {
-                    _dbContext.Students = _dbContext.Set<Student>();
-                }
+                _dbContext.Students ??= _dbContext.Set<Student>();
                 _dbContext.Students.Add(newStdnt);
                 await _dbContext.SaveChangesAsync();
             }
@@ -242,10 +243,7 @@ namespace OgrenciAidatSistemi.Controllers
                 return NotFound();
             }
 
-            if (_dbContext.Students == null)
-            {
-                _dbContext.Students = _dbContext.Set<Student>();
-            }
+            _dbContext.Students ??= _dbContext.Set<Student>();
 
             var student = await _dbContext
                 .Students.Include(s => s.School)
@@ -272,10 +270,7 @@ namespace OgrenciAidatSistemi.Controllers
                 return NotFound();
             }
 
-            if (_dbContext.Students == null)
-            {
-                _dbContext.Students = _dbContext.Set<Student>();
-            }
+            _dbContext.Students ??= _dbContext.Set<Student>();
 
             var student = _dbContext.Students.Where(e => e.Id == id).FirstOrDefault();
 
@@ -333,7 +328,7 @@ namespace OgrenciAidatSistemi.Controllers
 
         public async Task<Student?> GetLoggedInStudent()
         {
-            var student = await _userService.GetCurrentUser();
+            var student = await _userService.GetCurrentUserAsync();
             if (student == null)
             {
                 return null;
@@ -411,10 +406,7 @@ namespace OgrenciAidatSistemi.Controllers
                 return NotFound();
             }
 
-            if (_dbContext.Students == null)
-            {
-                _dbContext.Students = _dbContext.Set<Student>();
-            }
+            _dbContext.Students ??= _dbContext.Set<Student>();
 
             var student = _dbContext.Students.Where(e => e.Id == id).FirstOrDefault();
 

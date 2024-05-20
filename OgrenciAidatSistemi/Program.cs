@@ -48,6 +48,7 @@ internal class Program
 
             _ = services.AddScoped<UserService>();
             _ = services.AddScoped<FileService>();
+            _ = services.AddScoped<ReceiptService>();
         }
 
         async Task ConfigureAppAsync(WebApplication app)

@@ -38,11 +38,8 @@ namespace OgrenciAidatSistemi.Controllers
             int pageSize = 20
         )
         {
-            if (_dbContext.Contacts == null)
-            {
-                _logger.LogError("Contacts table is null");
-                _dbContext.Contacts = _dbContext.Set<ContactInfo>();
-            }
+            _dbContext.Contacts ??= _dbContext.Set<ContactInfo>();
+
             var modelList = new QueryableModelHelper<ContactInfo>(
                 _dbContext.Contacts.AsQueryable(),
                 ContactInfo.SearchConfig

@@ -304,6 +304,7 @@ namespace OgrenciAidatSistemi.Migrations
                     PaymentPeriodId = table.Column<int>(type: "INTEGER", nullable: false),
                     Amount = table.Column<decimal>(type: "TEXT", nullable: false),
                     Status = table.Column<int>(type: "INTEGER", nullable: false),
+                    SchoolId = table.Column<int>(type: "INTEGER", nullable: true),
                     PaymentType = table.Column<string>(
                         type: "TEXT",
                         maxLength: 13,
@@ -336,6 +337,12 @@ namespace OgrenciAidatSistemi.Migrations
                         onDelete: ReferentialAction.SetNull
                     );
                     table.ForeignKey(
+                        name: "FK_Payments_Schools_SchoolId",
+                        column: x => x.SchoolId,
+                        principalTable: "Schools",
+                        principalColumn: "Id"
+                    );
+                    table.ForeignKey(
                         name: "FK_Payments_Students_StudentId",
                         column: x => x.StudentId,
                         principalTable: "Students",
@@ -346,13 +353,14 @@ namespace OgrenciAidatSistemi.Migrations
             );
 
             migrationBuilder.CreateTable(
-                name: "FilePaths",
+                name: "Receipts",
                 columns: table => new
                 {
                     Id = table
                         .Column<int>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
-                    Path = table.Column<string>(type: "TEXT", nullable: false),
+                    PaymentId = table.Column<int>(type: "INTEGER", nullable: true),
+                    Path = table.Column<string>(type: "TEXT", nullable: true),
                     Name = table.Column<string>(type: "TEXT", nullable: false),
                     Extension = table.Column<string>(type: "TEXT", nullable: false),
                     ContentType = table.Column<string>(type: "TEXT", nullable: false),
@@ -361,21 +369,20 @@ namespace OgrenciAidatSistemi.Migrations
                     CreatedById = table.Column<int>(type: "INTEGER", nullable: false),
                     FileHash = table.Column<string>(type: "TEXT", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "TEXT", nullable: false),
-                    UpdatedAt = table.Column<DateTime>(type: "TEXT", nullable: false),
-                    PaymentId = table.Column<int>(type: "INTEGER", nullable: true)
+                    UpdatedAt = table.Column<DateTime>(type: "TEXT", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_FilePaths", x => x.Id);
+                    table.PrimaryKey("PK_Receipts", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_FilePaths_Payments_PaymentId",
+                        name: "FK_Receipts_Payments_PaymentId",
                         column: x => x.PaymentId,
                         principalTable: "Payments",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.SetNull
                     );
                     table.ForeignKey(
-                        name: "FK_FilePaths_Users_CreatedById",
+                        name: "FK_Receipts_Users_CreatedById",
                         column: x => x.CreatedById,
                         principalTable: "Users",
                         principalColumn: "Id",
@@ -388,26 +395,6 @@ namespace OgrenciAidatSistemi.Migrations
                 name: "IX_Contacts_UserId",
                 table: "Contacts",
                 column: "UserId"
-            );
-
-            migrationBuilder.CreateIndex(
-                name: "IX_FilePaths_CreatedById",
-                table: "FilePaths",
-                column: "CreatedById"
-            );
-
-            migrationBuilder.CreateIndex(
-                name: "IX_FilePaths_Path",
-                table: "FilePaths",
-                column: "Path",
-                unique: true
-            );
-
-            migrationBuilder.CreateIndex(
-                name: "IX_FilePaths_PaymentId",
-                table: "FilePaths",
-                column: "PaymentId",
-                unique: true
             );
 
             migrationBuilder.CreateIndex(
@@ -441,9 +428,35 @@ namespace OgrenciAidatSistemi.Migrations
             );
 
             migrationBuilder.CreateIndex(
+                name: "IX_Payments_SchoolId",
+                table: "Payments",
+                column: "SchoolId"
+            );
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Payments_StudentId",
                 table: "Payments",
                 column: "StudentId"
+            );
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Receipts_CreatedById",
+                table: "Receipts",
+                column: "CreatedById"
+            );
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Receipts_Path",
+                table: "Receipts",
+                column: "Path",
+                unique: true
+            );
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Receipts_PaymentId",
+                table: "Receipts",
+                column: "PaymentId",
+                unique: true
             );
 
             migrationBuilder.CreateIndex(
@@ -522,17 +535,17 @@ namespace OgrenciAidatSistemi.Migrations
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropTable(name: "FilePaths");
-
             migrationBuilder.DropTable(name: "GradeStudent");
+
+            migrationBuilder.DropTable(name: "Receipts");
 
             migrationBuilder.DropTable(name: "SchoolAdmins");
 
             migrationBuilder.DropTable(name: "SiteAdmins");
 
-            migrationBuilder.DropTable(name: "Payments");
-
             migrationBuilder.DropTable(name: "Grades");
+
+            migrationBuilder.DropTable(name: "Payments");
 
             migrationBuilder.DropTable(name: "PaymentPeriods");
 

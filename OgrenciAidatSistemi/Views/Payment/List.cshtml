@@ -1,6 +1,14 @@
 @model IQueryable<Payment>
 @{
     ViewData["Title"] = "Payments";
+    var usrRole = ViewBag.UserRole;
+    if (usrRole == null)
+    {
+        usrRole = UserRole.None;
+    }
+    var showStudentIdColumn = (usrRole != UserRole.Student && usrRole != UserRole.None);
+    var showIsVerifiedColumn = (usrRole != UserRole.None);
+    var showSchoolIdColumn = (usrRole == UserRole.SiteAdmin);
 }
 
 <h2>@ViewData["Title"] <a asp-action="Create" class="btn btn-sm btn-primary float-end">Create New</a></h2>
@@ -44,8 +52,21 @@
             <th>
                 <a asp-action="List" asp-route-sortOrder="@(ViewData["IdSortParam"]?.ToString())"
                     asp-route-searchString="@ViewData["CurrentSearchString"]?.ToString()">Payment Id</a>
-
             </th>
+            @if (showStudentIdColumn)
+            {
+                <th>
+                    <a asp-action="List" asp-route-sortOrder="@(ViewData["StudentIdSortParam"]?.ToString())"
+                        asp-route-searchString="@ViewData["CurrentSearchString"]?.ToString()">Student Id</a>
+                </th>
+            }
+            @if (showSchoolIdColumn)
+            {
+                <th>
+                    <a asp-action="List" asp-route-sortOrder="@(ViewData["SchoolIdSortParam"]?.ToString())"
+                        asp-route-searchString="@ViewData["CurrentSearchString"]?.ToString()">School</a>
+                </th>
+            }
             <th>
                 <a asp-action="List" asp-route-sortOrder="@(ViewData["DateSortParam"]?.ToString())"
                     asp-route-searchString="@ViewData["CurrentSearchString"]?.ToString()">Payment Date</a>
@@ -66,10 +87,13 @@
                 <a asp-action="List" asp-route-sortOrder="@(ViewData["StatusSortParam"]?.ToString())"
                     asp-route-searchString="@ViewData["CurrentSearchString"]?.ToString()">Status</a>
             </th>
-            <th>
-                <a asp-action="List" asp-route-sortOrder="@(ViewData["IsVerifiedSortParam"]?.ToString())"
-                    asp-route-searchString="@(ViewData["CurrentSearchString"]?.ToString())">Is Verified</a>
-            </th>
+            @if (showIsVerifiedColumn)
+            {
+                <th>
+                    <a asp-action="List" asp-route-sortOrder="@(ViewData["IsVerifiedSortParam"]?.ToString())"
+                        asp-route-searchString="@ViewData["CurrentSearchString"]?.ToString()">Is Verified</a>
+                </th>
+            }
             <th></th> <!-- column for buttons edit | details | delete -->
             <!-- Add other fields as needed -->
         </tr>
@@ -79,12 +103,42 @@
         {
             <tr>
                 <td>@Html.DisplayFor(modelItem => item.Id)</td>
+                @if (showStudentIdColumn)
+                {
+                    @if (item.Student != null)
+                    {
+                        <td>@Html.DisplayFor(modelItem => item.Student.StudentId)</td>
+                    }
+                    else
+                    {
+                        <td> Student info not found</td>
+                    }
+                }
+
+                @if (showSchoolIdColumn)
+                {
+                    @if (item.School != null)
+                    {
+                        <td>
+                        <partial name="_SchoolViewPartial" model="item.School.ToView(true)" />
+                        </td>
+                    }
+                    else
+                    {
+                        <td> School info not found</td>
+                    }
+                }
+
+
                 <td>@Html.DisplayFor(modelItem => item.PaymentDate)</td>
                 <td>@Html.DisplayFor(modelItem => item.PaymentMethod)</td>
                 <td>@Html.DisplayFor(modelItem => item.PaymentPeriodId)</td>
                 <td>@Html.DisplayFor(modelItem => item.Amount)</td>
                 <td>@Html.DisplayFor(modelItem => item.Status)</td>
-                <td>@Html.DisplayFor(modelItem => item.IsVerified)</td>
+                @if (showIsVerifiedColumn)
+                {
+                    <td>@Html.DisplayFor(modelItem => item.IsVerified)</td>
+                }
                 <td>
                     <a href="@Url.Action("Edit", new { id = item.Id})">Edit</a>
                     |

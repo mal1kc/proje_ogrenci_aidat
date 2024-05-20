@@ -122,26 +122,25 @@ namespace OgrenciAidatSistemi.Data.DBSeeders
             payment.Status = (PaymentStatus)
                 random.Next(Enum.GetNames(typeof(PaymentStatus)).Length);
 
-            payment.Receipt = new FilePath(
+            payment.Receipt = new(
                 path: null,
                 name: "Receipt of " + payment.Student.FirstName,
                 extension: ".pdf",
                 contentType: "application/pdf",
                 size: 0,
                 description: "Receipt of " + payment.Student.FirstName
-            );
-            payment.Receipt.FileHash = "invalid hash";
+            )
+            {
+                FileHash = "invalid hash"
+            };
 
             return payment;
         }
 
         protected override async Task SeedDataAsync()
         {
-            if (_context.Payments == null)
-            {
-                throw new Exception("PaymentDBSeeder: SeedDataAsync Payments is null");
-            }
-            // TODO: use _seedData in later for now this work as SeedRandomDataAsync
+            _context.Payments ??= _context.Set<Payment>();
+
             await SeedRandomDataAsync();
             return;
 
@@ -150,8 +149,7 @@ namespace OgrenciAidatSistemi.Data.DBSeeders
 
         protected override async Task SeedRandomDataAsync()
         {
-            if (_context.Payments == null)
-                throw new Exception("PaymentDBSeeder: SeedRandomDataAsync Payments is null");
+            _context.Payments ??= _context.Set<Payment>();
 
             var dbCount = await _context.Payments.CountAsync();
             if (dbCount >= _maxSeedCount)
@@ -211,8 +209,7 @@ namespace OgrenciAidatSistemi.Data.DBSeeders
             // get all payments created in last 10 minutes
 
 
-            if (_context.Payments == null)
-                throw new Exception("PaymentDBSeeder: AfterSeedDataAsync Payments is null");
+            _context.Payments ??= _context.Set<Payment>();
 
             var tenminutesago = DateTime.Now - TimeSpan.FromMinutes(10);
             // need to take each payment type separately
@@ -293,16 +290,12 @@ namespace OgrenciAidatSistemi.Data.DBSeeders
             entity.PaymentPeriod.UpdatedAt = DateTime.Now;
             if (entity.Receipt.Path == null)
             {
-                // try to find not used path
-                if (_context.FilePaths == null)
-                    throw new Exception(
-                        "PaymentDBSeeder: SeedEntityAsync _context.FilePaths is null"
-                    );
+                _context.Receipts ??= _context.Set<Receipt>();
                 while (true)
                 {
                     var path = random.Next(1000, 9999).ToString() + ".pdf";
                     if (
-                        await _context.FilePaths.Where(fp => fp.Path == path).FirstOrDefaultAsync()
+                        await _context.Receipts.Where(fp => fp.Path == path).FirstOrDefaultAsync()
                         == null
                     )
                     {
@@ -312,6 +305,7 @@ namespace OgrenciAidatSistemi.Data.DBSeeders
                 }
             }
             entity.Receipt.CreatedBy = entity.Student;
+            entity.School = entity.Student.School;
 
             if (_verboseLogging)
                 Console.WriteLine(

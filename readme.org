@@ -76,21 +76,24 @@
             + [ ] delete
             + [ ] detail
             + [ ] list
-        + [ ] filepath (all , but student can only see their own)
+        + [ ] receipt (all , but student can only see their own)
             + [ ] edit
             + [ ] create
             + [ ] delete
             + [ ] detail
-            + [ ] list
+            + [X] list
         + [X] grade not necessary
     
     + [ ] add services for retrieving related data for students and school admins - (studentService, schoolAdminService)
     + [ ] crete paymentperiod service for auto create payments for students and save to db 
-    + [ ] try to add school id as claim for school admin and student , and for site admin it should be 0 or null
-
+    + [X] try to add school id as claim for school admin and student , and for site admin it should be 0 or null
     + [ ] add type check before search in ModelQueryableHelper (for security) (only allow string and int types)
         + [ ] update all searchconfig of models to use only string and int types
 
+    + [ ] impelment exportService for exporting data to excel or similiar formats
+
+    + [ ] change error's to use partial view for error pages (404, 500, 403, 401) 
+        + [ ] add error handling for all controllers and services
 
 * todo , maybe
 

@@ -1,0 +1,138 @@
+@model IQueryable<Receipt>
+
+@{
+    ViewBag.Title = "List of Receipts";
+    var usrRole = ViewBag.UserRole ?? UserRole.None;
+    var showStudentIdColumn = (usrRole != UserRole.Student && usrRole != UserRole.None);
+    var showCreatedByColumn = usrRole == UserRole.SiteAdmin;
+}
+
+<h2>@ViewData["Title"] <a asp-action="Create" class="btn btn-sm btn-primary float-end">Create New</a></h2>
+
+<form asp-action="List" method="get">
+    <div class="row">
+        <div class="col-md-6">
+            <div class="input-group mb-3">
+                <span class="input-group-text">Search:</span>
+                <input type="text" class="form-control" name="searchString" value="@ViewData["CurrentSearchString"]" />
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="input-group mb-3">
+                <span class="input-group-text">in</span>
+                <select class="form-select" name="searchField">
+                    <option value='@ViewData["CurrentSearchField"]' selected>@ViewData["CurrentSearchField"]</option>
+                    <option value="">All</option>
+                    <option value="Id">Receipt Id</option>
+                    <option value="ReceiptDate">Receipt Date</option>
+                    <option value="ReceiptMethod">Receipt Method</option>
+                    <option value="ReceiptPeriodId">Receipt Period</option>
+                    <option value="Amount">Amount</option>
+                    <!-- Add more search fields as needed -->
+                </select>
+                <button type="submit" class="btn btn-primary">Search</button>
+            </div>
+        </div>
+    </div>
+</form>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                <a asp-action="List" asp-route-sortOrder="@(ViewData["IdSortParam"]?.ToString())"
+                    asp-route-searchString="@ViewData["CurrentSearchString"]?.ToString()">Receipt Id</a>
+            </th>
+            @if (showStudentIdColumn)
+            {
+                <th>
+                    <a asp-action="List" asp-route-sortOrder="@(ViewData["StudentIdSortParam"]?.ToString())"
+                        asp-route-searchString="@ViewData["CurrentSearchString"]?.ToString()">Student Id</a>
+                </th>
+            }
+            @if (showCreatedByColumn)
+            {
+                <th>
+                    <a asp-action="List" asp-route-sortOrder="@(ViewData["CreatedByIdSortParam"]?.ToString())"
+                        asp-route-searchString="@ViewData["CurrentSearchString"]?.ToString()">Created By</a>
+                </th>
+            }
+            <th>
+                <a asp-action="List" asp-route-sortOrder="@(ViewData["DateSortParam"]?.ToString())"
+                    asp-route-searchString="@ViewData["CurrentSearchString"]?.ToString()">Receipt Date</a>
+            </th>
+            <th>
+                <a asp-action="List" asp-route-sortOrder="@(ViewData["MethodSortParam"]?.ToString())"
+                    asp-route-searchString="@ViewData["CurrentSearchString"]?.ToString()">Receipt Method</a>
+            </th>
+            <th>
+                <a asp-action="List" asp-route-sortOrder="@(ViewData["PeriodSortParam"]?.ToString())"
+                    asp-route-searchString="@ViewData["CurrentSearchString"]?.ToString()">Receipt Period</a>
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>
+                    <a asp-action="Details" asp-route-id="@item.Id">@item.Id</a>
+                </td>
+                @if (showStudentIdColumn)
+                {
+                    <td>
+                        <a asp-action="Details" asp-route-id="@item.Payment?.Student?.StudentId">@item.Payment?.Student?.StudentId ?? "Unknown"</a>
+                    </td>
+                }
+                @if (showCreatedByColumn)
+                {
+                    <td>
+                        @item.CreatedBy
+                    </td>
+                }
+                <td>
+                    @(item.Payment?.CreatedAt != null ? item.Payment.CreatedAt.ToString() : "Unknown")
+                </td>
+                <td>
+                    @(item.Payment?.PaymentMethod != null ? item.Payment.PaymentMethod : "Unknown")
+                </td>
+                <td>
+                    @((item.Payment?.PaymentPeriod?.Id.ToString()) ?? "Unknown")
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+
+<nav aria-label="Page navigation">
+    <ul class="pagination">
+        @if (ViewData["CurrentPageIndex"] != null)
+        {
+            int currentPageIndex = (int)ViewData["CurrentPageIndex"];
+            int totalPages = (int)ViewData["TotalPages"];
+
+            <li class="page-item @(currentPageIndex <= 1 ? "disabled" : "")">
+                <a class="page-link" asp-action="List" asp-route-pageIndex="1">First</a>
+            </li>
+            <li class="page-item @(currentPageIndex <= 1 ? "disabled" : "")">
+                <a class="page-link" asp-action="List" asp-route-pageIndex="@(currentPageIndex - 1)">Previous</a>
+            </li>
+
+            @for (int i = 1; i <= totalPages; i++)
+            {
+                <li class="page-item @(i == currentPageIndex ? "active" : "")">
+                    <a class="page-link" asp-action="List" asp-route-pageIndex="@i">@i</a>
+                </li>
+            }
+
+            <li class="page-item @(currentPageIndex >= totalPages ? "disabled" : "")">
+                <a class="page-link" asp-action="List" asp-route-pageIndex="@(currentPageIndex + 1)">Next</a>
+            </li>
+            <li class="page-item @(currentPageIndex >= totalPages ? "disabled" : "")">
+                <a class="page-link" asp-action="List" asp-route-pageIndex="@totalPages">Last</a>
+            </li>
+        }
+    </ul>
+</nav>
+

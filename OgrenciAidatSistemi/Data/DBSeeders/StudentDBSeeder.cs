@@ -10,10 +10,7 @@ namespace OgrenciAidatSistemi.Data
 
         protected override async Task SeedDataAsync()
         {
-            if (_context.Students == null)
-            {
-                throw new NullReferenceException("StudentDBSeeder: _context.Students is null");
-            }
+            _context.Students ??= _context.Set<Student>();
 
             var dbCount = await _context.Students.CountAsync();
             if (dbCount >= _maxSeedCount)
