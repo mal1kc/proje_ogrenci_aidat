@@ -1,38 +1,61 @@
 @model WorkYearView
 
-<div class="container">
-    <div class="row">
-        <div class="col-md-12">
-            <hr />
-            <dl class="row">
-                <dt class="col-sm-4">@Html.DisplayNameFor(model => model.Id)</dt>
-                <dd class="col-sm-8">@Html.DisplayFor(model => model.Id)</dd>
+@{
+    const string CardName = "workYearDetailCard";
+    const string partialViewTitle = "Work Year Details";
+}
 
-                <dt class="col-sm-4">Start Date:</dt>
-                <dd class="col-sm-8">@Model.StartDate.ToShortDateString()</dd>
+<div class="container-fluid py-0 my-0">
+    <div class="card m-0">
+        <div class="card-header" id="headingOne">
+            <h5 class="mb-0">
+                @partialViewTitle <button class="btn btn-link collapsed" type="button" data-bs-toggle="collapse"
+                    data-bs-target="#@CardName" aria-expanded="true" aria-controls="userDetailCard">
+                    <span class="triangle">&#9650;</span> <!-- This is a Unicode up arrow -->
+                </button>
+            </h5>
+        </div>
+        <div id="@CardName" class="collapse show" aria-labelledby="headingOne" data-parent="#accordion">
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-12">
+                        <hr />
 
-                <dt class="col-sm-4">End Date:</dt>
-                <dd class="col-sm-8">@Model.EndDate.ToShortDateString()</dd>
+                        <a class="btn btn-primary float-end"
+                            href="@Url.Action("Details", "WorkYear", new { id = Model.Id })">🔗</a>
 
-                <dt class="col-sm-4">@Html.DisplayNameFor(model => model.CreatedAt)</dt>
-                <dd class="col-sm-8">@Html.DisplayFor(model => model.CreatedAt)</dd>
+                        <dl class="row">
+                            <dt class="col-sm-4">@Html.DisplayNameFor(model => model.Id)</dt>
+                            <dd class="col-sm-8">@Html.DisplayFor(model => model.Id)</dd>
 
-                <dt class="col-sm-4">@Html.DisplayNameFor(model => model.UpdatedAt)</dt>
-                <dd class="col-sm-8">@Html.DisplayFor(model => model.UpdatedAt)</dd>
+                            <dt class="col-sm-4">Start Date:</dt>
+                            <dd class="col-sm-8">@Model.StartDate.ToShortDateString()</dd>
 
-                @if (Model.School != null)
-                {
-                    <dt class="col-sm-4">School:</dt>
-                    <dd class="col-sm-8">@Model.School.Name</dd>
-                }
-                else
-                {
-                    <dt class="col-sm-4">School:</dt>
-                    <dd class="col-sm-8">School not available</dd>
-                }
-            </dl>
+                            <dt class="col-sm-4">End Date:</dt>
+                            <dd class="col-sm-8">@Model.EndDate.ToShortDateString()</dd>
 
-            <hr />
+                            <dt class="col-sm-4">@Html.DisplayNameFor(model => model.CreatedAt)</dt>
+                            <dd class="col-sm-8">@Html.DisplayFor(model => model.CreatedAt)</dd>
+
+                            <dt class="col-sm-4">@Html.DisplayNameFor(model => model.UpdatedAt)</dt>
+                            <dd class="col-sm-8">@Html.DisplayFor(model => model.UpdatedAt)</dd>
+
+                            @if (Model.School != null)
+                            {
+                                <dt class="col-sm-4">School:</dt>
+                                <dd class="col-sm-8">@Model.School.Name</dd>
+                            }
+                            else
+                            {
+                                <dt class="col-sm-4">School:</dt>
+                                <dd class="col-sm-8">School not available</dd>
+                            }
+                        </dl>
+
+                        <hr />
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </div>

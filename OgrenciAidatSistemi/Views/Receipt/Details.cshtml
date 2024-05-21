@@ -1,0 +1,118 @@
+@model ReceiptView
+
+@{
+    var showFileHashColumn = (ViewBag.UserRole ?? UserRole.None) == UserRole.SiteAdmin;
+}
+
+<div class="container-fluid">
+    <h2 class="mb-4">Receipt Details</h2>
+
+    <div class="card">
+        <div class="card-body">
+            <h4 class="card-title">Receipt</h4>
+            <hr />
+            <dl class="row">
+                <dt class="col-sm-2 text-nowrap">
+                    @Html.DisplayNameFor(model => model.Id)
+                </dt>
+                <dd class="col-sm-10">
+                    @Html.DisplayFor(model => model.Id)
+                </dd>
+
+                <dt class="col-sm-2 text-nowrap">
+                    @Html.DisplayNameFor(model => model.Name)
+                </dt>
+                <dd class="col-sm-10">
+                    @Html.DisplayFor(model => model.Name)
+                </dd>
+                <dt class="col-sm-2 text-nowrap">
+                    @Html.DisplayNameFor(model => model.Extension)
+                </dt>
+                <dd class="col-sm-10">
+                    @Html.DisplayFor(model => model.Extension)
+                </dd>
+                <dt class="col-sm-2 text-nowrap">
+                    @Html.DisplayNameFor(model => model.ContentType)
+                </dt>
+                <dd class="col-sm-10">
+                    @Html.DisplayFor(model => model.ContentType)
+                </dd>
+                <dt class="col-sm-2 text-nowrap">
+                    @Html.DisplayNameFor(model => model.Size)
+                </dt>
+                <dd class="col-sm-10">
+                    @Html.DisplayFor(model => model.Size)
+                </dd>
+                <dt class="col-sm-2 text-nowrap">
+                    @Html.DisplayNameFor(model => model.Description)
+                </dt>
+                <dd class="col-sm-10">
+                    @Html.DisplayFor(model => model.Description)
+                </dd>
+                @if (Model.CreatedBy != null)
+                {
+                    <dt class="col-sm-2 text-nowrap">
+                        @Html.DisplayNameFor(model => model.CreatedBy)
+                    </dt>
+                    <dd class="col-sm-10">
+                        <partial name="_UserDetailPartial" model="Model.CreatedBy" />
+                    </dd>
+               }else
+                {
+                    <div class="alert alert-info" role="alert">
+                        cannot find the creator of this file.
+                    </div>
+                }
+
+                <dt class="col-sm-2 text-nowrap">
+                    @Html.DisplayNameFor(model => model.Path)
+                </dt>
+                <dd class="col-sm-10">
+                    <a asp-action="Download" asp-route-path="@Model.Path" class="btn btn-primary">Download</a>
+                </dd>
+
+                @if(showFileHashColumn){
+                    <dt class="col-sm-2 text-nowrap">
+                        @Html.DisplayNameFor(model => model.FileHash)
+                    </dt>
+                    <dd class="col-sm-10">
+                        @Html.DisplayFor(model => model.FileHash)
+                    </dd>
+                }
+                <dt class="col-sm-2 text-nowrap">
+                    @Html.DisplayNameFor(model => model.CreatedAt)
+                </dt>
+                <dd class="col-sm-10">
+                    @Html.DisplayFor(model => model.CreatedAt)
+                </dd>
+                <dt class="col-sm-2 text-nowrap">
+                    @Html.DisplayNameFor(model => model.UpdatedAt)
+                </dt>
+                <dd class="col-sm-10">
+                    @Html.DisplayFor(model => model.UpdatedAt)
+                </dd>
+                @if (Model.Payment != null)
+                {
+                    <dt class="col-sm-2 text-nowrap">
+                        @Html.DisplayNameFor(model => model.Payment)
+                    </dt>
+                    <dd class="col-sm-10">
+                        <partial name="_PaymentDetailPartial" model="Model.Payment" />
+                    </dd>
+                }
+                else
+                {
+                    <div class="alert alert-info" role="alert">
+                        No payment found.
+                    </div>
+                }
+            </dl>
+        </div>
+    </div>
+    <p class="mt-5">
+        <a asp-action="Edit" class="btn btn-primary">Edit</a>
+        <a asp-action="List" class="btn btn-secondary">Back to List</a>
+
+        <a asp-action="Detete" class="btn btn-danger float-end">Delete</a>
+    </p>
+</div>

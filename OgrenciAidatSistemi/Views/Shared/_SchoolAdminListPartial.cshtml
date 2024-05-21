@@ -1,25 +1,41 @@
 @model IEnumerable<SchoolAdminView?>?
-@*
-iterate over the SchoolAdminView objects and display max 5 of them
-*@
-<div class="table-responsive">
-    @if (Model == null)
-    {
-        <p> cannot get the school admins</p>
-        return; @* return to stop the execution of the rest of the code *@
-    }
+@{
+    const string CardName = "schoolAdminListCard";
+    const string partialViewTitle = "School Admins";
+}
 
-    @foreach (var item in Model)
-    {
-        if (item == null)
-            continue;
-        <partial name="_SchoolAdminDetailPartial" model="item" />
-    }
-    @*
-    if more than 5 add link to see all
-    *@
-    @if (Model.Count() > 5)
-    {
-        <a asp-action="List" asp-controller="SchoolAdmins" class="btn btn-primary">See All</a>
-    }
+<div class="container-fluid py-0 my-0">
+    <div class="card m-0">
+        <div class="card-header" id="headingOne">
+            <h5 class="mb-0">
+                @partialViewTitle <button class="btn btn-link collapsed" type="button" data-bs-toggle="collapse"
+                    data-bs-target="#@CardName" aria-expanded="false" aria-controls="userDetailCard">
+                    <span class="triangle">&#9650;</span> <!-- This is a Unicode up arrow -->
+                </button>
+            </h5>
+        </div>
+        <div id="@CardName" class="collapse" aria-labelledby="headingOne" data-parent="#accordion">
+            <div class="card-body">
+                @if (Model == null)
+                {
+                    <p> cannot get the school admins</p>
+                    return; @* return to stop the execution of the rest of the code *@
+                }
+
+                @foreach (var item in Model)
+                {
+                    if (item == null)
+                        continue;
+                    <partial name="_SchoolAdminDetailPartial" model="item" />
+                }
+                @*
+                if more than 5 add link to see all
+                *@
+                @if (Model.Count() > 5)
+                {
+                    <a asp-action="List" asp-controller="SchoolAdmins" class="btn btn-primary">See All</a>
+                }
+            </div>
+        </div>
+    </div>
 </div>

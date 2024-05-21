@@ -1,24 +1,43 @@
-@*
-@model OgrenciAidatSistemi.Models.School
-*@
-<div class="card">
-    <div class="card-body">
-        <h5 class="card-title">School Information</h5>
-        <div class="card-text">
-            <div class="row">
-                <div class="col-md-6">
-                    <strong>ID:</strong> @Model.Id
-                </div>
-                <div class="col-md-6">
-                    <strong>Name:</strong> @Model.Name
-                </div>
-            </div>
-            <div class="row">
-                <div class="col-md-6">
-                    <strong>Created At:</strong> @Model.CreatedAt
-                </div>
-                <div class="col-md-6">
-                    <strong>Updated At:</strong> @Model.UpdatedAt
+@* @model School *@
+@{
+    var uniqCardName = "schoolDetailCard" + Model.Id;
+    @* var partialViewTitle = "School Information" + Model.Name; *@
+    var partialViewTitle = Model.Name;
+}
+
+
+<div class="container-fluid py-0 my-0">
+    <div class="card m-0">
+        <div class="card-header" id="headingOne">
+            <h6 class="mb-0">
+                @partialViewTitle <button class="btn btn-link collapsed" type="button" data-bs-toggle="collapse"
+                    data-bs-target="#@uniqCardName" aria-expanded="false" aria-controls="userDetailCard">
+                    <span class="triangle">&#9650;</span> <!-- This is a Unicode up arrow -->
+                </button>
+            </h6>
+        </div>
+        <div id="@uniqCardName" class="collapse" aria-labelledby="headingOne" data-parent="#accordion">
+            <div class="card-body">
+
+                <div class="card-text">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <strong>ID:</strong> @Model.Id
+                        </div>
+                        <div class="col-md-6">
+                            <strong>Name:</strong> @Model.Name
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <strong>Created At:</strong> @Model.CreatedAt
+                        </div>
+                        <div class="col-md-6">
+                            <strong>Updated At:</strong> @Model.UpdatedAt
+                        </div>
+                    </div>
+                    <a asp-controller="School" asp-action="Details" asp-route-id="@Model.Id"
+                        class="btn btn-primary float-end">🔗</a>
                 </div>
             </div>
         </div>

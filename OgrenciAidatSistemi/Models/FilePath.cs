@@ -3,41 +3,29 @@ using OgrenciAidatSistemi.Models.Interfaces;
 
 namespace OgrenciAidatSistemi.Models
 {
-    public class FilePath : IBaseDbModel
+    public class FilePath(
+        string path,
+        string name,
+        string extension,
+        string contentType,
+        long size,
+        string description
+    ) : IBaseDbModel
     {
         public int Id { get; set; }
 
-        public string? Path { get; set; }
-        public string Name { get; set; }
-        public string Extension { get; set; }
-        public string ContentType { get; set; }
-        public long Size { get; set; }
-        public string Description { get; set; }
+        public string? Path { get; set; } = path;
+        public string Name { get; set; } = name;
+        public string Extension { get; set; } = extension;
+        public string ContentType { get; set; } = contentType;
+        public long Size { get; set; } = size;
+        public string Description { get; set; } = description;
 
         public User CreatedBy { get; set; }
         public string FileHash { get; set; }
 
-        public DateTime CreatedAt { get; set; }
-        public DateTime UpdatedAt { get; set; }
-
-        public FilePath(
-            string path,
-            string name,
-            string extension,
-            string contentType,
-            long size,
-            string description
-        )
-        {
-            Path = path;
-            Name = name;
-            Extension = extension;
-            ContentType = contentType;
-            Size = size;
-            Description = description;
-            CreatedAt = DateTime.Now;
-            UpdatedAt = DateTime.Now;
-        }
+        public DateTime CreatedAt { get; set; } = DateTime.Now;
+        public DateTime UpdatedAt { get; set; } = DateTime.Now;
 
         // get safely data of file asynchrously
         public async Task<byte[]> GetDataAsync()

@@ -83,6 +83,8 @@ namespace OgrenciAidatSistemi.Models
         public decimal Amount { get; set; }
         public DateTime CreatedAt { get; set; }
         public DateTime UpdatedAt { get; set; }
+
+        public PaymentStatus? Status { get; set; }
     }
 
     public class BankPayment : Payment
@@ -107,6 +109,7 @@ namespace OgrenciAidatSistemi.Models
                 Student = ignoreBidirectNav ? null : Student?.ToView(ignoreBidirectNav: true),
                 PaymentDate = PaymentDate,
                 Amount = Amount,
+                Status = Status,
                 CreatedAt = CreatedAt,
                 UpdatedAt = UpdatedAt,
                 BankName = BankName,
@@ -145,6 +148,7 @@ namespace OgrenciAidatSistemi.Models
                 Student = ignoreBidirectNav ? null : Student?.ToView(ignoreBidirectNav: true),
                 PaymentDate = PaymentDate,
                 Amount = Amount,
+                Status = Status,
                 CreatedAt = CreatedAt,
                 UpdatedAt = UpdatedAt,
                 CheckNumber = CheckNumber,
@@ -188,6 +192,7 @@ namespace OgrenciAidatSistemi.Models
                 Student = ignoreBidirectNav ? null : Student?.ToView(ignoreBidirectNav: true),
                 PaymentDate = PaymentDate,
                 Amount = Amount,
+                Status = Status,
                 CreatedAt = CreatedAt,
                 UpdatedAt = UpdatedAt,
                 CardNumber = CardNumber,
@@ -232,6 +237,7 @@ namespace OgrenciAidatSistemi.Models
                 Student = ignoreBidirectNav ? null : Student?.ToView(ignoreBidirectNav: true),
                 PaymentDate = PaymentDate,
                 Amount = Amount,
+                Status = Status,
                 CreatedAt = CreatedAt,
                 UpdatedAt = UpdatedAt,
                 CashierName = CashierName,

@@ -8,7 +8,11 @@ html {
   }
 }
 
-.btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
+.btn:focus,
+.btn:active:focus,
+.btn-link.nav-link:focus,
+.form-control:focus,
+.form-check-input:focus {
   box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
 }
 
@@ -19,4 +23,27 @@ html {
 
 body {
   margin-bottom: 60px;
+}
+
+
+.collapse {
+  transition-duration: 2s;
+  /* Change this to the duration you want */
+}
+
+.container-fluid,
+.card {
+  padding: 0 !important;
+  /* Override any other padding */
+  margin: 0 !important;
+  /* Override any other margin */
+}
+
+.triangle {
+  display: inline-block;
+  transition: transform 0.3s ease-in-out;
+}
+
+.flipped {
+  transform: scaleY(-1);
 }

@@ -1,20 +1,45 @@
 @model HashSet<OgrenciAidatSistemi.Models.Grade>
 
-<table class="table table-striped">
-    <thead>
-        <tr>
-            <th>Grade</th>
-            <td>Grade Level</td>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var grade in Model)
+@{
+    const string CardName = "gradeDetailCard";
+    const string partialViewTitle = "Grades";
+}
 
-        {
-            <tr>
-                <td>@grade.Name</td>
-                <td>@grade.GradeLevel</td>
-            </tr>
-        }
-    </tbody>
-</table>
+<div class="container-fluid py-0 my-0">
+    <div class="card m-0">
+        <div class="card-header" id="headingOne">
+            <h5 class="mb-0">
+                @partialViewTitle <button class="btn btn-link collapsed" type="button" data-bs-toggle="collapse"
+                    data-bs-target="#@CardName" aria-expanded="false" aria-controls="userDetailCard">
+                    <span class="triangle">&#9650;</span> <!-- This is a Unicode up arrow -->
+                </button>
+            </h5>
+        </div>
+        <div id="@CardName" class="collapse" aria-labelledby="headingOne" data-parent="#accordion">
+            <div class="card-body">
+
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>
+                                <Details< /th>
+                            <th>Grade</th>
+                            <td>Grade Level</td>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var grade in Model)
+
+                        {
+                            <tr>
+                                <td><a asp-controller="Grade" asp-action="Details" asp-route-id="@grade.Id">Details</a></td>
+                                <td>@grade.Name</td>
+                                <td>@grade.GradeLevel</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>

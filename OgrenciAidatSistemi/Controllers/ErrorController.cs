@@ -48,10 +48,5 @@ namespace OgrenciAidatSistemi.Controllers
             ViewBag.Title = "Error 500 - Internal Server Error";
             return View("Index");
         }
-
-        // public PartialViewResult ErrorPartial()
-        // {
-        //     return PartialView("_ErrorPartial");
-        // }
     }
 }

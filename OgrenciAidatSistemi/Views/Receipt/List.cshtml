@@ -5,6 +5,7 @@
     var usrRole = ViewBag.UserRole ?? UserRole.None;
     var showStudentIdColumn = (usrRole != UserRole.Student && usrRole != UserRole.None);
     var showCreatedByColumn = usrRole == UserRole.SiteAdmin;
+    var showEditColumn = showCreatedByColumn;
 }
 
 <h2>@ViewData["Title"] <a asp-action="Create" class="btn btn-sm btn-primary float-end">Create New</a></h2>
@@ -69,6 +70,7 @@
                 <a asp-action="List" asp-route-sortOrder="@(ViewData["PeriodSortParam"]?.ToString())"
                     asp-route-searchString="@ViewData["CurrentSearchString"]?.ToString()">Receipt Period</a>
             </th>
+            <th>Actions</th>
         </tr>
     </thead>
     <tbody>
@@ -81,7 +83,8 @@
                 @if (showStudentIdColumn)
                 {
                     <td>
-                        <a asp-action="Details" asp-route-id="@item.Payment?.Student?.StudentId">@item.Payment?.Student?.StudentId ?? "Unknown"</a>
+                        <a asp-action="Details"
+                            asp-route-id="@item.Payment?.Student?.StudentId">@item.Payment?.Student?.StudentId ?? "Unknown"</a>
                     </td>
                 }
                 @if (showCreatedByColumn)
@@ -99,6 +102,16 @@
                 <td>
                     @((item.Payment?.PaymentPeriod?.Id.ToString()) ?? "Unknown")
                 </td>
+                <td>
+                    @if (showEditColumn)
+                    {
+                        <a asp-action="Edit" asp-route-id="@item.Id">Edit</a>
+                        <p>|</p>
+                    }
+                    <a href="@Url.Action("Details", new { id = item.Id})">Details</a>
+                    <a href="@Url.Action("Delete", new { id = item.Id })">Delete</a>
+                </td>
+
             </tr>
         }
     </tbody>
@@ -135,4 +148,3 @@
         }
     </ul>
 </nav>
-

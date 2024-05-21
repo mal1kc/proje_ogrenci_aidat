@@ -309,23 +309,6 @@ namespace OgrenciAidatSistemi.Controllers
             return RedirectToAction("List");
         }
 
-        [Authorize]
-        public async Task<PartialViewResult> SchoolViewPartial(int? id)
-        {
-            _dbContext.Schools ??= _dbContext.Set<School>();
-            if (id == null)
-            {
-                return PartialView("_SchoolViewPartial", null);
-            }
-            var school = await _dbContext.Schools.FindAsync(id);
-            if (school == null)
-            {
-                return PartialView("_SchoolViewPartial", null);
-            }
-            var schView = school.ToView();
-            return PartialView("_SchoolViewPartial", schView);
-        }
-
         public async Task<Student?> GetLoggedInStudent()
         {
             var student = await _userService.GetCurrentUserAsync();
@@ -344,57 +327,6 @@ namespace OgrenciAidatSistemi.Controllers
                         .FirstOrDefault(),
                 _ => null,
             };
-        }
-
-        // <partial name="_PaymentHistoryPartial"/>
-
-        [Authorize(Roles = Configurations.Constants.userRoles.Student)]
-        public async Task<IActionResult> PaymentHistoryPartial()
-        {
-            var student = await GetLoggedInStudent();
-
-            var payments = new QueryableModelHelper<Payment>(
-                _dbContext.Payments.Where(p => p.Student == student).AsQueryable(),
-                Payment.SearchConfig
-            )
-                .Sort("PaymentDate", SortOrderEnum.ASC)
-                .Take(5)
-                .ToHashSet();
-
-            return PaymentHistoryPartial(payments);
-        }
-
-        // <partial name="_PaymentHistoryPartial" model="Model.Payments" />
-
-        [Authorize(Roles = Configurations.Constants.userRoles.Student)]
-        public IActionResult PaymentHistoryPartial(HashSet<Payment> model)
-        {
-            return PartialView("_PaymentHistoryPartial", model);
-        }
-
-        // <partial name="_GradesPartial"/>
-
-        [Authorize(Roles = Configurations.Constants.userRoles.Student)]
-        public async Task<IActionResult> GradesPartial()
-        {
-            var student = await GetLoggedInStudent();
-            // student have many to many relation with grades
-            var grades = new QueryableModelHelper<Grade>(
-                _dbContext.Grades.Where(g => g.Students.Contains(student)).AsQueryable(),
-                Grade.SearchConfig
-            )
-                .Sort("GradeDate", SortOrderEnum.ASC)
-                .Take(5)
-                .ToHashSet();
-            return GradesPartial(grades);
-        }
-
-        // <partial name="_GradesPartial" model="Model.Grades" />
-
-        [Authorize(Roles = Configurations.Constants.userRoles.Student)]
-        public IActionResult GradesPartial(HashSet<Grade> model)
-        {
-            return PartialView("_GradesPartial", model);
         }
 
         [Authorize(Roles = Configurations.Constants.userRoles.SiteAdmin)]
@@ -459,22 +391,6 @@ namespace OgrenciAidatSistemi.Controllers
         private bool StudentExists(int id)
         {
             return _dbContext.Students.Any(e => e.Id == id);
-        }
-
-        // _StudentDetailPartial with IEnumarable<StudentView>
-        public IActionResult _StudentDetailPartial(IEnumerable<StudentView?>? model)
-        {
-            return PartialView("_StudentDetailPartial", model);
-        }
-
-        // _StudentDetailPartial with IEnumarable<Student>
-        public IActionResult _StudentDetailPartial(IEnumerable<Student?>? model)
-        {
-            if (model == null)
-            {
-                return PartialView("_StudentDetailPartial", null);
-            }
-            return PartialView("_StudentDetailPartial", model.Select(s => s?.ToView()));
         }
     }
 }

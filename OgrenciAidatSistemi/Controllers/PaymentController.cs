@@ -265,11 +265,6 @@ namespace OgrenciAidatSistemi.Controllers
             return View(paymentPeriod.ToView());
         }
 
-        public IActionResult PaymentListPartial(HashSet<PaymentView> model)
-        {
-            return PartialView("_PaymentListPartial", model);
-        }
-
         public IActionResult PeriodDelete(int? id)
         {
             if (id == null)

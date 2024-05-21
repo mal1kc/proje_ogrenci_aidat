@@ -2,63 +2,82 @@
 @*
 partial view to display the SchoolAdminView object
 *@
+@{
+    const string CardName = "schoolAdminDetailCard";
+    var partialViewTitle = @Model.EmailAddress;
+}
 
-<div class="card">
-    <div class="card-body">
-        <h4 class="card-title">School Admin</h4>
-        <hr />
-        <dl class="row">
-            <dt class="col-sm-2 text-nowrap">
-                @Html.DisplayNameFor(model => model.Id)
-            </dt>
-            <dd class="col-sm-10">
-                @Html.DisplayFor(model => model.Id)
-            </dd>
-            @if (Model.School != null)
-            {
-                <dt class="col-sm-2 text-nowrap">
-                    @Html.DisplayNameFor(model => model.School)
-                </dt>
-                <dd class="col-sm-10">
-                    <partial name="_SchoolViewPartial" model="Model.School" />
-                </dd>
-            }
+<div class="container-fluid py-0 my-0">
+    <div class="card m-0">
+        <div class="card-header" id="headingOne">
+            <h5 class="mb-0">
+                @partialViewTitle <button class="btn btn-link collapsed" type="button" data-bs-toggle="collapse"
+                    data-bs-target="#@CardName" aria-expanded="false" aria-controls="userDetailCard">
+                    <span class="triangle">&#9650;</span> <!-- This is a Unicode up arrow -->
+                </button>
+            </h5>
+        </div>
+        <div id="@CardName" class="collapse" aria-labelledby="headingOne" data-parent="#accordion">
+            <div class="card-body">
+                <h4 class="card-title">School Admin</h4>
+                <hr />
+                <dl class="row">
+                    <dt class="col-sm-2 text-nowrap">
+                        @Html.DisplayNameFor(model => model.Id)
+                    </dt>
+                    <dd class="col-sm-10">
+                        @Html.DisplayFor(model => model.Id)
+                    </dd>
+                    @if (Model.School != null)
+                    {
+                        <dt class="col-sm-2 text-nowrap">
+                            @Html.DisplayNameFor(model => model.School)
+                        </dt>
+                        <dd class="col-sm-10">
+                            <partial name="_SchoolViewPartial" model="Model.School" />
+                        </dd>
+                    }
 
-            <dt class="col-sm-2 text-nowrap">
-                @Html.DisplayNameFor(model => model.FirstName)
-            </dt>
-            <dd class="col-sm-10">
-                @Html.DisplayFor(model => model.FirstName)
-            </dd>
+                    <dt class="col-sm-2 text-nowrap">
+                        @Html.DisplayNameFor(model => model.FirstName)
+                    </dt>
+                    <dd class="col-sm-10">
+                        @Html.DisplayFor(model => model.FirstName)
+                    </dd>
 
-            <dt class="col-sm-2 text-nowrap">
-                @Html.DisplayNameFor(model => model.LastName)
-            </dt>
-            <dd class="col-sm-10">
-                @Html.DisplayFor(model => model.LastName)
-            </dd>
+                    <dt class="col-sm-2 text-nowrap">
+                        @Html.DisplayNameFor(model => model.LastName)
+                    </dt>
+                    <dd class="col-sm-10">
+                        @Html.DisplayFor(model => model.LastName)
+                    </dd>
 
-            <dt class="col-sm-2 text-nowrap">
-                @Html.DisplayNameFor(model => model.EmailAddress)
-            </dt>
-            <dd class="col-sm-10">
-                @Html.DisplayFor(model => model.EmailAddress)
-            </dd>
+                    <dt class="col-sm-2 text-nowrap">
+                        @Html.DisplayNameFor(model => model.EmailAddress)
+                    </dt>
+                    <dd class="col-sm-10">
+                        @Html.DisplayFor(model => model.EmailAddress)
+                    </dd>
 
-            <dt class="col-sm-2 text-nowrap">
-                @Html.DisplayNameFor(model => model.CreatedAt)
-            </dt>
-            <dd class="col-sm-10">
-                @Html.DisplayFor(model => model.CreatedAt)
-            </dd>
+                    <dt class="col-sm-2 text-nowrap">
+                        @Html.DisplayNameFor(model => model.CreatedAt)
+                    </dt>
+                    <dd class="col-sm-10">
+                        @Html.DisplayFor(model => model.CreatedAt)
+                    </dd>
 
-            <dt class="col-sm-2 text-nowrap">
-                @Html.DisplayNameFor(model => model.UpdatedAt)
-            </dt>
-            <dd class="col-sm-10">
-                @Html.DisplayFor(model => model.UpdatedAt)
-            </dd>
-        </dl>
+                    <dt class="col-sm-2 text-nowrap">
+                        @Html.DisplayNameFor(model => model.UpdatedAt)
+                    </dt>
+                    <dd class="col-sm-10">
+                        @Html.DisplayFor(model => model.UpdatedAt)
+                    </dd>
+                </dl>
+
+                <a class="btn btn-primary float-end" asp-action="Details" asp-controller="SchoolAdmin"
+                    asp-route-id="@Model.Id">Details</a>
+            </div>
+
+        </div>
     </div>
-
 </div>

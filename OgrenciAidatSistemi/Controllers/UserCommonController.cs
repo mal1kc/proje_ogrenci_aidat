@@ -40,15 +40,5 @@ namespace OgrenciAidatSistemi.Controllers
             _logger.LogInformation("SignOutUser() -> redirecting to home page");
             return RedirectToAction("Index", "Home");
         }
-
-        public async Task<IActionResult> ContactInfoPartialView(ContactInfoView contactInfoView)
-        {
-            return PartialView("_ContactInfoPartialView", contactInfoView);
-        }
-
-        public async Task<IActionResult> ContactInfoPartialView(ContactInfo contactInfo)
-        {
-            return PartialView("_ContactInfoPartialView", contactInfo.ToView());
-        }
     }
 }

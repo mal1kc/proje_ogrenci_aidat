@@ -46,22 +46,12 @@
                     <div class="col-md-6 border-start">
                         <h3 class="mt-5">School Admins</h3>
                         @if (Model.SchoolAdmins == null || Model.SchoolAdmins.Count == 0)
-
-
-
                         {
                             <div class="alert alert-info" role="alert">
                                 No school admins found.
                             </div>
-
                         }
-
-
-
                         else
-
-
-
                         {
                             <div class="table-responsive">
                                 <partial name="_SchoolAdminListPartial" model="Model.SchoolAdmins" />
@@ -79,5 +69,6 @@
         <a asp-action="Edit" class="btn btn-primary">Edit</a>
         <a asp-action="List" class="btn btn-secondary">Back to List</a>
 
+        <a asp-action="Detete" class="btn btn-danger float-end">Delete</a>
     </p>
 </div>

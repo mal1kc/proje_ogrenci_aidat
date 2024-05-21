@@ -80,7 +80,7 @@
             + [ ] edit
             + [ ] create
             + [ ] delete
-            + [ ] detail
+            + [X] detail
             + [X] list
         + [X] grade not necessary
     

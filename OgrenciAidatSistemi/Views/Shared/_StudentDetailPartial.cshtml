@@ -1,11 +1,27 @@
 @model StudentView
 
-<div class="container mt-5">
-    <div class="card">
-        <div class="card-body">
+@{
+    const string CardName = "StudentDetailCard";
+    const string partialViewTitle = "Student Details";
+}
+
+<div class="container-fluid py-0 my-0">
+    <div class="card m-0">
+        <div class="card-header" id="headingOne">
+            <h5 class="mb-0">
+                @partialViewTitle <button class="btn btn-link collapsed" type="button" data-bs-toggle="collapse"
+                    data-bs-target="#@CardName" aria-expanded="false" aria-controls="userDetailCard">
+                    <span class="triangle">&#9650;</span> <!-- This is a Unicode up arrow -->
+                </button>
+            </h5>
+        </div>
+        <div id="@CardName" class="collapse" aria-labelledby="headingOne" data-parent="#accordion">
+            <div class="card-body">
             <h5 class="card-title bg-light p-2">Student</h5>
 
             <dl class="row">
+                <a class="btn btn-primary" href="@Url.Action("Details", "Student", new { id = Model.Id })">🔗</a>
+
                 <dt class="col-sm-2 text-nowrap">
                     @Html.DisplayNameFor(model => model.Id)
                 </dt>
@@ -104,10 +120,6 @@
 
             </div>
         </div>
-
-
-
-        <p class="mt-5">
-            <a href="@Url.Action("List", "Student")" class="btn btn-primary">Show All Students</a>
-        </p>
     </div>
+
+</div>

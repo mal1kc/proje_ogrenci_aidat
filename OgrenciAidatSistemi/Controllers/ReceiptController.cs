@@ -183,5 +183,47 @@ namespace OgrenciAidatSistemi.Controllers
                 );
             }
         }
+
+        [HttpGet]
+        [Authorize]
+        public async Task<IActionResult> Details(int id)
+        {
+            try
+            {
+                var receipt = await _dbContext
+                    .Receipts.Include(r => r.CreatedBy)
+                    .Include(r => r.Payment)
+                    .Include(r => r.Payment.Student)
+                    .FirstOrDefaultAsync(r => r.Id == id);
+
+                if (receipt == null)
+                {
+                    return RedirectToAction("Index", "Error", new { statusCode = 404 });
+                }
+
+                var (role, schoolid) = _userService.GetUserRoleAndSchoolId().Result;
+
+                if (role == null)
+                {
+                    return Unauthorized();
+                }
+
+                if (role == UserRole.Student && receipt.Payment.School.Id != schoolid)
+                {
+                    return Unauthorized();
+                }
+                ViewBag.UserRole = role;
+
+                return View(receipt.ToView());
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting file details");
+                return StatusCode(
+                    StatusCodes.Status500InternalServerError,
+                    "An error occurred while getting file details"
+                );
+            }
+        }
     }
 }

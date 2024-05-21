@@ -3,22 +3,52 @@
 @{
     int showcount = ViewBag.showCount ?? 5;
     int counter = 0;
+
+    const string CardName = "studentListCard";
+    const string partialViewTitle = "Students";
 }
 
-@if (Model != null)
-{
-    @foreach (var item in Model)
-    {
-        if (counter > showcount)
-            break;
-        if (item == null)
-            continue;
+<div class="container-fluid py-0 my-0">
+    <div class="card m-0">
+        <div class="card-header" id="headingOne">
+            <h5 class="mb-0">
+                @partialViewTitle <button class="btn btn-link collapsed" type="button" data-bs-toggle="collapse"
+                    data-bs-target="#@CardName" aria-expanded="false" aria-controls="userDetailCard">
+                    <span class="triangle">&#9650;</span> <!-- This is a Unicode up arrow -->
+                </button>
+            </h5>
+        </div>
+        <div id="@CardName" class="collapse" aria-labelledby="headingOne" data-parent="#accordion">
+            <div class="card-body">
+                <div class="row">
+                    <div class="col">
 
-        <partial name="_StudentDetailPartial" model="item" />
-        counter++;
-    }
-}
-else
-{
-    <p> cannot get the students</p>
-}
+                        @if (Model != null)
+                        {
+                            @foreach (var item in Model)
+                            {
+                                if (counter > showcount)
+                                    break;
+                                if (item == null)
+                                    continue;
+
+                                <partial name="_StudentDetailPartial" model="item" />
+                                counter++;
+                            }
+                        }
+                        else
+                        {
+                            <p> cannot get the students</p>
+                        }
+
+                        @if (Model.Count() > showcount)
+                        {
+                            <a asp-action="List" asp-controller="Students" class="btn btn-primary">See All</a>
+                        }
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
