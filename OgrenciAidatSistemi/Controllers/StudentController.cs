@@ -203,7 +203,13 @@ namespace OgrenciAidatSistemi.Controllers
                     PasswordHash = _userService.HashPassword(studentView.Password),
                     School = school,
                     CreatedAt = DateTime.Now,
-                    UpdatedAt = DateTime.Now
+                    UpdatedAt = DateTime.Now,
+                    ContactInfo = new ContactInfo
+                    {
+                        Email = studentView.EmailAddress,
+                        PhoneNumber = studentView.ContactInfo.PhoneNumber,
+                        Addresses = studentView.ContactInfo.Addresses
+                    }
                 };
                 newStdnt.GenerateUniqueId(_dbContext);
                 _logger.LogDebug("User {0} created", studentView.EmailAddress);

@@ -1,9 +1,9 @@
-@model SchoolAdminView
+@model StudentView
 @{
     ViewData["Title"] = "Create Student";
 }
 
-<h1>Create Student</h1>
+<h1 class="mb-4">Create Student</h1>
 
 <partial name="_ValidationScriptsPartial" />
 
@@ -63,6 +63,91 @@
                 <p> <strong>Error:</strong> Please fix the errors above. </p>
             </div>
         }
-        <button type="submit" class="btn btn-primary">Create</button>
     </div>
+    <h2 class="mb-3">Contact Info</h2>
+    <div class="mb-3">
+        <div class="mb-3">
+            <label asp-for="ContactInfo.PhoneNumber" class="form-label">Phone Number</label>
+            <input asp-for="ContactInfo.PhoneNumber" class="form-control" placeholder="555 555 555" required />
+            <div class="invalid-feedback">
+                Please enter a valid phone number.
+            </div>
+        </div>
+        <div class="mb-2">
+            <label asp-for="ContactInfo.Addresses" class="form-label">Address</label>
+
+
+            <div id="addressContainer">
+                <div class="mb-3">
+                    <label class="form-label">Address 1</label>
+                    <input name="Addresses[0]" class="form-control" required />
+                    <div class="invalid-feedback">
+                        Please enter a valid address.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <button type="button" id="addAddress" class="btn btn-secondary mb-3">Add Address</button>
+    </div>
+
+    <button type="submit" class="btn btn-primary me-2">Create</button>
+    <a asp-action="List" class="btn btn-secondary">Return to List</a>
 </form>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            var addressIndex = 1;
+
+            $('#addAddress').click(function () {
+                $('#addressContainer').append(`
+                        <div class="mb-3">
+                            <label class="form-label">Address ${addressIndex + 1}</label>
+                            <input name="Addresses[${addressIndex}]" class="form-control" required />
+                            <button type="button" class="btn btn-danger btn-sm removeAddress float-end">Remove</button>
+                            <div class="invalid-feedback">
+                                Please enter a valid address.
+                            </div>
+                        </div>
+                    `);
+
+                addressIndex++;
+                updateLabels();
+            });
+
+            $('#addressContainer').on('click', '.removeAddress', function () {
+                $(this).parent().remove();
+                updateLabels();
+            });
+
+            function updateLabels() {
+                $('#addressContainer .form-label').each(function (index) {
+                    $(this).text(`Address ${index + 1}`);
+                });
+            }
+        })
+    </script>
+    <script>
+            // Bootstrap 5 form validation script
+            (function () {
+                'use strict'
+
+                // Fetch all the forms we want to apply custom Bootstrap validation styles to
+                var forms = document.querySelectorAll('.needs-validation')
+
+                // Loop over them and prevent submission
+                Array.prototype.slice.call(forms)
+                    .forEach(function (form) {
+                        form.addEventListener('submit', function (event) {
+                            if (!form.checkValidity()) {
+                                event.preventDefault()
+                                event.stopPropagation()
+                            }
+
+                            form.classList.add('was-validated')
+                        }, false)
+                    })
+            })()
+    </script>
+}

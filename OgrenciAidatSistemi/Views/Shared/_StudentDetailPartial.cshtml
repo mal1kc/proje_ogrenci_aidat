@@ -1,8 +1,8 @@
 @model StudentView
 
 @{
-    const string CardName = "StudentDetailCard";
-    const string partialViewTitle = "Student Details";
+    var CardName = "StudentDetailCard" + Model.Id;
+    var partialViewTitle = "Student :" + Model.Id;
 }
 
 <div class="container-fluid py-0 my-0">

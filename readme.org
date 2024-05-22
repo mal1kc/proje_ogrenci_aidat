@@ -71,14 +71,14 @@
             + [X] detail
             + [x] list
         + [ ] contactınfo (all , but student can only see their own)
-            + [ ] edit
-            + [ ] create
+            + [ ] edit(integrated with student & school admin edit)
+            + [X] create(integrated with student & school admin create)
             + [ ] delete
-            + [ ] detail
-            + [ ] list
+            + [X] detail (not necessary because it can be shown with _contactinfo partial views) 
+            + [X] list (not necessary)
         + [ ] receipt (all , but student can only see their own)
-            + [ ] edit
-            + [ ] create
+            + [ ] edit (integrated with payment)
+            + [ ] create (integrated with payment)
             + [ ] delete
             + [X] detail
             + [X] list
