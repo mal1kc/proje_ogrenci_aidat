@@ -2,13 +2,18 @@ using Bogus;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.VisualBasic;
 using OgrenciAidatSistemi.Models;
+using OgrenciAidatSistemi.Services;
 #pragma warning disable CS8604 // Possible null reference argument.
 namespace OgrenciAidatSistemi.Data
 {
-    public class StudentDBSeeder : DbSeeder<AppDbContext, Student>
+    public class StudentDBSeeder(
+        AppDbContext context,
+        IConfiguration configuration,
+        ILogger logger,
+        StudentService studentService
+    ) : DbSeeder<AppDbContext, Student>(context, configuration, logger)
     {
-        public StudentDBSeeder(AppDbContext context, IConfiguration configuration, ILogger logger)
-            : base(context, configuration, logger) { }
+        private readonly StudentService _studentService = studentService;
 
         private readonly Faker faker = new("tr");
 
@@ -86,7 +91,7 @@ namespace OgrenciAidatSistemi.Data
             var school = new School
             {
                 Name = "RandomSchool" + faker.Random.Number(100),
-                Students = new HashSet<Student>()
+                Students = null
             };
 
             var student = new Student
@@ -134,13 +139,21 @@ namespace OgrenciAidatSistemi.Data
             };
             entity.CreatedAt = DateTime.Now;
             entity.UpdatedAt = DateTime.Now;
-            entity.GenerateUniqueId(_context);
+
             entity.EmailAddress = entity.StudentId + $"@mail.school.com";
             entity.ContactInfo.Email = entity.EmailAddress;
 
-            School? assumed_sch = await _context.Schools.FirstAsync(s =>
-                s.Name == entity.School.Name
-            );
+            School? assumed_sch = null;
+            try
+            {
+                assumed_sch = await _context.Schools.FirstAsync(s =>
+                    entity.School != null && s.Name == entity.School.Name
+                );
+            }
+            catch (InvalidOperationException)
+            {
+                // ignored
+            }
 
             if (_verboseLogging)
             {
@@ -153,14 +166,17 @@ namespace OgrenciAidatSistemi.Data
             }
             else
             {
-                entity.School.Students.Add(entity);
-                entity.School.Id = _context.Schools.Count() + 1;
+                entity.School ??= new School
+                {
+                    Name = "RandomSchool" + faker.Random.Number(100),
+                    Students = null
+                };
                 entity.School.CreatedAt = DateTime.Now;
                 entity.School.UpdatedAt = DateTime.Now;
             }
 
             // regenerate unique id because we have updated the school
-            entity.GenerateUniqueId(_context);
+            entity.StudentId = _studentService.GenerateStudentId(entity.School);
             entity.EmailAddress = entity.StudentId + $"@mail.school.com";
             entity.ContactInfo.Email = entity.EmailAddress;
 
@@ -182,7 +198,7 @@ namespace OgrenciAidatSistemi.Data
             {
                 FirstName = "studento one",
                 LastName = "numberone",
-                School = new School { Name = "School 1", Students = new HashSet<Student>() },
+                School = new School { Name = "School 1", Students = null },
                 GradLevel = 10,
                 IsGraduated = false,
                 PasswordHash = Student.ComputeHash("password"),
@@ -192,7 +208,7 @@ namespace OgrenciAidatSistemi.Data
             {
                 FirstName = "studento two",
                 LastName = "number two",
-                School = new School { Name = "School 2", Students = new HashSet<Student>() },
+                School = new School { Name = "School 2", Students = null },
                 GradLevel = 11,
                 IsGraduated = false,
                 PasswordHash = Student.ComputeHash("password"),

@@ -44,8 +44,6 @@ namespace OgrenciAidatSistemi.Controllers
             int pageSize = 20
         )
         {
-            _dbContext.Schools ??= _dbContext.Set<School>();
-
             var modelList = new QueryableModelHelper<School>(
                 _dbContext.Schools.AsQueryable(),
                 School.SearchConfig
@@ -82,12 +80,10 @@ namespace OgrenciAidatSistemi.Controllers
                     return RedirectToAction("Create");
                 }
 
-                _dbContext.Schools ??= _dbContext.Set<School>();
-
                 var school = new School
                 {
                     Name = schoolView.Name,
-                    Students = new HashSet<Student>(),
+                    Students = null,
                     CreatedAt = DateTime.Now,
                     UpdatedAt = DateTime.Now
                 };

@@ -49,6 +49,7 @@ internal class Program
             _ = services.AddScoped<UserService>();
             _ = services.AddScoped<FileService>();
             _ = services.AddScoped<ReceiptService>();
+            _ = services.AddScoped<StudentService>();
         }
 
         async Task ConfigureAppAsync(WebApplication app)
@@ -79,53 +80,76 @@ internal class Program
                 throw new Exception("AppDbContext is null");
             }
 
-            var logger = app.Services.GetRequiredService<ILogger<Program>>();
-
-            if (configuration.GetSection("SeedData").GetValue("SeedSiteAdmin", true) == true)
+            using (var scope = app.Services.CreateScope())
             {
-                var siteAdminSeeder = new SiteAdminDBSeeder(
-                    context: ctx,
-                    configuration: configuration,
-                    logger: logger
-                );
+                var services = scope.ServiceProvider;
+                var logger = services.GetRequiredService<ILogger<Program>>();
+                var studentService = services.GetRequiredService<StudentService>();
 
-                await siteAdminSeeder.SeedAsync();
-            }
-
-            if (configuration.GetSection("SeedData").GetValue("SeedDB", true) == true)
-            {
-                var _verbs = configuration.GetSection("SeedData").GetValue("VerboseLogging", false);
-                Console.WriteLine("Seeding Database");
-
-                List<IDbSeeder<AppDbContext>> DBseeders =
-                [
-                    new SchoolAdminDBSeeder(
+                if (configuration.GetSection("SeedData").GetValue("SeedSiteAdmin", true) == true)
+                {
+                    var siteAdminSeeder = new SiteAdminDBSeeder(
                         context: ctx,
                         configuration: configuration,
                         logger: logger
-                    ),
-                    new SchoolDBSeeder(context: ctx, configuration: configuration, logger: logger),
-                    new StudentDBSeeder(context: ctx, configuration: configuration, logger: logger),
-                    new PaymentDBSeeder(context: ctx, configuration: configuration, logger: logger),
-                ];
-                if (_verbs)
-                {
-                    Console.WriteLine("we have " + DBseeders.Count + " seeders");
+                    );
+
+                    await siteAdminSeeder.SeedAsync();
                 }
 
-                foreach (var seeder in DBseeders)
+                if (configuration.GetSection("SeedData").GetValue("SeedDB", true) == true)
                 {
+                    var _verbs = configuration
+                        .GetSection("SeedData")
+                        .GetValue("VerboseLogging", false);
+                    Console.WriteLine("Seeding Database");
+
+                    List<IDbSeeder<AppDbContext>> DBseeders =
+                    [
+                        new SchoolAdminDBSeeder(
+                            context: ctx,
+                            configuration: configuration,
+                            logger: logger,
+                            maxSeedCount: 10
+                        ),
+                        new SchoolDBSeeder(
+                            context: ctx,
+                            configuration: configuration,
+                            logger: logger
+                        ),
+                        new StudentDBSeeder(
+                            context: ctx,
+                            configuration: configuration,
+                            logger: logger,
+                            studentService: studentService
+                        ),
+                        new PaymentDBSeeder(
+                            context: ctx,
+                            configuration: configuration,
+                            logger: logger,
+                            studentService: studentService
+                        )
+                    ];
                     if (_verbs)
                     {
-                        Console.WriteLine("Seeding with " + seeder.GetType().Name);
+                        Console.WriteLine("we have " + DBseeders.Count + " seeders");
                     }
-                    await seeder.SeedAsync();
-                    await seeder.AfterSeedAsync();
+
+                    // seed random data for each seeder other than the SiteAdminDBSeeder
+                    foreach (var seeder in DBseeders)
+                    {
+                        if (_verbs)
+                        {
+                            Console.WriteLine("Seeding with " + seeder.GetType().Name);
+                        }
+                        await seeder.SeedAsync(randomSeed: true);
+                        await seeder.AfterSeedAsync();
+                    }
+
+                    Console.WriteLine("Database Seeded");
+
+                    _ = ctx.SaveChanges();
                 }
-
-                Console.WriteLine("Database Seeded");
-
-                _ = ctx.SaveChanges();
             }
 
             _ = app.UseHttpsRedirection();

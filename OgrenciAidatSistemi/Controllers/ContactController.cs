@@ -37,8 +37,6 @@ namespace OgrenciAidatSistemi.Controllers
             int pageSize = 20
         )
         {
-            _dbContext.Contacts ??= _dbContext.Set<ContactInfo>();
-
             var modelList = new QueryableModelHelper<ContactInfo>(
                 _dbContext.Contacts.AsQueryable(),
                 ContactInfo.SearchConfig

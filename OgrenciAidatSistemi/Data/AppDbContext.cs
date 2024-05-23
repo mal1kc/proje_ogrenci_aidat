@@ -6,29 +6,29 @@ namespace OgrenciAidatSistemi.Data
 {
     public class AppDbContext(DbContextOptions options) : DbContext(options)
     {
-        public DbSet<User>? Users { get; set; } // must be id table of users
-        public DbSet<SiteAdmin>? SiteAdmins { get; set; }
+        public DbSet<User> Users { get; set; } // must be id table of users
+        public DbSet<SiteAdmin> SiteAdmins { get; set; }
 
-        public DbSet<SchoolAdmin>? SchoolAdmins { get; set; }
-        public DbSet<Student>? Students { get; set; }
-        public DbSet<School>? Schools { get; set; }
+        public DbSet<SchoolAdmin> SchoolAdmins { get; set; }
+        public DbSet<Student> Students { get; set; }
+        public DbSet<School> Schools { get; set; }
 
-        public DbSet<ContactInfo>? Contacts { get; set; }
+        public DbSet<ContactInfo> Contacts { get; set; }
 
-        public DbSet<Payment>? Payments { get; set; }
-        public DbSet<PaymentPeriod>? PaymentPeriods { get; set; }
+        public DbSet<Payment> Payments { get; set; }
+        public DbSet<PaymentPeriod> PaymentPeriods { get; set; }
 
-        public DbSet<CashPayment>? CashPayments { get; set; }
+        public DbSet<CashPayment> CashPayments { get; set; }
 
-        public DbSet<BankPayment>? BankPayments { get; set; }
-        public DbSet<DebitCardPayment>? DebitCardPayments { get; set; }
+        public DbSet<BankPayment> BankPayments { get; set; }
+        public DbSet<DebitCardPayment> DebitCardPayments { get; set; }
 
-        public DbSet<CheckPayment>? CheckPayments { get; set; }
+        public DbSet<CheckPayment> CheckPayments { get; set; }
 
-        public DbSet<WorkYear>? WorkYears { get; set; }
-        public DbSet<Grade>? Grades { get; set; }
+        public DbSet<WorkYear> WorkYears { get; set; }
+        public DbSet<Grade> Grades { get; set; }
 
-        public DbSet<Receipt>? Receipts { get; set; }
+        public DbSet<Receipt> Receipts { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {

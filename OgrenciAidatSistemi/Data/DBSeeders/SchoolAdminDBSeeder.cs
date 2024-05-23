@@ -8,8 +8,9 @@ namespace OgrenciAidatSistemi.Data
     public class SchoolAdminDBSeeder(
         AppDbContext context,
         IConfiguration configuration,
-        ILogger logger
-    ) : DbSeeder<AppDbContext, SchoolAdmin>(context, configuration, logger)
+        ILogger logger,
+        int maxSeedCount = 100
+    ) : DbSeeder<AppDbContext, SchoolAdmin>(context, configuration, logger, maxSeedCount)
     {
         private readonly Faker faker = new("tr");
 
@@ -90,7 +91,7 @@ namespace OgrenciAidatSistemi.Data
                 School = new School
                 {
                     Name = "School" + faker.Random.Number(1, 100),
-                    Students = new HashSet<Student>()
+                    Students = null
                 },
                 ContactInfo = new ContactInfo { Email = email, }
             };
@@ -136,7 +137,7 @@ namespace OgrenciAidatSistemi.Data
                 LastName = "SchoolAdmin1",
                 EmailAddress = "sch_admin1@school1",
                 PasswordHash = SchoolAdmin.ComputeHash("Password1"),
-                School = new School { Name = "School1", Students = new HashSet<Student>() },
+                School = new School { Name = "School1", Students = null },
                 ContactInfo = new ContactInfo
                 {
                     Email = "sch_admin2@school2",

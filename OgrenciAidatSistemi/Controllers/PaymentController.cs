@@ -15,22 +15,15 @@ namespace OgrenciAidatSistemi.Controllers
     // must be SiteAdmin or SchoolAdmin (for its school) => list, create, details
     // or Student (for its own Payments) => details, list , create
 
-    public class PaymentController : Controller
+    public class PaymentController(
+        ILogger<PaymentController> logger,
+        AppDbContext dbContext,
+        UserService userService
+    ) : Controller
     {
-        private readonly ILogger<PaymentController> _logger;
-        private readonly AppDbContext _dbContext;
-        private readonly UserService _userService;
-
-        public PaymentController(
-            ILogger<PaymentController> logger,
-            AppDbContext dbContext,
-            UserService userService
-        )
-        {
-            _logger = logger;
-            _dbContext = dbContext;
-            _userService = userService;
-        }
+        private readonly ILogger<PaymentController> _logger = logger;
+        private readonly AppDbContext _dbContext = dbContext;
+        private readonly UserService _userService = userService;
 
         [Authorize(Roles = Configurations.Constants.userRoles.SiteAdmin)]
         [DebugOnly]
@@ -45,7 +38,6 @@ namespace OgrenciAidatSistemi.Controllers
 #if DEBUG
             ViewBag.IsDebug = true;
 #endif
-            _dbContext.Payments ??= _dbContext.Set<Payment>();
             IQueryable<Payment>? payments = null;
 
             var (role, schoolId) = _userService.GetUserRoleAndSchoolId().Result;
@@ -197,14 +189,20 @@ namespace OgrenciAidatSistemi.Controllers
             switch (role)
             {
                 case UserRole.SiteAdmin:
-                    paymentPeriods = _dbContext.PaymentPeriods.Include(pp => pp.Student);
+                    paymentPeriods = _dbContext
+                        .PaymentPeriods.Include(pp => pp.Student)
+                        .Where(p => p.Student != null && p.Student.School != null);
                     break;
                 case UserRole.SchoolAdmin:
                     if (schoolId.HasValue)
                     {
                         paymentPeriods = _dbContext
                             .PaymentPeriods.Include(pp => pp.Student)
-                            .Where(p => p.Student.School.Id == schoolId.Value);
+                            .Where(p =>
+                                p.Student != null
+                                && p.Student.School != null
+                                && p.Student.School.Id == schoolId.Value
+                            );
                     }
                     break;
                 case UserRole.Student:
@@ -322,9 +320,6 @@ namespace OgrenciAidatSistemi.Controllers
             var (role, schoolId) = _userService.GetUserRoleAndSchoolId().Result;
 
             ViewBag.IsSiteAdmin = role == UserRole.SiteAdmin;
-
-            _dbContext.Students ??= _dbContext.Set<Student>();
-            _dbContext.WorkYears ??= _dbContext.Set<WorkYear>();
 
             switch (role)
             {

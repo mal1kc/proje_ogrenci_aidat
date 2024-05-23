@@ -39,12 +39,11 @@ namespace OgrenciAidatSistemi.Helpers
             if (string.IsNullOrEmpty(searchField))
             {
                 // if searchField is not specified, search in all fields
-                foreach (var searchMethod in _searchConfig.SearchMethods.Values)
-                {
-                    resultParallel = resultParallel.Where(model =>
+                resultParallel = resultParallel.Where(model =>
+                    _searchConfig.SearchMethods.Values.Any(searchMethod =>
                         searchMethod(model, searchString)
-                    );
-                }
+                    )
+                );
             }
             else if (
                 _searchConfig.SearchMethods.TryGetValue(

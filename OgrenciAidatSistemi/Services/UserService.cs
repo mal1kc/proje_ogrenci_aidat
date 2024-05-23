@@ -64,7 +64,6 @@ namespace OgrenciAidatSistemi.Services
                 // You may want to hash the password before storing it
                 user.PasswordHash = User.ComputeHash(user.PasswordHash);
                 user.CreatedAt = DateTime.UtcNow;
-                _dbContext.Users ??= _dbContext.Set<User>();
 
                 _dbContext.Users.Add(user);
                 await _dbContext.SaveChangesAsync();

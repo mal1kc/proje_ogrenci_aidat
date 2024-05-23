@@ -1,4 +1,4 @@
-@model IQueryable<PaymentPeriod>
+@model IQueryable<PaymentPeriod>?
 @{
     ViewData["Title"] = "PaymentPeriods";
 }
@@ -67,7 +67,7 @@
         </tr>
     </thead>
     <tbody>
-        @foreach (var item in Model)
+        @foreach (var item in Model ?? Enumerable.Empty<PaymentPeriod?>())
         {
             <tr>
                 <td>@Html.DisplayFor(modelItem => item.Id)</td>

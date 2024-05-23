@@ -26,6 +26,7 @@ namespace OgrenciAidatSistemi.Data
         protected readonly IDbSeeder<TContext>? _dependentSeeder; // TODO: not fully implemented
 
         protected bool _verboseLogging;
+        protected bool _generateRandom;
 
         protected DbSeeder(
             TContext context,

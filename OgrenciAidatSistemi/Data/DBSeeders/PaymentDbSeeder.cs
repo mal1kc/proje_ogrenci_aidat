@@ -2,13 +2,20 @@ using System.Text.Json;
 using Bogus;
 using Microsoft.EntityFrameworkCore;
 using OgrenciAidatSistemi.Models;
+using OgrenciAidatSistemi.Services;
 
 namespace OgrenciAidatSistemi.Data.DBSeeders
 {
-#warning "PaymentDBSeeder is not fully implemented"
-    public class PaymentDBSeeder(AppDbContext context, IConfiguration configuration, ILogger logger)
-        : DbSeeder<AppDbContext, Payment>(context, configuration, logger)
+    public class PaymentDBSeeder(
+        AppDbContext context,
+        IConfiguration configuration,
+        ILogger logger,
+        StudentService studentService,
+        int maxSeedCount = 100
+    ) : DbSeeder<AppDbContext, Payment>(context, configuration, logger, maxSeedCount)
     {
+        private readonly StudentService _studentService = studentService;
+
         private readonly Faker faker = new("tr");
 
         public override IEnumerable<Payment> GetSeedData(bool randomSeed = false)
@@ -30,7 +37,7 @@ namespace OgrenciAidatSistemi.Data.DBSeeders
                 School = new School
                 {
                     Name = "RandomSchool" + faker.Random.Number(1, 100),
-                    Students = new HashSet<Student>()
+                    Students = null
                 },
                 GradLevel = faker.Random.Number(1, 12),
                 IsGraduated = faker.Random.Number(2) == 0, // Generate a random graduation status
@@ -49,10 +56,9 @@ namespace OgrenciAidatSistemi.Data.DBSeeders
             student.UpdatedAt = DateTime.Now;
             student.School.CreatedAt = DateTime.Now;
             student.School.UpdatedAt = DateTime.Now;
-            student.GenerateUniqueId(_context);
+            student.StudentId = _studentService.GenerateStudentId(student.School);
             student.EmailAddress = student.StudentId + $"@mail.school.com";
             student.ContactInfo.Email = student.EmailAddress;
-            student.School.Students.Add(student);
 
             var school = student.School;
             PaymentPeriod paymentperiod = new PaymentPeriod
@@ -122,12 +128,12 @@ namespace OgrenciAidatSistemi.Data.DBSeeders
                 faker.Random.Number(0, Enum.GetNames(typeof(PaymentStatus)).Length - 1);
 
             payment.Receipt = new(
-                path: null,
-                name: "Receipt of " + payment.Student.FirstName,
+                path: null, // i will this nullability in below SeedEntityAsync()
+                name: "Receipt of " + payment.Student?.FirstName,
                 extension: ".pdf",
                 contentType: "application/pdf",
                 size: 0,
-                description: "Receipt of " + payment.Student.FirstName
+                description: "Receipt of " + payment.Student?.FirstName
             )
             {
                 FileHash = "invalid hash"
@@ -275,14 +281,15 @@ namespace OgrenciAidatSistemi.Data.DBSeeders
             if (entity.Receipt == null)
                 throw new Exception("PaymentDBSeeder: SeedEntityAsync entity.Receipt is null");
 
-            entity.PaymentPeriod.WorkYear.School = entity.Student.School;
-            entity.PaymentPeriod.WorkYear.PaymentPeriods = new HashSet<PaymentPeriod>
+            if (entity.PaymentPeriod.WorkYear != null)
             {
-                entity.PaymentPeriod
-            };
+                entity.PaymentPeriod.WorkYear.School = entity.Student.School;
+                entity.PaymentPeriod.WorkYear.PaymentPeriods = new HashSet<PaymentPeriod>();
 
-            entity.PaymentPeriod.WorkYear.CreatedAt = DateTime.Now;
-            entity.PaymentPeriod.WorkYear.UpdatedAt = DateTime.Now;
+                entity.PaymentPeriod.WorkYear.CreatedAt = DateTime.Now;
+                entity.PaymentPeriod.WorkYear.UpdatedAt = DateTime.Now;
+            }
+
             entity.PaymentPeriod.PerPaymentAmount = entity.Amount;
             entity.PaymentPeriod.Occurrence = Occurrence.Monthly;
             entity.PaymentPeriod.CreatedAt = DateTime.Now;
@@ -305,6 +312,14 @@ namespace OgrenciAidatSistemi.Data.DBSeeders
             }
             entity.Receipt.CreatedBy = entity.Student;
             entity.School = entity.Student.School;
+
+            School? possible_school = _context
+                .Schools.Where(s => entity.School != null && entity.School.Name == s.Name)
+                .FirstOrDefault();
+            if (possible_school != null)
+            {
+                entity.Student.StudentId = _studentService.GenerateStudentId(possible_school);
+            }
 
             if (_verboseLogging)
                 Console.WriteLine(

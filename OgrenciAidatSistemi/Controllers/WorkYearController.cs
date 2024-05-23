@@ -47,7 +47,7 @@ namespace OgrenciAidatSistemi.Controllers
                         _logger.LogError("School id is null");
                         return RedirectToAction("Index", "Home");
                     }
-                    _dbContext.WorkYears ??= _dbContext.Set<WorkYear>();
+
                     var modelList2 = new QueryableModelHelper<WorkYear>(
                         _dbContext
                             .WorkYears.Where(wy => wy.School != null && wy.School.Id == schId)
@@ -72,7 +72,7 @@ namespace OgrenciAidatSistemi.Controllers
             }
             #endregion
 
-            _dbContext.WorkYears ??= _dbContext.Set<WorkYear>();
+
             var modelList = new QueryableModelHelper<WorkYear>(
                 _dbContext
                     .WorkYears.Include(wy => wy.PaymentPeriods)
@@ -303,8 +303,8 @@ namespace OgrenciAidatSistemi.Controllers
 
             // TODO: use schooladminservice to check if is signed schadmin's school and workyear's school is same
 
-            _dbContext.Schools ??= _dbContext.Set<School>();
-            _dbContext.WorkYears ??= _dbContext.Set<WorkYear>();
+
+
 
             School? school = null;
 

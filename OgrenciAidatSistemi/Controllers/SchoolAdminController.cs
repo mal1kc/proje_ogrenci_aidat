@@ -69,7 +69,6 @@ namespace OgrenciAidatSistemi.Controllers
             // check if user exists
             var passwordHash = _userService.HashPassword(scAdminView.Password);
 
-            _dbContext.SchoolAdmins ??= _dbContext.Set<SchoolAdmin>();
             var schAdmin = _dbContext
                 .SchoolAdmins.Where(u =>
                     u.EmailAddress == scAdminView.EmailAddress && u.PasswordHash == passwordHash
@@ -125,8 +124,6 @@ namespace OgrenciAidatSistemi.Controllers
             int pageSize = 20
         )
         {
-            _dbContext.SchoolAdmins ??= _dbContext.Set<SchoolAdmin>();
-
             var modelList = new QueryableModelHelper<SchoolAdmin>(
                 _dbContext.SchoolAdmins.Include(sa => sa.School).AsQueryable(),
                 SchoolAdmin.SearchConfig
@@ -213,7 +210,7 @@ namespace OgrenciAidatSistemi.Controllers
                     Addresses = scAdminView.ContactInfo.Addresses
                 };
                 _logger.LogDebug("User {0} created", scAdminView.EmailAddress);
-                _dbContext.SchoolAdmins ??= _dbContext.Set<SchoolAdmin>();
+
                 _dbContext.SchoolAdmins.Add(newSchAdmin);
                 await _dbContext.SaveChangesAsync();
             }

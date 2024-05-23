@@ -102,7 +102,6 @@ namespace OgrenciAidatSistemi.Tests
         [Fact]
         public Task SearchRandomData()
         {
-
             var seedData = _studentDBSeeder.GetSeedData(true);
 
             QueryableModelHelper<Student> studentSearchHelper =
@@ -120,27 +119,32 @@ namespace OgrenciAidatSistemi.Tests
                             $"Property '{searchField}' does not exist on type '{seedEntity.GetType().Name}'."
                         );
                     var searchValue = property.GetValue(seedEntity, null);
-                    if (searchValue == null) continue;
-                    var searchResult = studentSearchHelper.Search(searchValue.ToString(), searchField);
+                    if (searchValue == null)
+                        continue;
+                    var searchResult = studentSearchHelper.Search(
+                        searchValue.ToString(),
+                        searchField
+                    );
 
                     // we use Firstname because id isn't generated yet(we did not add to db)
                     exception = new Exception(
-                             $"No students found with {searchField} equal to '{searchValue}'."
-                         );
-                    if (!searchResult.Any()) throw exception;
+                        $"No students found with {searchField} equal to '{searchValue}'."
+                    );
+                    if (!searchResult.Any())
+                        throw exception;
 
                     Assert.Equal(seedEntity.EmailAddress, searchResult.First().EmailAddress);
 
                     // search without specifying field
                     searchResult = studentSearchHelper.Search(searchValue.ToString());
 
-                    if (!searchResult.Any()) throw exception;
+                    if (!searchResult.Any())
+                        throw exception;
                     Assert.Equal(seedEntity.EmailAddress, searchResult.First().EmailAddress);
                 }
             }
 
             return Task.CompletedTask;
         }
-
     }
 }

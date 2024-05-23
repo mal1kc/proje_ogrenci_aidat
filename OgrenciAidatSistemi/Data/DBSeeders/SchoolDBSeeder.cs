@@ -77,7 +77,7 @@ namespace OgrenciAidatSistemi.Data
                 Name = "RandomSchool" + random.Next(100),
                 CreatedAt = DateTime.Now,
                 UpdatedAt = DateTime.Now,
-                Students = new HashSet<Student>()
+                Students = null
             };
         }
 
@@ -104,30 +104,30 @@ namespace OgrenciAidatSistemi.Data
             _seedCount++;
         }
 
-        private readonly List<School> _seedData = new List<School>
-        {
-            new School
+        private readonly List<School> _seedData =
+        [
+            new()
             {
                 Name = "School 1",
                 CreatedAt = DateTime.Now,
                 UpdatedAt = DateTime.Now,
-                Students = new HashSet<Student>()
+                Students = null
             },
-            new School
+            new()
             {
                 Name = "School 2",
                 CreatedAt = DateTime.Now,
                 UpdatedAt = DateTime.Now,
-                Students = new HashSet<Student>()
+                Students = null
             },
-            new School
+            new()
             {
                 Name = "School 3",
                 CreatedAt = DateTime.Now,
                 UpdatedAt = DateTime.Now,
-                Students = new HashSet<Student>()
+                Students = null
             }
-        };
+        ];
         private AppDbContext context;
         private IConfiguration configuration;
         private Logger<DbSeeder<AppDbContext, IBaseDbModel>> logger;

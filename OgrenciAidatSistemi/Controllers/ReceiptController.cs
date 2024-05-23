@@ -101,7 +101,7 @@ namespace OgrenciAidatSistemi.Controllers
         )
         {
             ViewBag.IsSiteAdmin = false;
-            _dbContext.Receipts ??= _dbContext.Set<Receipt>();
+
             IQueryable<Receipt>? receipts = null;
 
             var (role, schoolid) = _userService.GetUserRoleAndSchoolId().Result;

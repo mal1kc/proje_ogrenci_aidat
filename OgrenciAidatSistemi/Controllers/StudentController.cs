@@ -9,24 +9,20 @@ using OgrenciAidatSistemi.Services;
 
 namespace OgrenciAidatSistemi.Controllers
 {
-    public class StudentController : Controller
+    public class StudentController(
+        ILogger<StudentController> logger,
+        AppDbContext dbContext,
+        UserService userService,
+        StudentService studentService
+    ) : Controller
     {
-        private readonly ILogger<StudentController> _logger;
+        private readonly ILogger<StudentController> _logger = logger;
 
-        private readonly AppDbContext _dbContext;
+        private readonly AppDbContext _dbContext = dbContext;
 
-        private readonly UserService _userService;
+        private readonly UserService _userService = userService;
 
-        public StudentController(
-            ILogger<StudentController> logger,
-            AppDbContext dbContext,
-            UserService userService
-        )
-        {
-            _logger = logger;
-            _dbContext = dbContext;
-            _userService = userService;
-        }
+        private readonly StudentService _studentService = studentService;
 
         [Authorize(Roles = Configurations.Constants.userRoles.Student)]
         public async Task<IActionResult> Index()
@@ -51,7 +47,7 @@ namespace OgrenciAidatSistemi.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> SignIn(
-            [Bind("EmailAddress", "Password")] StudentView studentView
+            [Bind("StudentId", "Password")] StudentView studentView
         )
         {
             // some idoitic validation
@@ -59,35 +55,37 @@ namespace OgrenciAidatSistemi.Controllers
             UserViewValidationResult validationResult = studentView.ValidateFieldsSignIn();
             if (validationResult != UserViewValidationResult.FieldsAreValid)
             {
-                TempData["CantSignIn"] = true;
+                TempData["Error"] = "Invalid fields";
                 switch (validationResult)
                 {
-                    case UserViewValidationResult.EmailAddressNotMatchRegex:
-                        ModelState.AddModelError("EmailAddress", "invalid email syntax");
-                        break;
+                    case UserViewValidationResult.PasswordsNotMatch:
+                        ModelState.AddModelError("Password", "Passwords do not match");
+                        return View(studentView);
                     case UserViewValidationResult.PasswordEmpty:
                         ModelState.AddModelError("Password", "Password is empty");
-                        break;
+                        return View(studentView);
+                    case UserViewValidationResult.InvalidName:
+                        ModelState.AddModelError("StudentId", "Invalid studentId");
+                        return View(studentView);
+                    default:
+                        return View(studentView);
                 }
-                return View(studentView);
             }
-
-            _dbContext.Students ??= _dbContext.Set<Student>();
 
             var passwordHash = _userService.HashPassword(studentView.Password);
             var dbStudent = _dbContext
                 .Students.Where(u =>
-                    u.EmailAddress == studentView.EmailAddress && u.PasswordHash == passwordHash
+                    u.StudentId == studentView.StudentId && u.PasswordHash == passwordHash
                 )
                 .FirstOrDefault();
             if (dbStudent == null)
             {
-                ModelState.AddModelError("EmailAddress", "User not found");
+                ModelState.AddModelError("StudentId", "Invalid studentId or password");
                 return RedirectToAction("SignIn");
             }
             else
             {
-                _logger.LogDebug("User {0} signed in", dbStudent.EmailAddress);
+                _logger.LogDebug("User {0} signed in", dbStudent.StudentId);
             }
 
             try
@@ -106,8 +104,8 @@ namespace OgrenciAidatSistemi.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(
-                    "Error while signing in user {0}: {1}",
-                    dbStudent.EmailAddress,
+                    "Error while signing in user {}: {}",
+                    dbStudent.StudentId,
                     ex.Message
                 );
                 TempData["CantSignIn"] = true;
@@ -125,8 +123,6 @@ namespace OgrenciAidatSistemi.Controllers
             int pageSize = 20
         )
         {
-            _dbContext.Students ??= _dbContext.Set<Student>();
-
             var modelList = new QueryableModelHelper<Student>(
                 _dbContext.Students.Include(s => s.School).AsQueryable(),
                 Student.SearchConfig
@@ -192,7 +188,7 @@ namespace OgrenciAidatSistemi.Controllers
             }
 
             // check if user exists
-            _logger.LogDebug("Creating user {0}", studentView.EmailAddress);
+            _logger.LogDebug("Creating user {}", studentView.EmailAddress);
             try
             {
                 var newStdnt = new Student
@@ -209,13 +205,13 @@ namespace OgrenciAidatSistemi.Controllers
                         Email = studentView.EmailAddress,
                         PhoneNumber = studentView.ContactInfo.PhoneNumber,
                         Addresses = studentView.ContactInfo.Addresses
-                    }
+                    },
+                    StudentId = _studentService.GenerateStudentId(school)
                 };
-                newStdnt.GenerateUniqueId(_dbContext);
                 _logger.LogDebug("User {0} created", studentView.EmailAddress);
                 _logger.LogDebug("User id generated: {0}", newStdnt.Id);
                 _logger.LogDebug("saving user {0} to db", studentView.EmailAddress);
-                _dbContext.Students ??= _dbContext.Set<Student>();
+
                 _dbContext.Students.Add(newStdnt);
                 await _dbContext.SaveChangesAsync();
             }
@@ -249,8 +245,6 @@ namespace OgrenciAidatSistemi.Controllers
                 return NotFound();
             }
 
-            _dbContext.Students ??= _dbContext.Set<Student>();
-
             var student = await _dbContext
                 .Students.Include(s => s.School)
                 .Include(s => s.Payments)
@@ -275,8 +269,6 @@ namespace OgrenciAidatSistemi.Controllers
             {
                 return NotFound();
             }
-
-            _dbContext.Students ??= _dbContext.Set<Student>();
 
             var student = _dbContext.Students.Where(e => e.Id == id).FirstOrDefault();
 
@@ -343,8 +335,6 @@ namespace OgrenciAidatSistemi.Controllers
             {
                 return NotFound();
             }
-
-            _dbContext.Students ??= _dbContext.Set<Student>();
 
             var student = _dbContext.Students.Where(e => e.Id == id).FirstOrDefault();
 

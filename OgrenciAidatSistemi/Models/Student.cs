@@ -1,7 +1,4 @@
-using System.Collections;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Security.Principal;
-using Microsoft.EntityFrameworkCore;
 using OgrenciAidatSistemi.Data;
 using OgrenciAidatSistemi.Models.Interfaces;
 
@@ -30,9 +27,10 @@ namespace OgrenciAidatSistemi.Models
                 sortingMethods: new()
                 {
                     { "FirstName", static s => s.FirstName },
-                    { "LastName", static s => s.LastName },
+                    { "LastName", static s => s.LastName ?? "" },
+                    { "StudentId", static s => s.StudentId },
                     // Sort by school by name
-                    { "School", static s => s.School.Name },
+                    { "School", static s => s.School != null ? s.School.Name : "" },
                     // Sort by gradlevel
                     { "GradLevel", static s => s.GradLevel },
                     // Sort by email address
@@ -48,7 +46,8 @@ namespace OgrenciAidatSistemi.Models
                     {
                         "LastName",
                         static (s, searchString) =>
-                            s.LastName.Contains(searchString, StringComparison.OrdinalIgnoreCase)
+                            s.LastName?.Contains(searchString, StringComparison.OrdinalIgnoreCase)
+                            ?? false
                     },
                     {
                         "StudentId",
@@ -58,7 +57,10 @@ namespace OgrenciAidatSistemi.Models
                     {
                         "School",
                         static (s, searchString) =>
-                            s.School.Name.Contains(searchString, StringComparison.OrdinalIgnoreCase)
+                            s.School?.Name.Contains(
+                                searchString,
+                                StringComparison.OrdinalIgnoreCase
+                            ) ?? false
                     },
                     {
                         "GradLevel",
@@ -113,53 +115,6 @@ namespace OgrenciAidatSistemi.Models
                     : ContactInfo?.ToView(ignoreBidirectNav: true),
             };
         }
-
-        private string GenStudentId(AppDbContext dbctx)
-        {
-            // generate student id by using school id and student count and unique id
-            // it needs to be unique
-
-            if (this.School == null)
-            {
-                throw new InvalidOperationException("School is not set for the student.");
-            }
-
-            // Get the school id
-            int schoolId = School.Id;
-            int studentCount = 0;
-
-            if (School.Students == null)
-                studentCount = dbctx.Students.Count(s => s.School.Name == School.Name);
-            // Name is unique like Id but id is autoincremented so it is not reliable
-            else
-                studentCount = School.Students.Count;
-
-            var uuid = Guid.NewGuid().ToString().Replace("-", "").Substring(0, 5);
-
-            // Generate the student id
-            string studentId = $"{uuid}{schoolId:D2}{studentCount:D3}";
-            if (studentId.Length != 10)
-            {
-                throw new InvalidOperationException("Generated student id is not 10 digits.");
-            }
-            return studentId;
-        }
-
-        public void GenerateUniqueId(AppDbContext dbctx, bool recall = false)
-        {
-            var studentId = GenStudentId(dbctx);
-            if (string.IsNullOrEmpty(studentId) && StudentId != studentId)
-                throw new InvalidOperationException(
-                    "Student id is already set and it is different from the generated one."
-                );
-
-            if (
-                dbctx.Students.Where(s => s.StudentId == studentId).FirstOrDefault() != null
-                && !recall
-            )
-                GenerateUniqueId(dbctx, true);
-            StudentId = studentId;
-        }
     }
 
     public class StudentView : UserView
@@ -197,6 +152,26 @@ namespace OgrenciAidatSistemi.Models
                 return true;
             }
             return false;
+        }
+
+        public override UserViewValidationResult ValidateFieldsSignIn()
+        {
+            if (!IsStudentIdValid(StudentId))
+                return UserViewValidationResult.InvalidName;
+            if (string.IsNullOrEmpty(Password))
+                return UserViewValidationResult.PasswordEmpty;
+            return UserViewValidationResult.FieldsAreValid;
+        }
+
+        public static bool IsStudentIdValid(string studentId)
+        {
+            if (studentId.Length != 10)
+                return false;
+            if (!studentId.Substring(5, 2).All(char.IsDigit))
+                return false;
+            if (!studentId.Substring(7, 3).All(char.IsDigit))
+                return false;
+            return true;
         }
     }
 }

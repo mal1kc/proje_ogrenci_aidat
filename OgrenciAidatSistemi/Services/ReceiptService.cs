@@ -61,7 +61,7 @@ namespace OgrenciAidatSistemi.Services
             }
 
             // if _dbContext.Receipts is null, set it to _dbContext.Set<Receipt>()
-            _dbContext.Receipts ??= _dbContext.Set<Receipt>();
+
 
             try
             {

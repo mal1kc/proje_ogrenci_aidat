@@ -1,4 +1,4 @@
-@model OgrenciAidatSistemi.Models.StudentView
+@model StudentView
 
 @{
     ViewData["Title"] = "Student Sign In";
@@ -11,9 +11,9 @@
         <form asp-action="SignIn">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <div class="form-group">
-                <label asp-for="EmailAddress" class="control-label"></label>
-                <input asp-for="EmailAddress" class="form-control" />
-                <span asp-validation-for="EmailAddress" class="text-danger"></span>
+                <label asp-for="StudentId" class="control-label"></label>
+                <input asp-for="StudentId" class="form-control" />
+                <span asp-validation-for="StudentId" class="text-danger"></span>
             </div>
             <div class="form-group">
                 <label asp-for="Password" class="control-label"></label>
