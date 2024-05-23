@@ -48,10 +48,7 @@ namespace OgrenciAidatSistemi.Controllers
 
             var modelList = new QueryableModelHelper<School>(
                 _dbContext.Schools.AsQueryable(),
-                new ModelSearchConfig(
-                    SchoolSearchConfig.AllowedFieldsForSearch,
-                    SchoolSearchConfig.AllowedFieldsForSort
-                )
+                School.SearchConfig
             );
 
             return View(

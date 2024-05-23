@@ -98,7 +98,7 @@ namespace OgrenciAidatSistemi.Data
         ///
         /// </summary>
         /// <typeparam name="TResult">The type of the result produced by the asynchronous operation.</typeparam>
-        protected abstract Task SeedEntityAsync(TEntity entity);
+        public abstract Task SeedEntityAsync(TEntity entity);
         protected abstract Task SeedRandomDataAsync();
         protected abstract Task AfterSeedDataAsync();
 

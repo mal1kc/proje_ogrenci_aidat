@@ -1,4 +1,5 @@
 using System.Security.Cryptography;
+using System.Text.Json;
 using OgrenciAidatSistemi.Models.Interfaces;
 
 namespace OgrenciAidatSistemi.Models
@@ -10,7 +11,7 @@ namespace OgrenciAidatSistemi.Models
         string contentType,
         long size,
         string description
-    ) : IBaseDbModel
+    ) : BaseDbModel
     {
         public int Id { get; set; }
 
@@ -30,11 +31,11 @@ namespace OgrenciAidatSistemi.Models
         // get safely data of file asynchrously
         public async Task<byte[]> GetDataAsync()
         {
-            byte[] data = { }; // empty array of byte
-            using (FileStream fs = new FileStream(Path, FileMode.Open, FileAccess.Read))
+            byte[] data = []; // empty array of byte
+            using (FileStream fs = new(Path, FileMode.Open, FileAccess.Read))
             {
                 data = new byte[fs.Length];
-                await fs.ReadAsync(data, 0, (int)fs.Length);
+                await fs.ReadAsync(data.AsMemory(0, (int)fs.Length));
             }
             return data;
         }

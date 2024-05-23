@@ -1,5 +1,7 @@
+using System.Linq.Expressions;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using OgrenciAidatSistemi.Models;
 using OgrenciAidatSistemi.Models.Interfaces;
 
 #pragma warning disable CS8618 // Non-nullable field is uninitialized. Consider declaring as nullable.
@@ -23,12 +25,8 @@ namespace OgrenciAidatSistemi.Models
         Partial
     }
 
-    public abstract class Payment : IBaseDbModel, ISearchableModel
+    public abstract class Payment : BaseDbModel, ISearchableModel<Payment>
     {
-        public int Id { get; set; }
-        public DateTime CreatedAt { get; set; }
-        public DateTime UpdatedAt { get; set; }
-
         public Student? Student { get; set; }
         public DateTime PaymentDate { get; set; }
         public PaymentMethod PaymentMethod { get; set; }
@@ -46,10 +44,55 @@ namespace OgrenciAidatSistemi.Models
 
         public School? School { get; set; }
 
-        public static ModelSearchConfig SearchConfig =>
+        // TODO: add subclass search config ot way to implement search config for subclasses
+        public static ModelSearchConfig<Payment> SearchConfig =>
             new(
-                PaymentSearchConfig.AllowedFieldsForSearch,
-                PaymentSearchConfig.AllowedFieldsForSort
+                sortingMethods: new()
+                {
+                    { "PaymentDate", static s => s.PaymentDate },
+                    { "Amount", static s => s.Amount },
+                    { "Status", static s => s.Status },
+                    { "CreatedAt", static s => s.CreatedAt },
+                    { "UpdatedAt", static s => s.UpdatedAt }
+                },
+                searchMethods: new()
+                {
+                    {
+                        "PaymentDate",
+                        static (s, searchString) =>
+                            s
+                                .PaymentDate.ToString("yyyy-MM")
+                                .Contains(searchString, StringComparison.OrdinalIgnoreCase)
+                    },
+                    {
+                        "Amount",
+                        static (s, searchString) =>
+                            s
+                                .Amount.ToString()
+                                .Contains(searchString, StringComparison.OrdinalIgnoreCase)
+                    },
+                    {
+                        "Status",
+                        static (s, searchString) =>
+                            s
+                                .Status.ToString()
+                                .Contains(searchString, StringComparison.OrdinalIgnoreCase)
+                    },
+                    {
+                        "CreatedAt",
+                        static (s, searchString) =>
+                            s
+                                .CreatedAt.ToString("yyyy-MM")
+                                .Contains(searchString, StringComparison.OrdinalIgnoreCase)
+                    },
+                    {
+                        "UpdatedAt",
+                        static (s, searchString) =>
+                            s
+                                .UpdatedAt.ToString("yyyy-MM")
+                                .Contains(searchString, StringComparison.OrdinalIgnoreCase)
+                    }
+                }
             );
 
         public Payment()
@@ -58,17 +101,6 @@ namespace OgrenciAidatSistemi.Models
             UpdatedAt = DateTime.Now;
             PaymentDate = DateTime.Now;
             Status = PaymentStatus.Unpaid; // default status
-        }
-
-        // to json
-        public string ToJson()
-        {
-            // has cyclic reference like Student -> School -> WorkYear -> PaymentPeriod -> Payment -> Student
-
-            return JsonSerializer.Serialize(
-                this,
-                new JsonSerializerOptions { ReferenceHandler = ReferenceHandler.Preserve }
-            );
         }
 
         public abstract PaymentView ToView(bool ignoreBidirectNav = false);
@@ -254,27 +286,6 @@ namespace OgrenciAidatSistemi.Models
         public string ReceiptNumber { get; set; }
         public DateTime ReceiptDate { get; set; }
         public string ReceiptIssuer { get; set; }
-    }
-
-    public static class PaymentSearchConfig
-    {
-        public static readonly string[] AllowedFieldsForSearch = new string[]
-        {
-            "PaymentMethod",
-            "PaymentDate",
-            "Amount",
-            "CreatedAt",
-            "UpdatedAt"
-        };
-        public static readonly string[] AllowedFieldsForSort = new string[]
-        {
-            "PaymentMethod",
-            "PaymentDate",
-            "Amount",
-            "CreatedAt",
-            "UpdatedAt",
-            "Status"
-        };
     }
 
     public static class PaymentMethodExtensions

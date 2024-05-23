@@ -8,7 +8,7 @@ using OgrenciAidatSistemi.Models.Interfaces;
 namespace OgrenciAidatSistemi.Models
 {
     [Table("Students")]
-    public class Student : User, ISearchableModel
+    public class Student : User, ISearchableModel<Student>
     {
         public string StudentId { get; set; }
         public School? School { get; set; }
@@ -17,8 +17,6 @@ namespace OgrenciAidatSistemi.Models
         public ICollection<Payment>? Payments { get; set; }
         public ICollection<PaymentPeriod>? PaymentPeriods { get; set; }
         public ICollection<Grade>? Grades { get; set; }
-        public override DateTime CreatedAt { get; set; }
-        public override DateTime UpdatedAt { get; set; }
 
         public ContactInfo? ContactInfo { get; set; }
 
@@ -26,6 +24,73 @@ namespace OgrenciAidatSistemi.Models
         {
             Role = UserRole.Student;
         }
+
+        public static ModelSearchConfig<Student> SearchConfig =>
+            new(
+                sortingMethods: new()
+                {
+                    { "FirstName", static s => s.FirstName },
+                    { "LastName", static s => s.LastName },
+                    // Sort by school by name
+                    { "School", static s => s.School.Name },
+                    // Sort by gradlevel
+                    { "GradLevel", static s => s.GradLevel },
+                    // Sort by email address
+                    { "EmailAddress", static s => s.EmailAddress }
+                },
+                searchMethods: new()
+                {
+                    {
+                        "FirstName",
+                        static (s, searchString) =>
+                            s.FirstName.Contains(searchString, StringComparison.OrdinalIgnoreCase)
+                    },
+                    {
+                        "LastName",
+                        static (s, searchString) =>
+                            s.LastName.Contains(searchString, StringComparison.OrdinalIgnoreCase)
+                    },
+                    {
+                        "StudentId",
+                        static (s, searchString) =>
+                            s.StudentId.Contains(searchString, StringComparison.OrdinalIgnoreCase)
+                    },
+                    {
+                        "School",
+                        static (s, searchString) =>
+                            s.School.Name.Contains(searchString, StringComparison.OrdinalIgnoreCase)
+                    },
+                    {
+                        "GradLevel",
+                        static (s, searchString) =>
+                            s
+                                .GradLevel.ToString()
+                                .Contains(searchString, StringComparison.OrdinalIgnoreCase)
+                    },
+                    {
+                        "EmailAddress",
+                        static (s, searchString) =>
+                            s.EmailAddress.Contains(
+                                searchString,
+                                StringComparison.OrdinalIgnoreCase
+                            )
+                    },
+                    {
+                        "CreatedAt",
+                        static (s, searchString) =>
+                            s
+                                .CreatedAt.ToString("yyyy-MM")
+                                .Contains(searchString, StringComparison.OrdinalIgnoreCase)
+                    },
+                    {
+                        "UpdatedAt",
+                        static (s, searchString) =>
+                            s
+                                .UpdatedAt.ToString("yyyy-MM")
+                                .Contains(searchString, StringComparison.OrdinalIgnoreCase)
+                    }
+                }
+            );
 
         public StudentView ToView(bool ignoreBidirectNav = false)
         {
@@ -48,12 +113,6 @@ namespace OgrenciAidatSistemi.Models
                     : ContactInfo?.ToView(ignoreBidirectNav: true),
             };
         }
-
-        public static ModelSearchConfig SearchConfig =>
-            new ModelSearchConfig(
-                StudentSearchConfig.AllowedFieldsForSearch,
-                StudentSearchConfig.AllowedFieldsForSort
-            );
 
         private string GenStudentId(AppDbContext dbctx)
         {
@@ -139,34 +198,5 @@ namespace OgrenciAidatSistemi.Models
             }
             return false;
         }
-    }
-
-    public static class StudentSearchConfig
-    {
-        public static readonly string[] AllowedFieldsForSearch = new string[]
-        {
-            "Id",
-            "StudentId",
-            "Username",
-            "FirstName",
-            "LastName",
-            "EmailAddress",
-            "GradLevel",
-            "IsGraduated"
-        };
-
-        public static readonly string[] AllowedFieldsForSort = new string[]
-        {
-            "Id",
-            "StudentId",
-            "Username",
-            "FirstName",
-            "LastName",
-            "EmailAddress",
-            "GradLevel",
-            "IsGraduated",
-            "CreatedAt",
-            "UpdatedAt"
-        };
     }
 }

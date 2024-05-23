@@ -1,20 +1,62 @@
+using Microsoft.EntityFrameworkCore;
 using OgrenciAidatSistemi.Models.Interfaces;
 
 namespace OgrenciAidatSistemi.Models
 {
-    public class WorkYear : IBaseDbModel, ISearchableModel
+    public class WorkYear : BaseDbModel, ISearchableModel<WorkYear>
     {
-        public int Id { get; set; }
-        public DateTime CreatedAt { get; set; }
-        public DateTime UpdatedAt { get; set; }
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }
         public ISet<PaymentPeriod>? PaymentPeriods { get; set; }
         public School? School { get; set; }
-        public static ModelSearchConfig SearchConfig =>
+        public static ModelSearchConfig<WorkYear> SearchConfig =>
             new(
-                WorkYearSearchConfig.AllowedFieldsForSearch,
-                WorkYearSearchConfig.AllowedFieldsForSort
+                sortingMethods: new()
+                {
+                    { "Id", static s => s.Id },
+                    { "StartDate", static s => s.StartDate },
+                    { "EndDate", static s => s.EndDate },
+                    { "CreatedAt", static s => s.CreatedAt },
+                    { "UpdatedAt", static s => s.UpdatedAt }
+                },
+                searchMethods: new()
+                {
+                    {
+                        "Id",
+                        static (s, searchString) =>
+                            s
+                                .Id.ToString()
+                                .Contains(searchString, StringComparison.OrdinalIgnoreCase)
+                    },
+                    {
+                        "StartDate",
+                        static (s, searchString) =>
+                            s
+                                .StartDate.ToString("yyyy-MM")
+                                .Contains(searchString, StringComparison.OrdinalIgnoreCase)
+                    },
+                    {
+                        "EndDate",
+                        static (s, searchString) =>
+                            s
+                                .EndDate.ToString("yyyy-MM")
+                                .Contains(searchString, StringComparison.OrdinalIgnoreCase)
+                    },
+                    {
+                        "CreatedAt",
+                        static (s, searchString) =>
+                            s
+                                .CreatedAt.ToString("yyyy-MM")
+                                .Contains(searchString, StringComparison.OrdinalIgnoreCase)
+                    },
+                    {
+                        "UpdatedAt",
+                        static (s, searchString) =>
+                            s
+                                .UpdatedAt.ToString("yyyy-MM")
+                                .Contains(searchString, StringComparison.OrdinalIgnoreCase)
+                    }
+                }
             );
 
         public decimal TotalAmount()
@@ -53,21 +95,5 @@ namespace OgrenciAidatSistemi.Models
         public DateTime UpdatedAt { get; set; }
 
         public decimal? TotalAmount { get; set; }
-    }
-
-    public static class WorkYearSearchConfig
-    {
-        public static readonly string[] AllowedFieldsForSearch = new string[]
-        {
-            "id",
-            "StartDate",
-            "EndDate"
-        };
-        public static readonly string[] AllowedFieldsForSort = new string[]
-        {
-            "id",
-            "StartDate",
-            "EndDate"
-        };
     }
 }

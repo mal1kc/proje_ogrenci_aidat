@@ -105,7 +105,7 @@ namespace OgrenciAidatSistemi.Data
             return _seedData;
         }
 
-        protected override async Task SeedEntityAsync(Student entity)
+        public override async Task SeedEntityAsync(Student entity)
         {
             if (await _context.Students.AnyAsync(s => s.StudentId == entity.StudentId))
             {
@@ -162,9 +162,9 @@ namespace OgrenciAidatSistemi.Data
             _seedCount++;
         }
 
-        private readonly List<Student> _seedData = new List<Student>
-        {
-            new Student
+        private readonly List<Student> _seedData =
+        [
+            new()
             {
                 FirstName = "studento one",
                 LastName = "numberone",
@@ -174,7 +174,7 @@ namespace OgrenciAidatSistemi.Data
                 PasswordHash = Student.ComputeHash("password"),
                 EmailAddress = "101@schol1.com"
             },
-            new Student
+            new()
             {
                 FirstName = "studento two",
                 LastName = "number two",
@@ -184,6 +184,6 @@ namespace OgrenciAidatSistemi.Data
                 PasswordHash = Student.ComputeHash("password"),
                 EmailAddress = "102@schol2.com"
             },
-        };
+        ];
     }
 }

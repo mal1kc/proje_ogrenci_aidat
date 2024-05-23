@@ -1,6 +1,5 @@
+using System.Linq;
 using System.Linq.Expressions;
-using System.Reflection;
-// import for ViewDataDictionary
 using Microsoft.AspNetCore.Mvc.ViewFeatures;
 using OgrenciAidatSistemi.Models.Interfaces;
 
@@ -13,17 +12,20 @@ namespace OgrenciAidatSistemi.Helpers
     }
 
     public class QueryableModelHelper<T>
-        where T : ISearchableModel
+        where T : ISearchableModel<T>
     {
+        private readonly ILogger<QueryableModelHelper<T>> _logger;
         private readonly IQueryable<T> _sourceQueryable;
-        private readonly ModelSearchConfig _searchConfig;
+        private readonly ModelSearchConfig<T> _searchConfig;
         private IQueryable<T> _resultedQueryable;
 
-        public QueryableModelHelper(IQueryable<T> source, ModelSearchConfig searchConfig)
+        public QueryableModelHelper(IQueryable<T> source, ModelSearchConfig<T> searchConfig)
         {
             _sourceQueryable = source;
             _searchConfig = searchConfig;
             _resultedQueryable = _sourceQueryable;
+            // TODO: Add logger factory or turn this helper into a service and inject the logger
+            _logger = new Logger<QueryableModelHelper<T>>(new LoggerFactory());
         }
 
         public IQueryable<T> Search(string? searchString, string? searchField = null)
@@ -33,99 +35,52 @@ namespace OgrenciAidatSistemi.Helpers
 
             var resultQueryable = _sourceQueryable;
 
+            var resultParallel = resultQueryable.AsParallel();
             if (string.IsNullOrEmpty(searchField))
             {
-                searchString = searchString.ToLower(); // Convert search string to lowercase
-                var parameter = Expression.Parameter(typeof(T), "x");
-                var predicate = GetCombinedContainsExpression(parameter, searchString);
-
-                if (predicate != null)
+                // if searchField is not specified, search in all fields
+                foreach (var searchMethod in _searchConfig.SearchMethods.Values)
                 {
-                    resultQueryable = resultQueryable.Where(predicate);
+                    resultParallel = resultParallel.Where(model =>
+                        searchMethod(model, searchString)
+                    );
                 }
             }
-            else
+            else if (
+                _searchConfig.SearchMethods.TryGetValue(
+                    searchField,
+                    out Func<T, string, bool>? value
+                )
+            )
             {
-                var parameter = Expression.Parameter(typeof(T), "x");
-                resultQueryable = resultQueryable.Where(
-                    FieldContainsExpression(parameter, searchField, searchString)
-                );
+                // if searchField is specified, search in the specified field
+                var searchMethod = value;
+                resultParallel = resultParallel.Where(model => searchMethod(model, searchString));
             }
+            resultQueryable = resultParallel.AsQueryable();
 
             return resultQueryable;
         }
 
-        private Expression<Func<T, bool>> GetCombinedContainsExpression(
-            ParameterExpression parameter,
-            string searchString
-        )
-        {
-            var properties = typeof(T).GetProperties();
-            Expression? combinedExpression = null;
-
-            foreach (var property in properties)
-            {
-                if (property.PropertyType == typeof(string))
-                {
-                    var containsExpression = FieldContainsExpression(
-                        parameter,
-                        property.Name,
-                        searchString
-                    );
-
-                    combinedExpression =
-                        combinedExpression == null
-                            ? containsExpression.Body
-                            : Expression.OrElse(combinedExpression, containsExpression.Body);
-                }
-            }
-
-            return combinedExpression == null
-                ? Expression.Lambda<Func<T, bool>>(Expression.Constant(true), parameter)
-                : Expression.Lambda<Func<T, bool>>(combinedExpression, parameter);
-        }
-
-        private Expression<Func<T, bool>> FieldContainsExpression(
-            ParameterExpression parameter,
-            string fieldName,
-            string searchString
-        )
-        {
-            MemberExpression property = Expression.Property(parameter, fieldName);
-            ConstantExpression search = Expression.Constant(searchString);
-            MethodInfo? containsMethod = typeof(string).GetMethod(
-                "Contains",
-                new[] { typeof(string) }
-            );
-            if (containsMethod == null) // If method not found return
-                return Expression.Lambda<Func<T, bool>>(Expression.Constant(false), parameter);
-            MethodCallExpression containsExpression = Expression.Call(
-                property,
-                containsMethod,
-                search
-            );
-            return Expression.Lambda<Func<T, bool>>(containsExpression, parameter);
-        }
-
         public IQueryable<T> Sort(string fieldName, SortOrderEnum sortOrder)
         {
+            // if fieldName is not specified, return the current queryable
+            // || if fieldName is not in the sorting methods, return the current queryable
             if (
                 string.IsNullOrEmpty(fieldName)
-                || !_searchConfig.AllowedFieldsForSort.Contains(fieldName)
+                || !_searchConfig.SortingMethods.TryGetValue(
+                    fieldName,
+                    out Expression<Func<T, object>>? value
+                )
             )
                 return _resultedQueryable;
 
-            var parameter = Expression.Parameter(typeof(T), "x");
-            var property = Expression.Property(parameter, fieldName);
-
-            // Convert property type to object
-            var conversion = Expression.Convert(property, typeof(object));
-            var lambda = Expression.Lambda<Func<T, object>>(conversion, parameter);
+            var sortMethod = value.Compile();
 
             _resultedQueryable =
                 sortOrder == SortOrderEnum.DESC
-                    ? _resultedQueryable.OrderByDescending(lambda)
-                    : _resultedQueryable.OrderBy(lambda);
+                    ? _resultedQueryable.OrderByDescending(sortMethod).AsQueryable()
+                    : _resultedQueryable.OrderBy(sortMethod).AsQueryable();
 
             return _resultedQueryable;
         }
@@ -141,7 +96,7 @@ namespace OgrenciAidatSistemi.Helpers
             if (sortOrderStr.EndsWith("_desc"))
             {
                 sortOrder = SortOrderEnum.DESC;
-                fieldName = fieldName.Substring(0, fieldName.Length - "_desc".Length);
+                fieldName = fieldName[..^"_desc".Length];
             }
 
             return Sort(fieldName, sortOrder);
@@ -154,12 +109,11 @@ namespace OgrenciAidatSistemi.Helpers
             SortOrderEnum sortType
         )
         {
-            if (_resultedQueryable == null)
-                _resultedQueryable = _sourceQueryable;
+            _resultedQueryable ??= _sourceQueryable;
             if (!string.IsNullOrEmpty(searchString))
-                return Search(searchString, searchField);
+                _resultedQueryable = Search(searchString, searchField);
             if (!string.IsNullOrEmpty(sortField))
-                return Sort(sortField, sortType);
+                _resultedQueryable = Sort(sortField, sortType);
             return _resultedQueryable;
         }
 
@@ -179,7 +133,6 @@ namespace OgrenciAidatSistemi.Helpers
             // validate sortOrder check '_' is exist and split it check field and type is valid
             string? sortField = null;
             string? sortType = null;
-
             if (!string.IsNullOrEmpty(sortOrder) && sortOrder.Contains("_"))
             {
                 var parts = sortOrder.Split('_');
@@ -192,12 +145,17 @@ namespace OgrenciAidatSistemi.Helpers
 
             if (searchField != null && !_searchConfig.AllowedFieldsForSearch.Contains(searchField))
             {
+                // if searchField is not in the allowed fields, reset it
                 searchField = null;
+                searchString = null;
             }
 
             if (sortType != null && sortType != "asc" && sortType != "desc")
             {
+                // if sortType is not valid, reset it
                 sortOrder = null;
+                sortField = null;
+                sortType = null;
             }
 
             // generate ViewData {Field}SortParam for view
@@ -233,7 +191,14 @@ namespace OgrenciAidatSistemi.Helpers
             );
             var paginatedModel = _resultedQueryable.Skip((pageIndex - 1) * pageSize).Take(pageSize);
 
-            var countOfmodelopResult = _resultedQueryable.Count();
+            int countOfmodelopResult;
+            // try to evaluate the query before getting the count
+            countOfmodelopResult = _resultedQueryable.Count();
+
+            // _logger.LogError(
+            //     message: "Error : {} while evaluating the query for pagination details : {}",
+            //     _resultedQueryable.Expression.ToString()
+
             ViewData["CurrentPageIndex"] = pageIndex;
             ViewData["TotalPages"] = (int)Math.Ceiling(countOfmodelopResult / (double)pageSize);
             ViewData["TotalItems"] = countOfmodelopResult;

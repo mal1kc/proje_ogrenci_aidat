@@ -259,7 +259,7 @@ namespace OgrenciAidatSistemi.Data.DBSeeders
             }
         }
 
-        protected override async Task SeedEntityAsync(Payment entity)
+        public override async Task SeedEntityAsync(Payment entity)
         {
             // do some validation here befor adding to db
             if (entity == null)

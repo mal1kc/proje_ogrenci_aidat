@@ -1,19 +1,22 @@
+using System.Linq.Expressions;
+using OgrenciAidatSistemi.Helpers;
+
 namespace OgrenciAidatSistemi.Models.Interfaces
 {
-    public interface ISearchableModel
+    public interface ISearchableModel<T>
     {
-        public static ModelSearchConfig SearchConfig { get; }
+        public static ModelSearchConfig<T> SearchConfig { get; }
     }
 
-    public class ModelSearchConfig
+    public class ModelSearchConfig<T>(
+        Dictionary<string, Expression<Func<T, object>>> sortingMethods,
+        Dictionary<string, Func<T, string, bool>> searchMethods
+    )
     {
-        public string[] AllowedFieldsForSearch { get; }
-        public string[] AllowedFieldsForSort { get; }
-
-        public ModelSearchConfig(string[] allowedFieldsForSearch, string[] allowedFieldsForSort)
-        {
-            AllowedFieldsForSearch = allowedFieldsForSearch;
-            AllowedFieldsForSort = allowedFieldsForSort;
-        }
+        public string[] AllowedFieldsForSearch { get; } = [.. searchMethods.Keys];
+        public string[] AllowedFieldsForSort { get; } = [.. sortingMethods.Keys];
+        public Dictionary<string, Expression<Func<T, object>>> SortingMethods { get; } =
+            sortingMethods;
+        public Dictionary<string, Func<T, string, bool>> SearchMethods { get; } = searchMethods;
     }
 }

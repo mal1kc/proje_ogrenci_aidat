@@ -10,24 +10,17 @@ using OgrenciAidatSistemi.Services;
 
 namespace OgrenciAidatSistemi.Controllers
 {
-    public class WorkYearController : Controller
+    public class WorkYearController(
+        ILogger<WorkYearController> logger,
+        AppDbContext dbContext,
+        UserService userService
+    ) : Controller
     {
-        private readonly ILogger<WorkYearController> _logger;
+        private readonly ILogger<WorkYearController> _logger = logger;
 
-        private readonly AppDbContext _dbContext;
+        private readonly AppDbContext _dbContext = dbContext;
 
-        private readonly UserService _userService;
-
-        public WorkYearController(
-            ILogger<WorkYearController> logger,
-            AppDbContext dbContext,
-            UserService userService
-        )
-        {
-            _logger = logger;
-            _dbContext = dbContext;
-            _userService = userService;
-        }
+        private readonly UserService _userService = userService;
 
         [HttpGet]
         [Authorize(Roles = Constants.userRoles.SiteAdmin + "," + Constants.userRoles.SchoolAdmin)]

@@ -88,7 +88,7 @@ namespace OgrenciAidatSistemi.Data
             return _seedData;
         }
 
-        protected override async Task SeedEntityAsync(School entity)
+        public override async Task SeedEntityAsync(School entity)
         {
             if (await _context.Schools.AnyAsync(s => s.Name == entity.Name))
             {

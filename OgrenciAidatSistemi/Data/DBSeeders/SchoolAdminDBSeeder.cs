@@ -105,7 +105,7 @@ namespace OgrenciAidatSistemi.Data
             return _seedData;
         }
 
-        protected override async Task SeedEntityAsync(SchoolAdmin entity)
+        public override async Task SeedEntityAsync(SchoolAdmin entity)
         {
             if (await _context.SchoolAdmins.AnyAsync(a => a.EmailAddress == entity.EmailAddress))
                 return;

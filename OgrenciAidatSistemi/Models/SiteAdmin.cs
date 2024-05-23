@@ -6,16 +6,71 @@ using OgrenciAidatSistemi.Models.Interfaces;
 namespace OgrenciAidatSistemi.Models
 {
     [Table("SiteAdmins")]
-    public class SiteAdmin : User, ISearchableModel
+    public class SiteAdmin : User, ISearchableModel<SiteAdmin>
     {
         public string Username { get; set; }
-        public override DateTime CreatedAt { get; set; }
-        public override DateTime UpdatedAt { get; set; }
 
-        public static ModelSearchConfig SearchConfig =>
-            new ModelSearchConfig(
-                SiteAdminSearchConfig.AllowedFieldsForSearch,
-                SiteAdminSearchConfig.AllowedFieldsForSort
+        public static ModelSearchConfig<SiteAdmin> SearchConfig =>
+            new(
+                sortingMethods: new()
+                {
+                    { "Id", static s => s.Id },
+                    { "Username", static s => s.Username },
+                    { "FirstName", static s => s.FirstName },
+                    { "LastName", static s => s.LastName ?? "" },
+                    { "EmailAddress", static s => s.EmailAddress },
+                    { "CreatedAt", static s => s.CreatedAt },
+                    { "UpdatedAt", static s => s.UpdatedAt }
+                },
+                searchMethods: new()
+                {
+                    {
+                        "Id",
+                        static (s, searchString) =>
+                            s
+                                .Id.ToString()
+                                .Contains(searchString, StringComparison.OrdinalIgnoreCase)
+                    },
+                    {
+                        "Username",
+                        static (s, searchString) =>
+                            s.Username.Contains(searchString, StringComparison.OrdinalIgnoreCase)
+                    },
+                    {
+                        "FirstName",
+                        static (s, searchString) =>
+                            s.FirstName.Contains(searchString, StringComparison.OrdinalIgnoreCase)
+                    },
+                    {
+                        "LastName",
+                        static (s, searchString) =>
+                            s.LastName != null
+                            && s.LastName.Contains(searchString, StringComparison.OrdinalIgnoreCase)
+                    },
+                    {
+                        "EmailAddress",
+                        static (s, searchString) =>
+                            s.EmailAddress.Contains(
+                                searchString,
+                                StringComparison.OrdinalIgnoreCase
+                            )
+                    },
+                    // search by year and month not complete date
+                    {
+                        "CreatedAt",
+                        static (s, searchString) =>
+                            s
+                                .CreatedAt.ToString("yyyy-MM")
+                                .Contains(searchString, StringComparison.OrdinalIgnoreCase)
+                    },
+                    {
+                        "UpdatedAt",
+                        static (s, searchString) =>
+                            s
+                                .UpdatedAt.ToString("yyyy-MM")
+                                .Contains(searchString, StringComparison.OrdinalIgnoreCase)
+                    }
+                }
             );
 
         public SiteAdmin(

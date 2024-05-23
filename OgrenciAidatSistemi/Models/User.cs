@@ -162,7 +162,7 @@ namespace OgrenciAidatSistemi.Models
         PasswordEmpty
     }
 
-    public abstract class User : IBaseDbModel
+    public abstract class User : BaseDbModel
     {
         public bool CheckPassword(string password)
         {
@@ -187,13 +187,10 @@ namespace OgrenciAidatSistemi.Models
             return builder.ToString();
         }
 
-        public int Id { get; set; }
         public required string PasswordHash { get; set; }
         public required string EmailAddress { get; set; }
         public UserRole Role { get; protected set; }
         public string FirstName { get; set; }
         public string? LastName { get; set; }
-        public abstract DateTime CreatedAt { get; set; }
-        public abstract DateTime UpdatedAt { get; set; }
     }
 }

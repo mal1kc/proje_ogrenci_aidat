@@ -28,7 +28,6 @@ namespace OgrenciAidatSistemi.Controllers
             _userService = userService;
         }
 
-#warning "This action not tested"
         [Authorize(Roles = Configurations.Constants.userRoles.SiteAdmin)]
         public IActionResult List(
             string? searchString = null,
@@ -47,26 +46,6 @@ namespace OgrenciAidatSistemi.Controllers
             return View(
                 modelList.List(ViewData, searchString, searchField, sortOrder, pageIndex, pageSize)
             );
-        }
-
-#warning "This action not tested"
-
-        [Authorize(Roles = Configurations.Constants.userRoles.SiteAdmin)]
-        public IActionResult Create()
-        {
-            ViewBag.Contacts = _dbContext.Contacts;
-            return View();
-        }
-
-        // POST: Contact/Create
-
-        [HttpPost]
-        [Authorize(Roles = Configurations.Constants.userRoles.SiteAdmin)]
-        [ValidateAntiForgeryToken]
-        public IActionResult Create(ContactInfo model)
-        {
-            // TODO:: implement contactinfo create action
-            throw new NotImplementedException("Create action not implemented");
         }
 
         // GET: Contact/Delete/5
@@ -88,15 +67,6 @@ namespace OgrenciAidatSistemi.Controllers
         {
             // TODO: implement contactinfo delete action
             throw new NotImplementedException("DeleteConfirmed action not implemented");
-        }
-
-        // GET: Contact/Detais/5
-
-        [Authorize(Roles = Configurations.Constants.userRoles.SiteAdmin)]
-        public IActionResult Details(int? id)
-        {
-            // TODO: implement contactinfo details action
-            throw new NotImplementedException("Details action not implemented");
         }
     }
 }

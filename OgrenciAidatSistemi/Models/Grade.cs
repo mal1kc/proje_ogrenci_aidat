@@ -1,20 +1,53 @@
+using System.Linq.Expressions;
 using OgrenciAidatSistemi.Models.Interfaces;
 
 namespace OgrenciAidatSistemi.Models
 {
-    public class Grade : IBaseDbModel, ISearchableModel
+    public class Grade : BaseDbModel, ISearchableModel<Grade>
     {
-        public int Id { get; set; }
-        public DateTime CreatedAt { get; set; }
-        public DateTime UpdatedAt { get; set; }
         public required string Name { get; set; }
         public School? School { get; set; }
         public int GradeLevel { get; set; }
         public ISet<Student>? Students { get; set; }
-        public static ModelSearchConfig SearchConfig =>
-            new ModelSearchConfig(
-                GradeSearchConfig.AllowedFieldsForSearch,
-                GradeSearchConfig.AllowedFieldsForSort
+        public ModelSearchConfig<Grade> SearchConfig =>
+            new(
+                sortingMethods: new()
+                {
+                    { "Name", static s => s.Name },
+                    { "GradeLevel", static s => s.GradeLevel },
+                    { "CreatedAt", static s => s.CreatedAt },
+                    { "UpdatedAt", static s => s.UpdatedAt }
+                },
+                searchMethods: new()
+                {
+                    {
+                        "Name",
+                        static (s, searchString) =>
+                            s.Name.Contains(searchString, StringComparison.OrdinalIgnoreCase)
+                    },
+                    {
+                        "GradeLevel",
+                        static (s, searchString) =>
+                            s
+                                .GradeLevel.ToString()
+                                .Contains(searchString, StringComparison.OrdinalIgnoreCase)
+                    },
+                    // search by year and month not complete date
+                    {
+                        "CreatedAt",
+                        static (s, searchString) =>
+                            s
+                                .CreatedAt.ToString("yyyy-MM")
+                                .Contains(searchString, StringComparison.OrdinalIgnoreCase)
+                    },
+                    {
+                        "UpdatedAt",
+                        static (s, searchString) =>
+                            s
+                                .UpdatedAt.ToString("yyyy-MM")
+                                .Contains(searchString, StringComparison.OrdinalIgnoreCase)
+                    }
+                }
             );
 
         public GradeView ToView(bool ignoreBidirectNav = false)
@@ -64,21 +97,5 @@ namespace OgrenciAidatSistemi.Models
             CreatedAt = createdAt;
             UpdatedAt = updatedAt;
         }
-    }
-
-    public static class GradeSearchConfig
-    {
-        public static readonly string[] AllowedFieldsForSearch = new string[]
-        {
-            "id",
-            "Name",
-            "GradeLevel"
-        };
-        public static readonly string[] AllowedFieldsForSort = new string[]
-        {
-            "id",
-            "Name",
-            "GradeLevel"
-        };
     }
 }

@@ -2,11 +2,8 @@ using OgrenciAidatSistemi.Models.Interfaces;
 
 namespace OgrenciAidatSistemi.Models
 {
-    public class School : IBaseDbModel, ISearchableModel
+    public class School : BaseDbModel, ISearchableModel<School>
     {
-        public int Id { get; set; }
-        public DateTime CreatedAt { get; set; }
-        public DateTime UpdatedAt { get; set; }
         public required string Name { get; set; }
         public ISet<SchoolAdmin>? SchoolAdmins { get; set; }
         public ISet<Grade>? Grades { get; set; }
@@ -14,10 +11,45 @@ namespace OgrenciAidatSistemi.Models
 
         public required ISet<Student?>? Students { get; set; }
 
-        public ModelSearchConfig SearchConfig =>
-            new ModelSearchConfig(
-                SchoolSearchConfig.AllowedFieldsForSearch,
-                SchoolSearchConfig.AllowedFieldsForSort
+        public static ModelSearchConfig<School> SearchConfig =>
+            new(
+                sortingMethods: new()
+                {
+                    { "Id", static s => s.Id },
+                    { "Name", static s => s.Name },
+                    { "CreatedAt", static s => s.CreatedAt },
+                    { "UpdatedAt", static s => s.UpdatedAt }
+                },
+                searchMethods: new()
+                {
+                    {
+                        "Id",
+                        static (s, searchString) =>
+                            s
+                                .Id.ToString()
+                                .Contains(searchString, StringComparison.OrdinalIgnoreCase)
+                    },
+                    {
+                        "Name",
+                        static (s, searchString) =>
+                            s.Name.Contains(searchString, StringComparison.OrdinalIgnoreCase)
+                    },
+                    // search by year and month not complete date
+                    {
+                        "CreatedAt",
+                        static (s, searchString) =>
+                            s
+                                .CreatedAt.ToString("yyyy-MM")
+                                .Contains(searchString, StringComparison.OrdinalIgnoreCase)
+                    },
+                    {
+                        "UpdatedAt",
+                        static (s, searchString) =>
+                            s
+                                .UpdatedAt.ToString("yyyy-MM")
+                                .Contains(searchString, StringComparison.OrdinalIgnoreCase)
+                    }
+                }
             );
 
         public SchoolView ToView(bool ignoreBidirectNav = false)
@@ -55,11 +87,5 @@ namespace OgrenciAidatSistemi.Models
             // TODO: Implement ToModel to all view models for more manageable code
             throw new NotImplementedException();
         }
-    }
-
-    public static class SchoolSearchConfig
-    {
-        public static readonly string[] AllowedFieldsForSearch = new string[] { "id", "Name" };
-        public static readonly string[] AllowedFieldsForSort = new string[] { "id", "Name" };
     }
 }

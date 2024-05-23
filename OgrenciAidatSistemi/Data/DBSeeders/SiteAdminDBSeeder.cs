@@ -166,7 +166,7 @@ namespace OgrenciAidatSistemi.Data
             return _seedData;
         }
 
-        protected override async Task SeedEntityAsync(SiteAdmin entity)
+        public override async Task SeedEntityAsync(SiteAdmin entity)
         {
             if (await _context.SiteAdmins.AnyAsync(a => a.EmailAddress == entity.EmailAddress))
                 return;

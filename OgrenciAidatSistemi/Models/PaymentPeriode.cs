@@ -10,13 +10,9 @@ namespace OgrenciAidatSistemi.Models
         Daily
     }
 
-    public class PaymentPeriod : IBaseDbModel, ISearchableModel
+    public class PaymentPeriod : BaseDbModel, ISearchableModel<PaymentPeriod>
     {
-        public int Id { get; set; }
-
         public Student? Student { get; set; }
-        public DateTime CreatedAt { get; set; }
-        public DateTime UpdatedAt { get; set; }
 
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }
@@ -35,10 +31,72 @@ namespace OgrenciAidatSistemi.Models
             Occurrence = Occurrence.Monthly; // default occurrence
         }
 
-        public static ModelSearchConfig SearchConfig =>
-            new ModelSearchConfig(
-                PaymentPeriodSearchConfig.AllowedFieldsForSearch,
-                PaymentPeriodSearchConfig.AllowedFieldsForSort
+        public static ModelSearchConfig<PaymentPeriod> SearchConfig =>
+            new(
+                sortingMethods: new()
+                {
+                    { "Id", static s => s.Id },
+                    { "StartDate", static s => s.StartDate },
+                    { "EndDate", static s => s.EndDate },
+                    { "TotalAmount", static s => s.TotalAmount },
+                    { "PerPaymentAmount", static s => s.PerPaymentAmount },
+                    { "CreatedAt", static s => s.CreatedAt },
+                    { "UpdatedAt", static s => s.UpdatedAt },
+                },
+                searchMethods: new()
+                {
+                    {
+                        "Id",
+                        static (s, searchString) =>
+                            s
+                                .Id.ToString()
+                                .Contains(searchString, StringComparison.OrdinalIgnoreCase)
+                    },
+                    // search by year and month not complete date
+                    {
+                        "StartDate",
+                        static (s, searchString) =>
+                            s
+                                .StartDate.ToString("yyyy-MM")
+                                .Contains(searchString, StringComparison.OrdinalIgnoreCase)
+                    },
+                    {
+                        "EndDate",
+                        static (s, searchString) =>
+                            s
+                                .EndDate.ToString("yyyy-MM")
+                                .Contains(searchString, StringComparison.OrdinalIgnoreCase)
+                    },
+                    {
+                        "CreatedAt",
+                        static (s, searchString) =>
+                            s
+                                .CreatedAt.ToString("yyyy-MM")
+                                .Contains(searchString, StringComparison.OrdinalIgnoreCase)
+                    },
+                    {
+                        "UpdatedAt",
+                        static (s, searchString) =>
+                            s
+                                .UpdatedAt.ToString("yyyy-MM")
+                                .Contains(searchString, StringComparison.OrdinalIgnoreCase)
+                    },
+                    // search amount as bigger than or equal to
+                    {
+                        "TotalAmount",
+                        static (s, searchString) =>
+                            s
+                                .TotalAmount.ToString()
+                                .Contains(searchString, StringComparison.OrdinalIgnoreCase)
+                    },
+                    {
+                        "PerPaymentAmount",
+                        static (s, searchString) =>
+                            s
+                                .PerPaymentAmount.ToString()
+                                .Contains(searchString, StringComparison.OrdinalIgnoreCase)
+                    },
+                }
             );
 
         public PaymentPeriodView ToView(bool ignoreBidirectNav = false)
@@ -83,21 +141,5 @@ namespace OgrenciAidatSistemi.Models
 
         public int? WorkYearId { get; set; }
         public int? StudentId { get; set; }
-    }
-
-    public static class PaymentPeriodSearchConfig
-    {
-        public static readonly string[] AllowedFieldsForSearch = new string[] { "id", };
-        public static readonly string[] AllowedFieldsForSort = new string[]
-        {
-            "id",
-            "Id",
-            "StartDate",
-            "EndDate",
-            "TotalAmount",
-            "PerPaymentAmount",
-            "CreatedAt",
-            "UpdatedAt",
-        };
     }
 }

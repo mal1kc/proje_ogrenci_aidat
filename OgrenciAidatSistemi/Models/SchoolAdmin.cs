@@ -5,19 +5,69 @@ using OgrenciAidatSistemi.Models.Interfaces;
 namespace OgrenciAidatSistemi.Models
 {
     [Table("SchoolAdmins")]
-    public class SchoolAdmin : User, ISearchableModel
+    public class SchoolAdmin : User, ISearchableModel<SchoolAdmin>
     {
         public School School { get; set; }
 
-        public override DateTime CreatedAt { get; set; }
-        public override DateTime UpdatedAt { get; set; }
-
         public ContactInfo ContactInfo { get; set; }
 
-        public static ModelSearchConfig SearchConfig =>
-            new ModelSearchConfig(
-                SchoolAdminSearchConfig.AllowedFieldsForSearch,
-                SchoolAdminSearchConfig.AllowedFieldsForSort
+        public static ModelSearchConfig<SchoolAdmin> SearchConfig =>
+            new(
+                sortingMethods: new()
+                {
+                    { "Id", static s => s.Id },
+                    { "FirstName", static s => s.FirstName },
+                    { "LastName", static s => s.LastName ?? "" },
+                    { "EmailAddress", static s => s.EmailAddress },
+                    { "CreatedAt", static s => s.CreatedAt },
+                    { "UpdatedAt", static s => s.UpdatedAt },
+                },
+                searchMethods: new()
+                {
+                    {
+                        "Id",
+                        static (s, searchString) =>
+                            s
+                                .Id.ToString()
+                                .Contains(searchString, StringComparison.OrdinalIgnoreCase)
+                    },
+                    {
+                        "FirstName",
+                        static (s, searchString) =>
+                            s.FirstName.Contains(searchString, StringComparison.OrdinalIgnoreCase)
+                    },
+                    {
+                        "LastName",
+                        static (s, searchString) =>
+                            (s.LastName ?? "").Contains(
+                                searchString,
+                                StringComparison.OrdinalIgnoreCase
+                            )
+                    },
+                    {
+                        "EmailAddress",
+                        static (s, searchString) =>
+                            s.EmailAddress.Contains(
+                                searchString,
+                                StringComparison.OrdinalIgnoreCase
+                            )
+                    },
+                    // search by year and month not complete date
+                    {
+                        "CreatedAt",
+                        static (s, searchString) =>
+                            s
+                                .CreatedAt.ToString("yyyy-MM")
+                                .Contains(searchString, StringComparison.OrdinalIgnoreCase)
+                    },
+                    {
+                        "UpdatedAt",
+                        static (s, searchString) =>
+                            s
+                                .UpdatedAt.ToString("yyyy-MM")
+                                .Contains(searchString, StringComparison.OrdinalIgnoreCase)
+                    },
+                }
             );
 
         public SchoolAdmin(
@@ -83,23 +133,5 @@ namespace OgrenciAidatSistemi.Models
             }
             return dbctx.SchoolAdmins.Any(s => s.EmailAddress == EmailAddress);
         }
-    }
-
-    public static class SchoolAdminSearchConfig
-    {
-        public static readonly string[] AllowedFieldsForSearch = new string[]
-        {
-            "Id",
-            "FirstName",
-            "LastName",
-            "EmailAddress"
-        };
-        public static readonly string[] AllowedFieldsForSort = new string[]
-        {
-            "CreatedAt",
-            "UpdatedAt",
-        }
-            .Concat(AllowedFieldsForSearch)
-            .ToArray();
     }
 }

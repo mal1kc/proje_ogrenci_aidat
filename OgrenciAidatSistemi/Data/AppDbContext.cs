@@ -4,9 +4,10 @@ using OgrenciAidatSistemi.Models;
 
 namespace OgrenciAidatSistemi.Data
 {
-    public class AppDbContext : DbContext
+    public class AppDbContext(DbContextOptions options, bool useInMemory) : DbContext(options)
     {
-        // TODO make users table for only reference in other tables
+        private readonly bool _useInMemory = useInMemory;
+
         public DbSet<User>? Users { get; set; } // must be id table of users
         public DbSet<SiteAdmin>? SiteAdmins { get; set; }
 
@@ -31,10 +32,18 @@ namespace OgrenciAidatSistemi.Data
 
         public DbSet<Receipt>? Receipts { get; set; }
 
-        // TODO: needs to be changed in development and production use
-
-        protected override void OnConfiguring(DbContextOptionsBuilder options) =>
-            options.UseSqlite("DataSource = app_.db; Cache=Shared");
+        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        {
+            if (_useInMemory)
+            {
+                optionsBuilder.UseInMemoryDatabase("TestDatabase");
+            }
+            else
+            {
+                // TODO: needs to be changed in development and production use
+                optionsBuilder.UseSqlite("Data Source=app.db");
+            }
+        }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
