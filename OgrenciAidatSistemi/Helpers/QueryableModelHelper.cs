@@ -30,7 +30,7 @@ namespace OgrenciAidatSistemi.Helpers
 
         public IQueryable<T> Search(string? searchString, string? searchField = null)
         {
-            if (string.IsNullOrEmpty(searchString))
+            if (string.IsNullOrEmpty(searchString) || searchString.Length < 3)
                 return _sourceQueryable;
 
             var resultQueryable = _sourceQueryable;

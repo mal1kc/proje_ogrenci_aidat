@@ -4,11 +4,14 @@ using OgrenciAidatSistemi.Models.Interfaces;
 #pragma warning disable CS8604 // Possible null reference argument.
 namespace OgrenciAidatSistemi.Data
 {
-    public class SchoolDBSeeder : DbSeeder<AppDbContext, School>
+    public class SchoolDBSeeder(
+        AppDbContext context,
+        IConfiguration configuration,
+        ILogger logger,
+        int maxSeedCount = 20,
+        bool randomSeed = false
+    ) : DbSeeder<AppDbContext, School>(context, configuration, logger, maxSeedCount, randomSeed)
     {
-        public SchoolDBSeeder(AppDbContext context, IConfiguration configuration, ILogger logger)
-            : base(context, configuration, logger) { }
-
         private readonly Random random = new();
 
         protected override async Task SeedDataAsync()
@@ -36,7 +39,7 @@ namespace OgrenciAidatSistemi.Data
             var dbCount = await _context.Schools.CountAsync();
             if (dbCount >= _maxSeedCount)
                 return;
-            var schools = GetSeedData(true);
+            var schools = GetSeedData();
             foreach (var school in schools)
             {
                 await SeedEntityAsync(school);
@@ -51,13 +54,16 @@ namespace OgrenciAidatSistemi.Data
         {
             if (_verboseLogging)
             {
-                Console.WriteLine("SchoolDBSeeder: AfterSeedDataAsync");
-                Console.WriteLine("We have seed data:");
+                _logger.LogInformation("SchoolDBSeeder: AfterSeedDataAsync");
+                _logger.LogInformation("We have seed data:");
                 foreach (var school in _seedData)
                 {
-                    Console.WriteLine($"SchoolDBSeeder: AfterSeedDataAsync {school.Name}");
+                    _logger.LogInformation($"SchoolDBSeeder: AfterSeedDataAsync {school.Name}");
                 }
             }
+
+            if (_randomSeed)
+                return;
 
             foreach (var school in _seedData)
             {
@@ -81,9 +87,9 @@ namespace OgrenciAidatSistemi.Data
             };
         }
 
-        public override IEnumerable<School> GetSeedData(bool randomSeed = false)
+        public override IEnumerable<School> GetSeedData()
         {
-            if (randomSeed)
+            if (_randomSeed)
             {
                 return Enumerable.Range(0, 10).Select(i => CreateRandomModel());
             }
@@ -128,8 +134,5 @@ namespace OgrenciAidatSistemi.Data
                 Students = null
             }
         ];
-        private AppDbContext context;
-        private IConfiguration configuration;
-        private Logger<DbSeeder<AppDbContext, IBaseDbModel>> logger;
     }
 }

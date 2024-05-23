@@ -10,8 +10,10 @@ namespace OgrenciAidatSistemi.Data
         AppDbContext context,
         IConfiguration configuration,
         ILogger logger,
-        StudentService studentService
-    ) : DbSeeder<AppDbContext, Student>(context, configuration, logger)
+        StudentService studentService,
+        int maxSeedCount = 40,
+        bool randomSeed = false
+    ) : DbSeeder<AppDbContext, Student>(context, configuration, logger, maxSeedCount, randomSeed)
     {
         private readonly StudentService _studentService = studentService;
 
@@ -44,7 +46,7 @@ namespace OgrenciAidatSistemi.Data
             if (dbCount >= _maxSeedCount)
                 return;
 
-            var students = GetSeedData(true);
+            var students = GetSeedData();
             foreach (var student in students)
             {
                 await SeedEntityAsync(student);
@@ -62,27 +64,26 @@ namespace OgrenciAidatSistemi.Data
                 var students = await _context
                     .Students.Where(s => s.CreatedAt > DateTime.Now.AddMinutes(-3))
                     .ToListAsync();
-                Console.WriteLine(
-                    $"StudentDBSeeder: AfterSeedDataAsync students: \n we have {students.Count} added in last 3 minutes"
+                _logger.LogInformation(
+                    "StudentDBSeeder: AfterSeedDataAsync students: we have {} added in last 3 minutes",
+                    students.Count
                 );
             }
-
+            if (_randomSeed)
+                return;
             foreach (var student in _seedData)
             {
                 // check they are in the db by name , lastname and gradlevel
                 // not email and studentid because they are generated randomly
-                var dbStudent = await _context.Students.FirstOrDefaultAsync(s =>
-                    s.FirstName == student.FirstName
-                    && s.LastName == student.LastName
-                    && s.GradLevel == student.GradLevel
-                );
-
-                if (dbStudent == null)
-                {
-                    throw new Exception(
+                var dbStudent =
+                    await _context.Students.FirstOrDefaultAsync(s =>
+                        s.FirstName == student.FirstName
+                        && s.LastName == student.LastName
+                        && s.GradLevel == student.GradLevel
+                    )
+                    ?? throw new Exception(
                         $"StudentDBSeeder: AfterSeedDataAsync student: {student.FirstName} {student.LastName} {student.GradLevel} not found in db"
                     );
-                }
             }
         }
 
@@ -115,7 +116,7 @@ namespace OgrenciAidatSistemi.Data
             return student;
         }
 
-        public override IEnumerable<Student> GetSeedData(bool randomSeed = false)
+        public override IEnumerable<Student> GetSeedData()
         {
             if (randomSeed)
             {
@@ -157,7 +158,9 @@ namespace OgrenciAidatSistemi.Data
 
             if (_verboseLogging)
             {
-                Console.WriteLine($"StudentDBSeeder: SeedEntityAsync assumed_sch: {assumed_sch}");
+                _logger.LogInformation(
+                    $"StudentDBSeeder: SeedEntityAsync assumed_sch: {assumed_sch}"
+                );
             }
 
             if (assumed_sch != null)

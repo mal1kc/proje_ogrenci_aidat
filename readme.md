@@ -3,21 +3,21 @@
 ## özellikler
 
 - admin paneli
-- okul admini yönetim paneli
-- okul çalışma yılı yönetimi (workyear)
+- okul admin yönetim paneli
+- okul çalışma yılı yönetimi (workYear)
 - aidat dönemi yönetimi (single payment period)
 - öğrenci yönetimi
-- öğrenci bazlı ödeme plani yönetimi (paymentperiod)
+- öğrenci bazlı ödeme planı yönetimi (paymentperiod)
 - excel export / import
 - dekont depolama
 
 ## todo
 
-- [X] studentid generator
-- [x] add Message tempdata for all views
+- [X] studentId generator
+- [x] add Message tempData for all views
 - [ ] add payment verification panel for sch admin
 - [ ] add payment panel for student
-- [ ] add workyear management panel for sch admin
+- [ ] add workYear management panel for sch admin
 - [ ] add paymentperiod management panel for sch admin (create, edit, delete) ++
 - [ ] add all models to delete , edit , create panel for site admin (some of them must be debug only) +++
 
@@ -33,9 +33,9 @@
         - [X] delete
         - [X] detail
         - [x] list
-    - [ ] workyear  (only school admin, site admin)
+    - [ ] workYear  (only school admin, site admin)
         - [ ] edit  
-        - [ ] create (needs relook)
+        - [ ] create (needs re-look)
         - [X] delete
         - [X] detail
         - [x] list  
@@ -51,17 +51,17 @@
         - [x] delete (only site admin)
         - [x] detail
         - [x] list (only site admin)
-    - [ ] schooladmin (only school admin, site admin)
+    - [ ] schoolAdmin (only school admin, site admin)
         - [ ] edit
         - [x] create 
         - [x] delete
         - [X] detail
         - [x] list
-    - [ ] contactınfo (all , but student can only see their own)
+    - [ ] contactInfo (all , but student can only see their own)
         - [ ] edit(integrated with student & school admin edit)
         - [X] create(integrated with student & school admin create)
         - [ ] delete
-        - [X] detail (not necessary because it can be shown with _contactinfo partial views) 
+        - [X] detail (not necessary because it can be shown with _contactInfo partial views) 
         - [X] list (not necessary)
     - [ ] receipt (all , but student can only see their own)
         - [ ] edit (integrated with payment)
@@ -72,24 +72,24 @@
     - [X] grade not necessary
 
 - [ ] add services for retrieving related data for students and school admins - (studentService, schoolAdminService)
-- [ ] crete paymentperiod service for auto create payments for students and save to db 
+- [ ] crete paymentPeriod service for auto create payments for students and save to db 
 - [X] try to add school id as claim for school admin and student , and for site admin it should be 0 or null
-- [X] rewrited ModelQueryableHelper to use predefined search methods and sort methods
-- [ ] impelment exportService for exporting data to excel or similiar formats
+- [X] rewrite ModelQueryableHelper to use predefined search methods and sort methods
+- [ ] implement exportService for exporting data to excel or similar formats
 - [ ] change error's to use partial view for error pages (404, 500, 403, 401) 
     - [ ] add error handling for all controllers and services
 
-- [ ] remove _dependentSeeder , seeder not improved unless they break
+- [X] remove _dependentSeeder , seeder not improved unless they break
 
 ## todo , maybe
 
-- [ ] move partial views to shared folder + add partial views for all possible models, add them to partialview controller or their model controller
+- [X] move partial views to shared folder + add partial views for all possible models (done 5-6 commits before check)
 - [X] öğrenci id ile giriş yapma 
-- [ ] student email generator
-- [ ] add predefined search filters linq queries and save as search config ( rewrite most of ModelQueryableHelper)
+- [ ] student email generator (not planned)
+- [X] add predefined search filters linQ queries and save as search config ( rewrite most of ModelQueryableHelper) (done with 32c88528e3a6e5e80a90356764fb473ee0174a38 & bug fix 27fa0523681c093290ffa5d4d7804fd51c814b5f)
 
 ## todo , maybe fix issues
 
 - [X] ( possible fix at [[./OgrenciAidatSistemi/Services/UserService.cs:220]] ) if a user is deleted, or not exist in db , if it is logged in, its still logged in, fix this
-    - in this condition, user related panels but novbar is not shown , logged status is not shown ( not easylly detectable)
+    - in this condition, user related panels but navbar is not shown , logged status is not shown ( not easily detectable)
 - [ ] list view links does not carry search parameters or sort parameters to next page (prob easy fix)

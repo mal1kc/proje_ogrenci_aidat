@@ -9,8 +9,16 @@ namespace OgrenciAidatSistemi.Data
         AppDbContext context,
         IConfiguration configuration,
         ILogger logger,
-        int maxSeedCount = 100
-    ) : DbSeeder<AppDbContext, SchoolAdmin>(context, configuration, logger, maxSeedCount)
+        int maxSeedCount = 100,
+        bool randomSeed = false
+    )
+        : DbSeeder<AppDbContext, SchoolAdmin>(
+            context,
+            configuration,
+            logger,
+            maxSeedCount,
+            randomSeed
+        )
     {
         private readonly Faker faker = new("tr");
 
@@ -37,10 +45,10 @@ namespace OgrenciAidatSistemi.Data
             var dbCount = await _context.SchoolAdmins.CountAsync();
             if (dbCount >= _maxSeedCount)
                 return;
-            var schoolAdmins = GetSeedData(true);
+            var schoolAdmins = GetSeedData();
             foreach (var schoolAdmin in schoolAdmins)
             {
-                Console.WriteLine(
+                _logger.LogInformation(
                     $"Generated SchoolAdmin: EmailAddress: {schoolAdmin.EmailAddress}, Password: {"RandomPassword_" + schoolAdmin.EmailAddress.Split('@')[0]}"
                 );
                 await SeedEntityAsync(schoolAdmin);
@@ -54,15 +62,18 @@ namespace OgrenciAidatSistemi.Data
         {
             if (_verboseLogging)
             {
-                Console.WriteLine("SchoolAdminDBSeeder: AfterSeedDataAsync");
-                Console.WriteLine("We have seed data:");
+                _logger.LogInformation("SchoolAdminDBSeeder: AfterSeedDataAsync");
+                _logger.LogInformation("We have seed data:");
                 foreach (var schoolAdmin in _seedData)
                 {
-                    Console.WriteLine(
+                    _logger.LogInformation(
                         $"SchoolAdminDBSeeder: AfterSeedDataAsync {schoolAdmin.EmailAddress}"
                     );
                 }
             }
+
+            if (_randomSeed)
+                return;
 
             foreach (var schoolAdmin in _seedData)
             {
@@ -97,9 +108,9 @@ namespace OgrenciAidatSistemi.Data
             };
         }
 
-        public override IEnumerable<SchoolAdmin> GetSeedData(bool randomSeed = false)
+        public override IEnumerable<SchoolAdmin> GetSeedData()
         {
-            if (randomSeed)
+            if (_randomSeed)
             {
                 return Enumerable.Range(0, 10).Select(i => CreateRandomModel());
             }

@@ -47,6 +47,27 @@ namespace OgrenciAidatSistemi.Data
             modelBuilder.Entity<CheckPayment>().HasBaseType<Payment>();
             modelBuilder.Entity<DebitCardPayment>().HasBaseType<Payment>();
 
+            modelBuilder
+                .Entity<User>()
+                .Property(u => u.Role)
+                .HasConversion<int>()
+                .ValueGeneratedNever();
+            modelBuilder
+                .Entity<Student>()
+                .Property(s => s.Role)
+                .HasDefaultValue(UserRole.Student)
+                .ValueGeneratedNever();
+            modelBuilder
+                .Entity<SchoolAdmin>()
+                .Property(sa => sa.Role)
+                .HasDefaultValue(UserRole.SchoolAdmin)
+                .ValueGeneratedNever();
+            modelBuilder
+                .Entity<SiteAdmin>()
+                .Property(sa => sa.Role)
+                .HasDefaultValue(UserRole.SiteAdmin)
+                .ValueGeneratedNever();
+
             // Add configurations for other derived types if applicable
 
             // Configure discriminator column (if needed)
@@ -74,19 +95,10 @@ namespace OgrenciAidatSistemi.Data
             modelBuilder.Entity<User>().HasIndex(u => u.Id).IsUnique();
 
             modelBuilder.Entity<Student>().HasIndex(s => s.StudentId).IsUnique();
-            modelBuilder.Entity<Student>().Property(s => s.Role).HasDefaultValue(UserRole.Student);
 
             // TODO implement auto generate student id for using school id etc
             /* modelBuilder.Entity<Student>().Property(s => s.StudentId).ValueGeneratedOnAdd */
 
-            modelBuilder
-                .Entity<SchoolAdmin>()
-                .Property(sa => sa.Role)
-                .HasDefaultValue(UserRole.SchoolAdmin);
-            modelBuilder
-                .Entity<SiteAdmin>()
-                .Property(sa => sa.Role)
-                .HasDefaultValue(UserRole.SiteAdmin);
 
             // all the time include school in student and school admin
             modelBuilder.Entity<Student>().HasOne(s => s.School);

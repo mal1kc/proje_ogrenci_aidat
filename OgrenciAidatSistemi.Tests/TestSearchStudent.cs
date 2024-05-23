@@ -1,10 +1,10 @@
-using System.Runtime.CompilerServices;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using OgrenciAidatSistemi.Data;
 using OgrenciAidatSistemi.Helpers;
 using OgrenciAidatSistemi.Models;
+using OgrenciAidatSistemi.Services;
 
 namespace OgrenciAidatSistemi.Tests
 {
@@ -19,7 +19,13 @@ namespace OgrenciAidatSistemi.Tests
         private readonly AppDbContext _dbContext;
 
         private readonly StudentDBSeeder _studentDBSeeder;
+
+        private readonly StudentService _studentService;
         private bool disposedValue;
+
+        private readonly List<Student> _seedData;
+
+        private readonly QueryableModelHelper<Student> studentSearchHelper;
 
         public TestSearchStudent()
         {
@@ -38,11 +44,32 @@ namespace OgrenciAidatSistemi.Tests
             _studentDBSeeder = new StudentDBSeeder(
                 context: _dbContext,
                 configuration: _configuration,
-                logger: Helpers.CreateLogger<StudentDBSeeder>()
+                logger: Helpers.CreateLogger<StudentDBSeeder>(),
+                studentService: _studentService,
+                randomSeed: true
             );
 
             // Add more students as needed
             _dbContext.SaveChanges();
+
+            _seedData = _studentDBSeeder.GetSeedData().ToList();
+            _seedData ??= [];
+            School school =
+                new() { Name = "Test School", Students = new HashSet<Student?>(_seedData) };
+
+            foreach (var seedEntity in _seedData)
+            {
+                seedEntity.EmailAddress = string.Concat(
+                    Path.GetRandomFileName().Replace(".", "").AsSpan(0, 10),
+                    "@random.com"
+                );
+                seedEntity.StudentId = Guid.NewGuid().ToString().Replace("-", "")[..10];
+            }
+
+            studentSearchHelper = new QueryableModelHelper<Student>(
+                _seedData.AsQueryable(),
+                Student.SearchConfig
+            );
         }
 
         protected virtual void Dispose(bool disposing)
@@ -78,7 +105,7 @@ namespace OgrenciAidatSistemi.Tests
         [Fact]
         public async Task SearchRandomDoesNotFail()
         {
-            await _studentDBSeeder.SeedAsync(randomSeed: true);
+            await _studentDBSeeder.SeedAsync();
 
             // Arrange
             var queryable = _dbContext.Students.AsQueryable();
@@ -100,17 +127,11 @@ namespace OgrenciAidatSistemi.Tests
         }
 
         [Fact]
-        public Task SearchRandomData()
+        public Task SearchRandomDataWithSpecifiedField()
         {
-            var seedData = _studentDBSeeder.GetSeedData(true);
-
-            QueryableModelHelper<Student> studentSearchHelper =
-                new(seedData.AsQueryable(), Student.SearchConfig);
-
-            Exception? exception = null;
-            foreach (var seedEntity in seedData)
+            foreach (var seedEntity in _seedData)
             {
-                foreach (var searchField in Student.SearchConfig.AllowedFieldsForSearch)
+                foreach (var searchField in new[] { "FirstName", "LastName", "EmailAddress" })
                 {
                     // check if search field can return correct result
                     var property =
@@ -126,21 +147,45 @@ namespace OgrenciAidatSistemi.Tests
                         searchField
                     );
 
-                    // we use Firstname because id isn't generated yet(we did not add to db)
-                    exception = new Exception(
-                        $"No students found with {searchField} equal to '{searchValue}'."
+                    Assert.NotNull(searchResult);
+
+                    Assert.True(searchResult.Any(), $"Search result is empty for {searchField}");
+
+                    Assert.Equal(seedEntity.EmailAddress, searchResult.First().EmailAddress);
+                }
+            }
+
+            return Task.CompletedTask;
+        }
+
+        [Fact]
+        public Task SearchRandomDataWithoutField()
+        {
+            foreach (var seedEntity in _seedData)
+            {
+                foreach (var searchField in new[] { "FirstName", "LastName", "EmailAddress" })
+                {
+                    // check if search field can return correct result
+                    var property =
+                        seedEntity.GetType().GetProperty(searchField)
+                        ?? throw new Exception(
+                            $"Property '{searchField}' does not exist on type '{seedEntity.GetType().Name}'."
+                        );
+                    var searchValue = property.GetValue(seedEntity, null);
+                    if (searchValue == null)
+                        continue;
+                    var searchResult = studentSearchHelper.Search(searchValue.ToString());
+
+                    Assert.NotNull(searchResult);
+
+                    Assert.True(
+                        searchResult.Any(),
+                        $"Search result is empty for {searchValue} at {searchField} field."
                     );
-                    if (!searchResult.Any())
-                        throw exception;
 
-                    Assert.Equal(seedEntity.EmailAddress, searchResult.First().EmailAddress);
+                    Assert.True(searchResult.Any(s => s.EmailAddress == seedEntity.EmailAddress));
 
-                    // search without specifying field
-                    searchResult = studentSearchHelper.Search(searchValue.ToString());
-
-                    if (!searchResult.Any())
-                        throw exception;
-                    Assert.Equal(seedEntity.EmailAddress, searchResult.First().EmailAddress);
+                    Assert.NotEqual(_seedData.Count, searchResult.Count());
                 }
             }
 

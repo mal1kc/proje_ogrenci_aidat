@@ -110,24 +110,30 @@ internal class Program
                             context: ctx,
                             configuration: configuration,
                             logger: logger,
-                            maxSeedCount: 10
+                            maxSeedCount: 10,
+                            randomSeed: true
                         ),
                         new SchoolDBSeeder(
                             context: ctx,
                             configuration: configuration,
-                            logger: logger
+                            logger: logger,
+                            maxSeedCount: 10,
+                            randomSeed: true
                         ),
                         new StudentDBSeeder(
                             context: ctx,
                             configuration: configuration,
                             logger: logger,
-                            studentService: studentService
+                            studentService: studentService,
+                            maxSeedCount: 40,
+                            randomSeed: true
                         ),
                         new PaymentDBSeeder(
                             context: ctx,
                             configuration: configuration,
                             logger: logger,
-                            studentService: studentService
+                            studentService: studentService,
+                            randomSeed: true
                         )
                     ];
                     if (_verbs)
@@ -142,7 +148,7 @@ internal class Program
                         {
                             Console.WriteLine("Seeding with " + seeder.GetType().Name);
                         }
-                        await seeder.SeedAsync(randomSeed: true);
+                        await seeder.SeedAsync();
                         await seeder.AfterSeedAsync();
                     }
 

@@ -281,7 +281,7 @@ namespace OgrenciAidatSistemi.Controllers
             // if the user is logged in, prevent deletion
 
             var loggedInUserId = _userService.GetSignedInUserId();
-            Console.WriteLine("Logged in user id: {0}", loggedInUserId);
+            _logger.LogInformation("Logged in user id: {}", loggedInUserId);
 
             if (loggedInUserId == id)
             {

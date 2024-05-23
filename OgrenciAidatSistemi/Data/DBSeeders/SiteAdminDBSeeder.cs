@@ -106,11 +106,11 @@ namespace OgrenciAidatSistemi.Data
             if (dbCount >= _maxSeedCount)
                 return;
 
-            var siteAdmins = GetSeedData(true);
+            var siteAdmins = GetSeedData();
 
             foreach (var siteAdmin in siteAdmins)
             {
-                Console.WriteLine(
+                _logger.LogInformation(
                     $"Generated SiteAdmin: EmailAddress: {siteAdmin.EmailAddress}, Password: RandomPassword_{siteAdmin.EmailAddress}"
                 );
                 await SeedEntityAsync(siteAdmin);
@@ -126,15 +126,17 @@ namespace OgrenciAidatSistemi.Data
         {
             if (_verboseLogging)
             {
-                Console.WriteLine("SiteAdminDBSeeder: AfterSeedDataAsync");
-                Console.WriteLine("We have seed data:");
+                _logger.LogInformation("SiteAdminDBSeeder: AfterSeedDataAsync");
+                _logger.LogInformation("We have seed data:");
                 foreach (var siteAdmin in _seedData)
                 {
-                    Console.WriteLine(
+                    _logger.LogInformation(
                         $"SiteAdminDBSeeder: AfterSeedDataAsync {siteAdmin.EmailAddress}"
                     );
                 }
             }
+            if (_randomSeed)
+                return;
 
             foreach (var siteAdmin in _seedData)
             {
@@ -165,9 +167,9 @@ namespace OgrenciAidatSistemi.Data
             };
         }
 
-        public override IEnumerable<SiteAdmin> GetSeedData(bool randomSeed = false)
+        public override IEnumerable<SiteAdmin> GetSeedData()
         {
-            if (randomSeed)
+            if (_randomSeed)
                 return Enumerable.Range(0, 10).Select(i => CreateRandomModel());
             return _seedData;
         }

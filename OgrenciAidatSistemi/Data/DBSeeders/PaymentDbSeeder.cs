@@ -6,19 +6,21 @@ using OgrenciAidatSistemi.Services;
 
 namespace OgrenciAidatSistemi.Data.DBSeeders
 {
+    // this dbseeder is has no default data to seed , it will use random data default
     public class PaymentDBSeeder(
         AppDbContext context,
         IConfiguration configuration,
         ILogger logger,
         StudentService studentService,
-        int maxSeedCount = 100
-    ) : DbSeeder<AppDbContext, Payment>(context, configuration, logger, maxSeedCount)
+        int maxSeedCount = 100,
+        bool randomSeed = true
+    ) : DbSeeder<AppDbContext, Payment>(context, configuration, logger, maxSeedCount, randomSeed)
     {
         private readonly StudentService _studentService = studentService;
 
         private readonly Faker faker = new("tr");
 
-        public override IEnumerable<Payment> GetSeedData(bool randomSeed = false)
+        public override IEnumerable<Payment> GetSeedData()
         {
             return Enumerable.Range(0, 10).Select(i => CreateRandomModel());
         }
@@ -28,8 +30,6 @@ namespace OgrenciAidatSistemi.Data.DBSeeders
             var paymentMethod = (PaymentMethod)
                 faker.Random.Number(0, Enum.GetNames(typeof(PaymentMethod)).Length - 1);
             ;
-
-            // TODO: write better generator of connected items like that
 
             var student = new Student
             {
@@ -160,13 +160,13 @@ namespace OgrenciAidatSistemi.Data.DBSeeders
             if (dbCount >= _maxSeedCount)
             {
                 if (_verboseLogging)
-                    Console.WriteLine(
+                    _logger.LogInformation(
                         $"PaymentDBSeeder: SeedRandomDataAsync already has {dbCount} payments in db"
                     );
                 return;
             }
 
-            var payments = GetSeedData(true);
+            var payments = GetSeedData();
             try
             {
                 foreach (var payment in payments)
@@ -176,7 +176,7 @@ namespace OgrenciAidatSistemi.Data.DBSeeders
                     if (_seedCount + dbCount >= _maxSeedCount)
                     {
                         if (_verboseLogging)
-                            Console.WriteLine(
+                            _logger.LogInformation(
                                 $"PaymentDBSeeder: SeedRandomDataAsync reached max seed count of {_maxSeedCount}"
                             );
                         break;
@@ -186,12 +186,12 @@ namespace OgrenciAidatSistemi.Data.DBSeeders
             catch (Exception e)
             {
                 if (_verboseLogging)
-                    Console.WriteLine(
+                    _logger.LogInformation(
                         $"PaymentDBSeeder: SeedRandomDataAsync could not save changes \n --- \n exception: {e} \n --- \n exception msg: {e.Message}"
                     );
                 if (e.InnerException != null && e.InnerException.Message != null)
                     if (_verboseLogging)
-                        Console.WriteLine(
+                        _logger.LogInformation(
                             $"PaymentDBSeeder: SeedRandomDataAsync could not save change \n --- \n inner exception: {e.InnerException} \n------\n inner exception msg: {e.InnerException.Message}"
                         );
             }
@@ -201,11 +201,11 @@ namespace OgrenciAidatSistemi.Data.DBSeeders
         {
             if (_verboseLogging && _seedData.Count > 0)
             {
-                Console.WriteLine("PaymentDBSeeder: AfterSeedDataAsync");
-                Console.WriteLine("We have seed data:");
+                _logger.LogInformation("PaymentDBSeeder: AfterSeedDataAsync");
+                _logger.LogInformation("We have seed data:");
                 foreach (var payment in _seedData)
                 {
-                    Console.WriteLine(
+                    _logger.LogInformation(
                         $"PaymentDBSeeder: AfterSeedDataAsync {payment.Student?.StudentId} {payment.Amount} {payment.PaymentMethod}"
                     );
                 }
@@ -250,14 +250,14 @@ namespace OgrenciAidatSistemi.Data.DBSeeders
 
             if (_verboseLogging && dbPayments.Count > 0)
             {
-                Console.WriteLine(
+                _logger.LogInformation(
                     $"PaymentDBSeeder: AfterSeedDataAsync we have {dbPayments.Count} payments in db here they are:"
                 );
 
                 foreach (var payment in dbPayments)
                 {
                     if (_verboseLogging)
-                        Console.WriteLine(
+                        _logger.LogInformation(
                             $"PaymentDBSeeder: AfterSeedDataAsync {payment.Student?.StudentId} {payment.Amount} {payment.PaymentMethod}"
                         );
                 }
@@ -322,7 +322,7 @@ namespace OgrenciAidatSistemi.Data.DBSeeders
             }
 
             if (_verboseLogging)
-                Console.WriteLine(
+                _logger.LogInformation(
                     $"PaymentDBSeeder: SeedEntityAsync {entity.Student?.StudentId} {entity.Amount} {entity.PaymentMethod}"
                 );
 
@@ -339,7 +339,7 @@ namespace OgrenciAidatSistemi.Data.DBSeeders
                     if (e.InnerException.Message.Contains("UNIQUE"))
                     {
                         if (_verboseLogging)
-                            Console.WriteLine(
+                            _logger.LogInformation(
                                 $"PaymentDBSeeder: SeedEntityAsync could not add Payment because of unique key \n exception: {e} \n\n----\n exception msg: {e.Message}"
                             );
                     }
@@ -347,7 +347,7 @@ namespace OgrenciAidatSistemi.Data.DBSeeders
                     {
                         var json = entity.ToJson();
                         if (_verboseLogging)
-                            Console.WriteLine(
+                            _logger.LogInformation(
                                 $"PaymentDBSeeder: SeedEntityAsync could not add Payment, exception: {e} \n\n----\n exception msg: {e.Message} \nn entity: {json}"
                             );
                         _logger.LogError(
@@ -358,7 +358,7 @@ namespace OgrenciAidatSistemi.Data.DBSeeders
                     {
                         var json = JsonSerializer.Serialize(entity);
                         if (_verboseLogging)
-                            Console.WriteLine(
+                            _logger.LogInformation(
                                 $"PaymentDBSeeder: SeedEntityAsync could not add Payment, exception: {e} \n\n----\n exception msg: {e.Message} \nn entity: {json}"
                             );
                         _logger.LogError(
@@ -382,44 +382,6 @@ namespace OgrenciAidatSistemi.Data.DBSeeders
             return iban;
         }
 
-        private readonly List<Payment> _seedData = new List<Payment> { };
-        // TODO: implement dependent dbseeders and better workflow for seeding with/without randomness, and with/without dependent seeders
+        private readonly List<Payment> _seedData = [];
     }
 }
-
-
-/*
-// TODO: later look at this for better implementation
-protected override Payment CreateRandomModel()
-{
-    var school = _dependentDbSeeders[typeof(SchoolDBSeeder)].GetRandomData();
-    var student = _dependentDbSeeders[typeof(StudentDBSeeder)].GetRandomData();
-    var paymentMethod = (PaymentMethod)random.Next(0, 3);
-    Payment payment;
-
-    switch (paymentMethod)
-    {
-       case PaymentMethod.Check:
-            payment = new CheckPayment()
-            {
-                School = school,
-                Student = student,
-                CheckNumber = faker.Random.Number(1000, 9999).ToString(),
-                BankName = "Bank1",
-                BranchCode = faker.Random.Number(1000, 9999).ToString(),
-            };
-            break;
-        default:
-            throw new Exception("Invalid payment method");
-    }
-
-    payment.CreatedAt = DateTime.Now;
-    payment.UpdatedAt = DateTime.Now;
-    payment.PaymentDate = DateTime.Now;
-    payment.Amount = random.Next(100, 1000);
-    payment.isVerified = random.Next(2) == 0;
-
-    return payment;
-}:
-
-*/

@@ -6,7 +6,7 @@ namespace OgrenciAidatSistemi.Data
     public interface IDbSeeder<TContext>
         where TContext : DbContext
     {
-        Task SeedAsync(bool randomSeed = false);
+        Task SeedAsync();
         Task AfterSeedAsync();
     }
 
@@ -23,22 +23,19 @@ namespace OgrenciAidatSistemi.Data
 
         protected int _seedCount = 0; // to keep track of the number of entities seeded
 
-        protected readonly IDbSeeder<TContext>? _dependentSeeder; // TODO: not fully implemented
-
         protected bool _verboseLogging;
-        protected bool _generateRandom;
+        protected bool _randomSeed = false;
 
         protected DbSeeder(
             TContext context,
             IConfiguration configuration,
             ILogger logger,
             int maxSeedCount = 100,
-            IDbSeeder<TContext>? dependentSeeder = null
+            bool randomSeed = false
         )
         {
             _context = context;
             _configuration = configuration;
-            _dependentSeeder = dependentSeeder;
             _logger = logger;
             _maxSeedCount = _configuration.GetValue<int>(
                 "SeedData:MaxSeedCount",
@@ -53,9 +50,10 @@ namespace OgrenciAidatSistemi.Data
             );
 
             _is_seeding = configuration.GetSection("SeedData").GetValue("SeedDB", false);
+            _randomSeed = randomSeed;
         }
 
-        public async Task SeedAsync(bool randomSeed = false)
+        public async Task SeedAsync()
         {
             if (!_is_seeding)
                 return;
@@ -67,7 +65,7 @@ namespace OgrenciAidatSistemi.Data
 
             await _context.Database.EnsureCreatedAsync();
 
-            if (randomSeed)
+            if (_randomSeed)
             {
                 await SeedRandomDataAsync();
             }
@@ -104,6 +102,6 @@ namespace OgrenciAidatSistemi.Data
 
         protected abstract TEntity CreateRandomModel();
 
-        public abstract IEnumerable<TEntity> GetSeedData(bool randomSeed = false);
+        public abstract IEnumerable<TEntity> GetSeedData();
     }
 }
