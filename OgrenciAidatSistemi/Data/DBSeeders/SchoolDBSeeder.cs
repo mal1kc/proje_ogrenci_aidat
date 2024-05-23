@@ -9,6 +9,8 @@ namespace OgrenciAidatSistemi.Data
         public SchoolDBSeeder(AppDbContext context, IConfiguration configuration, ILogger logger)
             : base(context, configuration, logger) { }
 
+        private readonly Random random = new();
+
         protected override async Task SeedDataAsync()
         {
             _context.Schools ??= _context.Set<School>();

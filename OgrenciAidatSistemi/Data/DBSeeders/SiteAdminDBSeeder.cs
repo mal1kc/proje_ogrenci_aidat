@@ -1,3 +1,4 @@
+using Bogus;
 using Microsoft.EntityFrameworkCore;
 using OgrenciAidatSistemi.Models;
 #pragma warning disable CS8604 // Possible null reference argument.
@@ -76,6 +77,8 @@ namespace OgrenciAidatSistemi.Data
             }
         }
 
+        private readonly Faker faker = new();
+
         protected override async Task SeedDataAsync()
         {
             _context.SiteAdmins ??= _context.Set<SiteAdmin>();
@@ -148,13 +151,16 @@ namespace OgrenciAidatSistemi.Data
 
         protected override SiteAdmin CreateRandomModel()
         {
-            var email_nm = "random_user" + random.Next(100);
+            var firstName = faker.Name.FirstName();
+            var lastName = faker.Name.LastName();
+
+            var email_nm = $"{firstName.ToLower()}_{lastName.ToLower()}";
             var password = "RandomPassword_" + email_nm; // gitleaks:allow
             return new SiteAdmin
             {
-                FirstName = "rnd_fn_" + RandomizerHelper.GenerateRandomString(5),
-                LastName = "rnd_ln_" + RandomizerHelper.GenerateRandomString(5),
-                EmailAddress = $"{email_nm}@example.com",
+                FirstName = firstName,
+                LastName = lastName,
+                EmailAddress = $"{email_nm}@random_generated.com",
                 PasswordHash = SiteAdmin.ComputeHash(password)
             };
         }

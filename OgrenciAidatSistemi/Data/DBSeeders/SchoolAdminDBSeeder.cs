@@ -1,17 +1,17 @@
+using Bogus;
 using Microsoft.EntityFrameworkCore;
 using OgrenciAidatSistemi.Models;
 
 #pragma warning disable CS8604 // Possible null reference argument.
 namespace OgrenciAidatSistemi.Data
 {
-    public class SchoolAdminDBSeeder : DbSeeder<AppDbContext, SchoolAdmin>
+    public class SchoolAdminDBSeeder(
+        AppDbContext context,
+        IConfiguration configuration,
+        ILogger logger
+    ) : DbSeeder<AppDbContext, SchoolAdmin>(context, configuration, logger)
     {
-        public SchoolAdminDBSeeder(
-            AppDbContext context,
-            IConfiguration configuration,
-            ILogger logger
-        )
-            : base(context, configuration, logger) { }
+        private readonly Faker faker = new("tr");
 
         protected override async Task SeedDataAsync()
         {
@@ -80,16 +80,16 @@ namespace OgrenciAidatSistemi.Data
 
         protected override SchoolAdmin CreateRandomModel()
         {
-            var email = $"rnd_ml_{random.Next(100)}@example.com";
+            var email = $"rnd_ml_{faker.Random.Number(1, 100)}@example.com";
             return new SchoolAdmin
             {
-                FirstName = "rschAdmin" + RandomizerHelper.GenerateRandomString(random.Next(2, 10)),
-                LastName = "rschAdmin" + RandomizerHelper.GenerateRandomString(random.Next(2, 10)),
+                FirstName = "rschAdmin" + faker.Name.FirstName(),
+                LastName = "rschAdmin" + faker.Name.LastName(),
                 EmailAddress = email,
                 PasswordHash = SchoolAdmin.ComputeHash("RandomPassword_" + email.Split('@')[0]),
                 School = new School
                 {
-                    Name = "School" + RandomizerHelper.GenerateRandomString(random.Next(2, 10)),
+                    Name = "School" + faker.Random.Number(1, 100),
                     Students = new HashSet<Student>()
                 },
                 ContactInfo = new ContactInfo { Email = email, }

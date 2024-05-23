@@ -25,7 +25,6 @@ namespace OgrenciAidatSistemi.Data
 
         protected readonly IDbSeeder<TContext>? _dependentSeeder; // TODO: not fully implemented
 
-        protected Random random = RandomizerHelper.random;
         protected bool _verboseLogging;
 
         protected DbSeeder(

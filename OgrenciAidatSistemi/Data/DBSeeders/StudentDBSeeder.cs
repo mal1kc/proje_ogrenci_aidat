@@ -1,4 +1,6 @@
+using Bogus;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.VisualBasic;
 using OgrenciAidatSistemi.Models;
 #pragma warning disable CS8604 // Possible null reference argument.
 namespace OgrenciAidatSistemi.Data
@@ -7,6 +9,8 @@ namespace OgrenciAidatSistemi.Data
     {
         public StudentDBSeeder(AppDbContext context, IConfiguration configuration, ILogger logger)
             : base(context, configuration, logger) { }
+
+        private readonly Faker faker = new("tr");
 
         protected override async Task SeedDataAsync()
         {
@@ -81,17 +85,27 @@ namespace OgrenciAidatSistemi.Data
         {
             var school = new School
             {
-                Name = "RandomSchool" + random.Next(100),
+                Name = "RandomSchool" + faker.Random.Number(100),
                 Students = new HashSet<Student>()
             };
 
             var student = new Student
             {
                 School = school,
-                GradLevel = random.Next(1, 13),
-                IsGraduated = random.Next(2) == 0, // Generate a random graduation status
+                GradLevel = faker.Random.Number(1, 12),
+                IsGraduated = faker.Random.Bool(), // Generate a random graduation status
                 PasswordHash = Student.ComputeHash("password"),
-                EmailAddress = "temp@random.com"
+                EmailAddress = "temp@random.com",
+                FirstName = faker.Name.FirstName(),
+                LastName = faker.Name.LastName(),
+                UpdatedAt = DateTime.Now,
+            };
+            student.ContactInfo = new ContactInfo
+            {
+                Email = student.EmailAddress,
+                PhoneNumber = faker.Phone.PhoneNumber(),
+                CreatedAt = DateTime.Now,
+                UpdatedAt = DateTime.Now,
             };
             return student;
         }

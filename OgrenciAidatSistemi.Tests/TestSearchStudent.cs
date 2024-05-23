@@ -31,7 +31,7 @@ namespace OgrenciAidatSistemi.Tests
 
             _configuration = Helpers.CreateConfiguration();
 
-            _dbContext = new AppDbContext(_options, useInMemory: true);
+            _dbContext = new AppDbContext(_options);
 
             // Seed the database with test data
 
@@ -100,10 +100,15 @@ namespace OgrenciAidatSistemi.Tests
         }
 
         [Fact]
-        public async Task SearchRandomData()
+        public Task SearchRandomData()
         {
-            var seedData = _studentDBSeeder.GetSeedData();
 
+            var seedData = _studentDBSeeder.GetSeedData(true);
+
+            QueryableModelHelper<Student> studentSearchHelper =
+                new(seedData.AsQueryable(), Student.SearchConfig);
+
+            Exception? exception = null;
             foreach (var seedEntity in seedData)
             {
                 foreach (var searchField in Student.SearchConfig.AllowedFieldsForSearch)
@@ -115,21 +120,27 @@ namespace OgrenciAidatSistemi.Tests
                             $"Property '{searchField}' does not exist on type '{seedEntity.GetType().Name}'."
                         );
                     var searchValue = property.GetValue(seedEntity, null);
-                    var searchResult = _dbContext.Students.Where(s =>
-                        EF.Property<string>(s, searchField) == searchValue.ToString()
-                    );
+                    if (searchValue == null) continue;
+                    var searchResult = studentSearchHelper.Search(searchValue.ToString(), searchField);
 
-                    if (!searchResult.Any())
-                    {
-                        throw new Exception(
-                            $"No students found with {searchField} equal to '{searchValue}'."
-                        );
-                    }
+                    // we use Firstname because id isn't generated yet(we did not add to db)
+                    exception = new Exception(
+                             $"No students found with {searchField} equal to '{searchValue}'."
+                         );
+                    if (!searchResult.Any()) throw exception;
 
-                    Assert.Single(searchResult); // Assuming each searchValue is unique
-                    Assert.Equal(seedEntity.Id, searchResult.First().Id); // Assuming Id is the unique identifier
+                    Assert.Equal(seedEntity.EmailAddress, searchResult.First().EmailAddress);
+
+                    // search without specifying field
+                    searchResult = studentSearchHelper.Search(searchValue.ToString());
+
+                    if (!searchResult.Any()) throw exception;
+                    Assert.Equal(seedEntity.EmailAddress, searchResult.First().EmailAddress);
                 }
             }
+
+            return Task.CompletedTask;
         }
+
     }
 }

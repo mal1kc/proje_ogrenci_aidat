@@ -98,29 +98,16 @@ internal class Program
                 Console.WriteLine("Seeding Database");
 
                 List<IDbSeeder<AppDbContext>> DBseeders =
-                    new()
-                    {
-                        new SchoolAdminDBSeeder(
-                            context: ctx,
-                            configuration: configuration,
-                            logger: logger
-                        ),
-                        new SchoolDBSeeder(
-                            context: ctx,
-                            configuration: configuration,
-                            logger: logger
-                        ),
-                        new StudentDBSeeder(
-                            context: ctx,
-                            configuration: configuration,
-                            logger: logger
-                        ),
-                        new PaymentDBSeeder(
-                            context: ctx,
-                            configuration: configuration,
-                            logger: logger
-                        ),
-                    };
+                [
+                    new SchoolAdminDBSeeder(
+                        context: ctx,
+                        configuration: configuration,
+                        logger: logger
+                    ),
+                    new SchoolDBSeeder(context: ctx, configuration: configuration, logger: logger),
+                    new StudentDBSeeder(context: ctx, configuration: configuration, logger: logger),
+                    new PaymentDBSeeder(context: ctx, configuration: configuration, logger: logger),
+                ];
                 if (_verbs)
                 {
                     Console.WriteLine("we have " + DBseeders.Count + " seeders");
@@ -182,6 +169,6 @@ internal class Program
 
         #endregion
 
-        app.Run();
+        await app.RunAsync();
     }
 }

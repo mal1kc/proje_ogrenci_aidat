@@ -87,8 +87,8 @@
     + [ ] add services for retrieving related data for students and school admins - (studentService, schoolAdminService)
     + [ ] crete paymentperiod service for auto create payments for students and save to db 
     + [X] try to add school id as claim for school admin and student , and for site admin it should be 0 or null
-    + [ ] add type check before search in ModelQueryableHelper (for security) (only allow string and int types)
-        + [ ] update all searchconfig of models to use only string and int types
+ 
+    + [X] rewrited ModelQueryableHelper to use predefined search methods and sort methods
 
     + [ ] impelment exportService for exporting data to excel or similiar formats
 

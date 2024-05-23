@@ -4,10 +4,8 @@ using OgrenciAidatSistemi.Models;
 
 namespace OgrenciAidatSistemi.Data
 {
-    public class AppDbContext(DbContextOptions options, bool useInMemory) : DbContext(options)
+    public class AppDbContext(DbContextOptions options) : DbContext(options)
     {
-        private readonly bool _useInMemory = useInMemory;
-
         public DbSet<User>? Users { get; set; } // must be id table of users
         public DbSet<SiteAdmin>? SiteAdmins { get; set; }
 
@@ -34,11 +32,8 @@ namespace OgrenciAidatSistemi.Data
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            if (_useInMemory)
-            {
-                optionsBuilder.UseInMemoryDatabase("TestDatabase");
-            }
-            else
+            // if no provider is not set use sqlite
+            if (!optionsBuilder.IsConfigured)
             {
                 // TODO: needs to be changed in development and production use
                 optionsBuilder.UseSqlite("Data Source=app.db");

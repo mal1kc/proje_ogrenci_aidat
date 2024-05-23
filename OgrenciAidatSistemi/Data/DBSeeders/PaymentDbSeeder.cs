@@ -1,38 +1,39 @@
 using System.Text.Json;
+using Bogus;
 using Microsoft.EntityFrameworkCore;
 using OgrenciAidatSistemi.Models;
 
 namespace OgrenciAidatSistemi.Data.DBSeeders
 {
 #warning "PaymentDBSeeder is not fully implemented"
-    public class PaymentDBSeeder : DbSeeder<AppDbContext, Payment>
+    public class PaymentDBSeeder(AppDbContext context, IConfiguration configuration, ILogger logger)
+        : DbSeeder<AppDbContext, Payment>(context, configuration, logger)
     {
-        public PaymentDBSeeder(AppDbContext context, IConfiguration configuration, ILogger logger)
-            : base(context, configuration, logger) { }
+        private readonly Faker faker = new("tr");
 
         public override IEnumerable<Payment> GetSeedData(bool randomSeed = false)
         {
-            // TODO: use _dependentDbSeeders to get the seed data of schools and students to create payments
             return Enumerable.Range(0, 10).Select(i => CreateRandomModel());
         }
 
         protected override Payment CreateRandomModel()
         {
             var paymentMethod = (PaymentMethod)
-                random.Next(Enum.GetNames(typeof(PaymentMethod)).Length);
+                faker.Random.Number(0, Enum.GetNames(typeof(PaymentMethod)).Length - 1);
+            ;
 
             // TODO: write better generator of connected items like that
 
             var student = new Student
             {
-                FirstName = "RandomStudent" + random.Next(100),
+                FirstName = faker.Name.FirstName(),
                 School = new School
                 {
-                    Name = "RandomSchool" + random.Next(100),
+                    Name = "RandomSchool" + faker.Random.Number(1, 100),
                     Students = new HashSet<Student>()
                 },
-                GradLevel = random.Next(1, 13),
-                IsGraduated = random.Next(2) == 0, // Generate a random graduation status
+                GradLevel = faker.Random.Number(1, 12),
+                IsGraduated = faker.Random.Number(2) == 0, // Generate a random graduation status
                 PasswordHash = Student.ComputeHash("password"), // dont overthink it
                 EmailAddress = "temp@somemail.com"
             };
@@ -75,7 +76,7 @@ namespace OgrenciAidatSistemi.Data.DBSeeders
                     {
                         Student = student,
                         CashierName = "cashier 1",
-                        ReceiptNumber = random.NextInt64(1, 111111).ToString(),
+                        ReceiptNumber = faker.Random.Number(1000, 9999).ToString(),
                         ReceiptIssuer = "issuer 1",
                         ReceiptDate = DateTime.UtcNow,
                         PaymentPeriod = paymentperiod,
@@ -86,8 +87,8 @@ namespace OgrenciAidatSistemi.Data.DBSeeders
                         Student = student,
                         PaymentPeriod = paymentperiod,
                         BankName = "Bank1",
-                        AccountNumber = random.NextInt64(1, 111111).ToString(),
-                        BranchCode = random.NextInt64(1, 111111).ToString(),
+                        AccountNumber = faker.Random.Number(1000, 9999).ToString(),
+                        BranchCode = faker.Random.Number(1000, 9999).ToString(),
                         // iban length is 26
                         IBAN = genIban(),
                     },
@@ -96,31 +97,29 @@ namespace OgrenciAidatSistemi.Data.DBSeeders
                     {
                         Student = student,
                         PaymentPeriod = paymentperiod,
-                        CardNumber = random
-                            .NextInt64(1111111111111111, 9999999999999999)
-                            .ToString(),
+                        CardNumber = "1234 5678 1234 5678",
                         CardHolderName = "cardholder 1",
                         ExpiryDate = DateTime.UtcNow.ToString(),
-                        CVC = [.. random.Next(100, 999).ToString()],
+                        CVC = [.. faker.Random.Number(100, 999).ToString()],
                     },
                 PaymentMethod.Check
                     => new CheckPayment()
                     {
                         Student = student,
                         PaymentPeriod = paymentperiod,
-                        CheckNumber = random.NextInt64(1, 111111).ToString(),
+                        CheckNumber = faker.Random.Number(1000, 9999).ToString(),
                         BankName = "Bank1",
-                        BranchCode = random.NextInt64(1, 111111).ToString(),
+                        BranchCode = faker.Random.Number(1000, 9999).ToString(),
                     },
                 _ => throw new Exception("Invalid payment method"),
             };
             payment.CreatedAt = DateTime.Now;
             payment.UpdatedAt = DateTime.Now;
             payment.PaymentDate = DateTime.Now;
-            payment.Amount = random.Next(100, 1000);
+            payment.Amount = faker.Random.Number(100, 1000);
             // set status randomly  from PaymentStatus enum
             payment.Status = (PaymentStatus)
-                random.Next(Enum.GetNames(typeof(PaymentStatus)).Length);
+                faker.Random.Number(0, Enum.GetNames(typeof(PaymentStatus)).Length - 1);
 
             payment.Receipt = new(
                 path: null,
@@ -293,7 +292,7 @@ namespace OgrenciAidatSistemi.Data.DBSeeders
                 _context.Receipts ??= _context.Set<Receipt>();
                 while (true)
                 {
-                    var path = random.Next(1000, 9999).ToString() + ".pdf";
+                    var path = faker.Random.Number(1000, 9999).ToString() + ".pdf";
                     if (
                         await _context.Receipts.Where(fp => fp.Path == path).FirstOrDefaultAsync()
                         == null
@@ -363,7 +362,7 @@ namespace OgrenciAidatSistemi.Data.DBSeeders
             var iban = "TR";
             for (int i = 0; i < 24; i++)
             {
-                iban += random.Next(0, 9);
+                iban += faker.Random.Number(0, 9);
             }
             return iban;
         }
@@ -390,9 +389,9 @@ protected override Payment CreateRandomModel()
             {
                 School = school,
                 Student = student,
-                CheckNumber = random.NextInt64(1, 111111).ToString(),
+                CheckNumber = faker.Random.Number(1000, 9999).ToString(),
                 BankName = "Bank1",
-                BranchCode = random.NextInt64(1, 111111).ToString(),
+                BranchCode = faker.Random.Number(1000, 9999).ToString(),
             };
             break;
         default:
