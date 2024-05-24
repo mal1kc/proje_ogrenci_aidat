@@ -18,6 +18,7 @@
         integrity="sha512-D1liES3uvDpPrgk7vXR/hR/sukGn7EtDWEyvpdLsyalQYq6v6YUsTUJmku7B4rcuQ21rf0UTksw2i/2Pdjbd3g=="
         crossorigin="anonymous" referrerpolicy="no-referrer" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/custom.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/OgrenciAidatSistemi.styles.css" asp-append-version="true" />
     @RenderSection("styles", required: false)
 </head>
@@ -41,7 +42,7 @@
                     <partial name="_ErrorPartial" model=@TempData["Error"] />
                 }
             </div>
-            @RenderBody()         
+            @RenderBody()
         </main>
     </div>
 
@@ -54,20 +55,9 @@
     </footer>
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/color-mode.js" asp-append-version="true"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
     @RenderSection("jslibs", required: false)
-    <script>
-        document.getElementById('Colorscheme_btnSwitch').addEventListener('click', () => {
-            if (document.documentElement.getAttribute('data-bs-theme') == 'dark') {
-                document.documentElement.setAttribute('data-bs-theme', 'light')
-                console.log('light')
-            }
-            else {
-                document.documentElement.setAttribute('data-bs-theme', 'dark')
-                console.log('dark')
-            }
-        })
-    </script>
     @RenderSection("scripts", required: false)
     <script src="~/js/collapse.js" asp-append-version="true"></script>
 </body>

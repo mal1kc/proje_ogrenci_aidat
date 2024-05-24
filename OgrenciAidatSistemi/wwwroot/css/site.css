@@ -8,12 +8,41 @@ html {
   }
 }
 
+:root {
+  --error-container-bg-light: #f8d7da;
+  --error-container-bg-dark: #2a2a2a;
+  --error-container-color-light: #721c24;
+  --error-container-color-dark: #ddd;
+  --error-link-bg-light: #d4edda;
+  --error-link-bg-dark: #444;
+  --error-link-hover-bg-light: #c3e6cb;
+  --error-link-hover-bg-dark: #555;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --error-container-bg: var(--error-container-bg-dark);
+    --error-container-color: var(--error-container-color-dark);
+    --error-link-bg: var(--error-link-bg-dark);
+    --error-link-hover-bg: var(--error-link-hover-bg-dark);
+  }
+}
+
+@media (prefers-color-scheme: light) {
+  :root {
+    --error-container-bg: var(--error-container-bg-light);
+    --error-container-color: var(--error-container-color-light);
+    --error-link-bg: var(--error-link-bg-light);
+    --error-link-hover-bg: var(--error-link-hover-bg-light);
+  }
+}
+
 .btn:focus,
 .btn:active:focus,
 .btn-link.nav-link:focus,
 .form-control:focus,
 .form-check-input:focus {
-  box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
+  box-shadow: 0 0 0 0.1rem var(--bs-light), 0 0 0 0.25rem var(--bs-primary);
 }
 
 html {
@@ -47,3 +76,7 @@ body {
 .flipped {
   transform: scaleY(-1);
 }
+
+
+/* apply color-mode */
+

@@ -1,0 +1,9 @@
+{
+  "dependencies": {
+    "bootstrap": "^5.3.3"
+  },
+  "scripts": {
+    "postinstall": "cp -R node_modules/bootstrap/dist OgrenciAidatSistemi/wwwroot/lib/bootstrap/dist",
+    "build-css": "npx sass OgrenciAidatSistemi/wwwroot/css/custom.scss  OgrenciAidatSistemi/wwwroot/css/custom.css"
+  }
+}

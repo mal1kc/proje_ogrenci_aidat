@@ -12,7 +12,8 @@
     <title>@ViewData["Title"] - @Constants.AppName</title>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
-    <link rel="stylesheet" href="~/ecommerce_app.styles.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/custom.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/OgrenciAidatSistemi.styles.css" asp-append-version="true" />
 </head>
 
 <body>
@@ -33,16 +34,6 @@
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
-    <!--    <script> -->
-    <!--         document.getElementById('Colorscheme_btnSwitch').addEventListener('click',()=>{ -->
-    <!--     if (document.documentElement.getAttribute('data-bs-theme') == 'dark') { -->
-    <!--         document.documentElement.setAttribute('data-bs-theme','light') -->
-    <!--     } -->
-    <!--     else { -->
-    <!--         document.documentElement.setAttribute('data-bs-theme','dark') -->
-    <!--     } -->
-    <!-- }) -->
-    <!--     </script> -->
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 

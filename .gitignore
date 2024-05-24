@@ -10,3 +10,4 @@ app*.db
 *.log
 app*.db*
 ./*/wwwroot/uploads/*
+node_modules/
