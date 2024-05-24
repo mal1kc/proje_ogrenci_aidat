@@ -4,48 +4,36 @@ namespace OgrenciAidatSistemi.Controllers
 {
     public class ErrorController : Controller
     {
-        // "/Error?statusCode=404"
-
-        public ActionResult Index(string? statusCode)
+        [Route("Error/{statusCode}")]
+        public IActionResult HttpStatusCodeHandler(int? statusCode = null)
         {
             ViewBag.Title = "Error";
-
-            // if (statusCode == "404")
-            // {
-            //     return RedirectToAction("Error404");
-            // }
-
-            return statusCode switch
+            switch (statusCode)
             {
-                "404" => RedirectToAction("Error404"),
-                "403" => RedirectToAction("Error403"),
-                "401" => RedirectToAction("Error401"),
-                "500" => RedirectToAction("Error500"),
-                _ => View(),
-            };
-        }
+                case 404:
+                    ViewBag.Title = "Error 404 - page not Found";
+                    ViewBag.Message =
+                        "The page you are looking for might have been removed, had its name changed, or is temporarily unavailable.";
+                    break;
+                case 403:
+                    ViewBag.Title = "Error 403 - Access Denied";
+                    ViewBag.Message = "You don't have permission to access this resource.";
+                    break;
+                case 401:
+                    ViewBag.Title = "Error 401 - Unauthorized";
+                    ViewBag.Message = "You are not authorized to view this page.";
+                    break;
+                case 500:
+                    ViewBag.Title = "Error 500 - Internal Server Error";
+                    ViewBag.Message =
+                        "The server encountered an internal error or misconfiguration and was unable to complete your request.";
+                    break;
+                default:
+                    ViewBag.Title = "Error - An error occurred";
+                    ViewBag.Message = "An error occurred while processing your request.";
+                    break;
+            }
 
-        public ActionResult Error404()
-        {
-            ViewBag.Title = "Error 404 - page not Found";
-            return View("Index");
-        }
-
-        public ActionResult Error403()
-        {
-            ViewBag.Title = "Error 403 - Access Denied";
-            return View("Index");
-        }
-
-        public ActionResult Error401()
-        {
-            ViewBag.Title = "Error 401 - Unauthorized";
-            return View("Index");
-        }
-
-        public ActionResult Error500()
-        {
-            ViewBag.Title = "Error 500 - Internal Server Error";
             return View("Index");
         }
     }

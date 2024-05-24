@@ -65,15 +65,13 @@ internal class Program
 
             if (!app.Environment.IsDevelopment())
             {
-                Console.WriteLine("Using production error handler");
-                _ = app.UseExceptionHandler("/Home/Error");
+                app.UseExceptionHandler("/Error");
+                _ = app.UseStatusCodePagesWithReExecute("/Error/{0}");
             }
             else
             {
                 Console.WriteLine("Using development error handler");
                 _ = app.UseDeveloperExceptionPage();
-                // how to use custom ErrorController
-                _ = app.UseStatusCodePagesWithReExecute("/Error", "?statusCode={0}");
             }
             if (ctx == null)
             {

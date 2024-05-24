@@ -76,8 +76,10 @@
 - [X] try to add school id as claim for school admin and student , and for site admin it should be 0 or null
 - [X] rewrite ModelQueryableHelper to use predefined search methods and sort methods
 - [ ] implement exportService for exporting data to excel or similar formats
-- [ ] change error's to use partial view for error pages (404, 500, 403, 401) 
+- [x] change errorController pages (404, 500, 403, 401) 
     - [ ] add error handling for all controllers and services
+
+- [ ] improve look by adding dark/light color-mode
 
 - [X] remove _dependentSeeder , seeder not improved unless they break
 
