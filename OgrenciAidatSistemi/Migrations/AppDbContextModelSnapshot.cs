@@ -114,11 +114,6 @@ namespace OgrenciAidatSistemi.Migrations
                     b.Property<int>("PaymentPeriodId")
                         .HasColumnType("INTEGER");
 
-                    b.Property<string>("PaymentType")
-                        .IsRequired()
-                        .HasMaxLength(13)
-                        .HasColumnType("TEXT");
-
                     b.Property<int?>("SchoolId")
                         .HasColumnType("INTEGER");
 
@@ -141,7 +136,7 @@ namespace OgrenciAidatSistemi.Migrations
 
                     b.ToTable("Payments");
 
-                    b.HasDiscriminator<string>("PaymentType").HasValue("Payment");
+                    b.HasDiscriminator<int>("PaymentMethod");
 
                     b.UseTphMappingStrategy();
                 });
@@ -155,7 +150,7 @@ namespace OgrenciAidatSistemi.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("TEXT");
 
-                    b.Property<DateTime>("EndDate")
+                    b.Property<DateOnly>("EndDate")
                         .HasColumnType("TEXT");
 
                     b.Property<int>("Occurrence")
@@ -164,7 +159,7 @@ namespace OgrenciAidatSistemi.Migrations
                     b.Property<decimal>("PerPaymentAmount")
                         .HasColumnType("TEXT");
 
-                    b.Property<DateTime>("StartDate")
+                    b.Property<DateOnly>("StartDate")
                         .HasColumnType("TEXT");
 
                     b.Property<int?>("StudentId")
@@ -291,9 +286,8 @@ namespace OgrenciAidatSistemi.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<int>("Role")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER")
-                        .HasDefaultValue(0);
+                        .HasDefaultValue(1);
 
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("TEXT");
@@ -320,13 +314,13 @@ namespace OgrenciAidatSistemi.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("TEXT");
 
-                    b.Property<DateTime>("EndDate")
+                    b.Property<DateOnly>("EndDate")
                         .HasColumnType("TEXT");
 
                     b.Property<int?>("SchoolId")
                         .HasColumnType("INTEGER");
 
-                    b.Property<DateTime>("StartDate")
+                    b.Property<DateOnly>("StartDate")
                         .HasColumnType("TEXT");
 
                     b.Property<DateTime>("UpdatedAt")
@@ -339,100 +333,16 @@ namespace OgrenciAidatSistemi.Migrations
                     b.ToTable("WorkYears");
                 });
 
-            modelBuilder.Entity("OgrenciAidatSistemi.Models.BankPayment", b =>
+            modelBuilder.Entity("OgrenciAidatSistemi.Models.PaidPayment", b =>
                 {
                     b.HasBaseType("OgrenciAidatSistemi.Models.Payment");
-
-                    b.Property<string>("AccountNumber")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("BankName")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("BranchCode")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("IBAN")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.ToTable("Payments", t =>
-                        {
-                            t.Property("BankName")
-                                .HasColumnName("BankPayment_BankName");
-
-                            t.Property("BranchCode")
-                                .HasColumnName("BankPayment_BranchCode");
-                        });
-
-                    b.HasDiscriminator().HasValue("Bank");
                 });
 
-            modelBuilder.Entity("OgrenciAidatSistemi.Models.CashPayment", b =>
+            modelBuilder.Entity("OgrenciAidatSistemi.Models.UnPaidPayment", b =>
                 {
                     b.HasBaseType("OgrenciAidatSistemi.Models.Payment");
 
-                    b.Property<string>("CashierName")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<DateTime>("ReceiptDate")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("ReceiptIssuer")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("ReceiptNumber")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.HasDiscriminator().HasValue("Cash");
-                });
-
-            modelBuilder.Entity("OgrenciAidatSistemi.Models.CheckPayment", b =>
-                {
-                    b.HasBaseType("OgrenciAidatSistemi.Models.Payment");
-
-                    b.Property<string>("BankName")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("BranchCode")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("CheckNumber")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.HasDiscriminator().HasValue("Check");
-                });
-
-            modelBuilder.Entity("OgrenciAidatSistemi.Models.DebitCardPayment", b =>
-                {
-                    b.HasBaseType("OgrenciAidatSistemi.Models.Payment");
-
-                    b.Property<string>("CVC")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("CardHolderName")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("CardNumber")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("ExpiryDate")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.HasDiscriminator().HasValue("DebitCard");
+                    b.HasDiscriminator().HasValue(0);
                 });
 
             modelBuilder.Entity("OgrenciAidatSistemi.Models.SchoolAdmin", b =>
@@ -473,7 +383,7 @@ namespace OgrenciAidatSistemi.Migrations
                     b.Property<int>("GradLevel")
                         .HasColumnType("INTEGER");
 
-                    b.Property<bool>("IsGraduated")
+                    b.Property<bool>("IsLeftSchool")
                         .HasColumnType("INTEGER");
 
                     b.Property<int?>("SchoolId")
@@ -491,6 +401,102 @@ namespace OgrenciAidatSistemi.Migrations
                         .IsUnique();
 
                     b.ToTable("Students");
+                });
+
+            modelBuilder.Entity("OgrenciAidatSistemi.Models.BankPayment", b =>
+                {
+                    b.HasBaseType("OgrenciAidatSistemi.Models.PaidPayment");
+
+                    b.Property<string>("AccountNumber")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("BankName")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("BranchCode")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("IBAN")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.ToTable("Payments", t =>
+                        {
+                            t.Property("BankName")
+                                .HasColumnName("BankPayment_BankName");
+
+                            t.Property("BranchCode")
+                                .HasColumnName("BankPayment_BranchCode");
+                        });
+
+                    b.HasDiscriminator().HasValue(2);
+                });
+
+            modelBuilder.Entity("OgrenciAidatSistemi.Models.CashPayment", b =>
+                {
+                    b.HasBaseType("OgrenciAidatSistemi.Models.PaidPayment");
+
+                    b.Property<string>("CashierName")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("ReceiptDate")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("ReceiptIssuer")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("ReceiptNumber")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.HasDiscriminator().HasValue(1);
+                });
+
+            modelBuilder.Entity("OgrenciAidatSistemi.Models.CheckPayment", b =>
+                {
+                    b.HasBaseType("OgrenciAidatSistemi.Models.PaidPayment");
+
+                    b.Property<string>("BankName")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("BranchCode")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("CheckNumber")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.HasDiscriminator().HasValue(4);
+                });
+
+            modelBuilder.Entity("OgrenciAidatSistemi.Models.DebitCardPayment", b =>
+                {
+                    b.HasBaseType("OgrenciAidatSistemi.Models.PaidPayment");
+
+                    b.Property<string>("CVC")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("CardHolderName")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("CardNumber")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("ExpiryDate")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.HasDiscriminator().HasValue(3);
                 });
 
             modelBuilder.Entity("GradeStudent", b =>

@@ -5,8 +5,8 @@ namespace OgrenciAidatSistemi.Models
 {
     public class WorkYear : BaseDbModel, ISearchableModel<WorkYear>
     {
-        public DateTime StartDate { get; set; }
-        public DateTime EndDate { get; set; }
+        public DateOnly StartDate { get; set; }
+        public DateOnly EndDate { get; set; }
         public ISet<PaymentPeriod>? PaymentPeriods { get; set; }
         public School? School { get; set; }
         public static ModelSearchConfig<WorkYear> SearchConfig =>
@@ -85,8 +85,8 @@ namespace OgrenciAidatSistemi.Models
     public class WorkYearView : IBaseDbModelView
     {
         public int Id { get; set; }
-        public DateTime StartDate { get; set; }
-        public DateTime EndDate { get; set; }
+        public DateOnly StartDate { get; set; }
+        public DateOnly EndDate { get; set; }
         public ISet<PaymentPeriodView>? PaymentPeriods { get; set; }
         public SchoolView? School { get; set; }
 

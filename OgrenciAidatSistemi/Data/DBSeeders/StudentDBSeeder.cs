@@ -99,7 +99,7 @@ namespace OgrenciAidatSistemi.Data
             {
                 School = school,
                 GradLevel = faker.Random.Number(1, 12),
-                IsGraduated = faker.Random.Bool(), // Generate a random graduation status
+                IsLeftSchool = faker.Random.Bool(),
                 PasswordHash = Student.ComputeHash("password"),
                 EmailAddress = "temp@random.com",
                 FirstName = faker.Name.FirstName(),
@@ -203,7 +203,7 @@ namespace OgrenciAidatSistemi.Data
                 LastName = "numberone",
                 School = new School { Name = "School 1", Students = null },
                 GradLevel = 10,
-                IsGraduated = false,
+                IsLeftSchool = false,
                 PasswordHash = Student.ComputeHash("password"),
                 EmailAddress = "101@schol1.com"
             },
@@ -213,7 +213,7 @@ namespace OgrenciAidatSistemi.Data
                 LastName = "number two",
                 School = new School { Name = "School 2", Students = null },
                 GradLevel = 11,
-                IsGraduated = false,
+                IsLeftSchool = false,
                 PasswordHash = Student.ComputeHash("password"),
                 EmailAddress = "102@schol2.com"
             },

@@ -10,7 +10,8 @@ namespace OgrenciAidatSistemi.Models
         public string StudentId { get; set; }
         public School? School { get; set; }
         public int GradLevel { get; set; }
-        public bool IsGraduated { get; set; }
+        public bool IsLeftSchool { get; set; }
+
         public ICollection<Payment>? Payments { get; set; }
         public ICollection<PaymentPeriod>? PaymentPeriods { get; set; }
         public ICollection<Grade>? Grades { get; set; }
@@ -104,7 +105,7 @@ namespace OgrenciAidatSistemi.Models
                 LastName = LastName,
                 School = ignoreBidirectNav ? null : School?.ToView(ignoreBidirectNav: true),
                 GradLevel = GradLevel,
-                IsGraduated = IsGraduated,
+                IsLeftSchool = IsLeftSchool,
                 EmailAddress = EmailAddress,
                 CreatedAt = CreatedAt,
                 UpdatedAt = UpdatedAt,
@@ -126,7 +127,7 @@ namespace OgrenciAidatSistemi.Models
         public ContactInfoView ContactInfo { get; set; }
 
         public int GradLevel { get; set; }
-        public bool IsGraduated { get; set; }
+        public bool IsLeftSchool { get; set; }
 
         public ICollection<Payment>? Payments { get; set; }
         public ICollection<Grade>? Grades { get; set; }

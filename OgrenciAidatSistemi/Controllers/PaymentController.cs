@@ -72,7 +72,8 @@ namespace OgrenciAidatSistemi.Controllers
 
             var modelList = new QueryableModelHelper<Payment>(payments, Payment.SearchConfig);
             return View(
-                modelList.List(ViewData, searchString, searchField, sortOrder, pageIndex, pageSize)
+                modelList
+                    .List(ViewData, searchString, searchField, sortOrder, pageIndex, pageSize)
             );
         }
 

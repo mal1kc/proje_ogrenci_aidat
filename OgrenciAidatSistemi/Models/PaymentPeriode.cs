@@ -14,8 +14,8 @@ namespace OgrenciAidatSistemi.Models
     {
         public Student? Student { get; set; }
 
-        public DateTime StartDate { get; set; }
-        public DateTime EndDate { get; set; }
+        public DateOnly StartDate { get; set; }
+        public DateOnly EndDate { get; set; }
         public decimal PerPaymentAmount { get; set; }
         public decimal TotalAmount { get; set; }
 
@@ -132,8 +132,8 @@ namespace OgrenciAidatSistemi.Models
         public WorkYearView? WorkYear { get; set; }
         public DateTime CreatedAt { get; set; }
         public DateTime UpdatedAt { get; set; }
-        public DateTime StartDate { get; set; }
-        public DateTime EndDate { get; set; }
+        public DateOnly StartDate { get; set; }
+        public DateOnly EndDate { get; set; }
 
         public decimal PerPaymentAmount { get; set; }
         public decimal TotalAmount { get; set; }

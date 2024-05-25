@@ -1,6 +1,9 @@
+using System.Data;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using OgrenciAidatSistemi.Data;
+using OgrenciAidatSistemi.Data.Extensions;
 using OgrenciAidatSistemi.Helpers;
 using OgrenciAidatSistemi.Helpers.Controller;
 using OgrenciAidatSistemi.Models;
@@ -9,23 +12,19 @@ using OgrenciAidatSistemi.Services;
 
 namespace OgrenciAidatSistemi.Controllers
 {
-    public class SiteAdminController : Controller
+    public class SiteAdminController(
+        ILogger<SiteAdminController> logger,
+        AppDbContext appDbContext,
+        UserService userService,
+        ExportService exportService
+    ) : Controller
     {
-        private readonly ILogger<SiteAdminController> _logger;
-        private readonly AppDbContext _appDbContext;
+        private readonly ILogger<SiteAdminController> _logger = logger;
+        private readonly AppDbContext _appDbContext = appDbContext;
 
-        private readonly UserService _userService;
+        private readonly UserService _userService = userService;
 
-        public SiteAdminController(
-            ILogger<SiteAdminController> logger,
-            AppDbContext appDbContext,
-            UserService userService
-        )
-        {
-            _logger = logger;
-            _appDbContext = appDbContext;
-            _userService = userService;
-        }
+        private readonly ExportService _exportService = exportService;
 
         // AKA : Admin Dashboard
         [Authorize(Roles = Configurations.Constants.userRoles.SiteAdmin)]
@@ -289,6 +288,16 @@ namespace OgrenciAidatSistemi.Controllers
             if (siteAdmin == null)
                 return NotFound();
             return View(siteAdmin.ToView());
+        }
+
+        // TODO: add some query parameters to filter the results by specific fields
+        // maybe date range , maybe school name etc
+
+        [Authorize(Roles = Configurations.Constants.userRoles.SiteAdmin)]
+        [HttpGet]
+        public IActionResult Export()
+        {
+            throw new NotImplementedException();
         }
     }
 }

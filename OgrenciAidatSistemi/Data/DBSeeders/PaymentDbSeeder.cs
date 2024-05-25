@@ -30,6 +30,8 @@ namespace OgrenciAidatSistemi.Data.DBSeeders
             var paymentMethod = (PaymentMethod)
                 faker.Random.Number(0, Enum.GetNames(typeof(PaymentMethod)).Length - 1);
             ;
+            var paymentStatus = (PaymentStatus)
+                faker.Random.Number(0, Enum.GetNames(typeof(PaymentStatus)).Length - 1);
 
             var student = new Student
             {
@@ -40,7 +42,7 @@ namespace OgrenciAidatSistemi.Data.DBSeeders
                     Students = null
                 },
                 GradLevel = faker.Random.Number(1, 12),
-                IsGraduated = faker.Random.Number(2) == 0, // Generate a random graduation status
+                IsLeftSchool = faker.Random.Number(2) == 0,
                 PasswordHash = Student.ComputeHash("password"), // dont overthink it
                 EmailAddress = "temp@somemail.com"
             };
@@ -56,9 +58,10 @@ namespace OgrenciAidatSistemi.Data.DBSeeders
             student.UpdatedAt = DateTime.Now;
             student.School.CreatedAt = DateTime.Now;
             student.School.UpdatedAt = DateTime.Now;
-            student.StudentId = _studentService.GenerateStudentId(student.School);
-            student.EmailAddress = student.StudentId + $"@mail.school.com";
-            student.ContactInfo.Email = student.EmailAddress;
+            // moved this to SeedEntityAsync because it needs school from db
+            // student.StudentId = _studentService.GenerateStudentId(student.School);
+            // student.EmailAddress = student.StudentId + $"@mail.school.com";
+            // student.ContactInfo.Email = student.EmailAddress;
 
             var school = student.School;
             PaymentPeriod paymentperiod = new PaymentPeriod
@@ -67,66 +70,70 @@ namespace OgrenciAidatSistemi.Data.DBSeeders
                 Student = student,
                 WorkYear = new WorkYear
                 {
-                    StartDate = DateTime.Now,
-                    EndDate = DateTime.Now + TimeSpan.FromDays(180), // 6 months
+                    StartDate = DateOnly.FromDateTime(DateTime.Today),
+                    EndDate = DateOnly.FromDateTime(DateTime.Today + TimeSpan.FromDays(180)), // 6 months
                     CreatedAt = DateTime.Now,
                     UpdatedAt = DateTime.Now,
                 },
                 CreatedAt = DateTime.Now,
                 UpdatedAt = DateTime.Now,
             };
-            Payment payment = paymentMethod switch
+            Payment payment = paymentStatus switch
             {
-                PaymentMethod.Cash
-                    => new CashPayment
+                PaymentStatus.Unpaid
+                    => new UnPaidPayment { Student = student, PaymentPeriod = paymentperiod, },
+                _
+                    => paymentMethod switch
                     {
-                        Student = student,
-                        CashierName = "cashier 1",
-                        ReceiptNumber = faker.Random.Number(1000, 9999).ToString(),
-                        ReceiptIssuer = "issuer 1",
-                        ReceiptDate = DateTime.UtcNow,
-                        PaymentPeriod = paymentperiod,
-                    },
-                PaymentMethod.Bank
-                    => new BankPayment
-                    {
-                        Student = student,
-                        PaymentPeriod = paymentperiod,
-                        BankName = "Bank1",
-                        AccountNumber = faker.Random.Number(1000, 9999).ToString(),
-                        BranchCode = faker.Random.Number(1000, 9999).ToString(),
-                        // iban length is 26
-                        IBAN = genIban(),
-                    },
-                PaymentMethod.DebitCard
-                    => new DebitCardPayment
-                    {
-                        Student = student,
-                        PaymentPeriod = paymentperiod,
-                        CardNumber = "1234 5678 1234 5678",
-                        CardHolderName = "cardholder 1",
-                        ExpiryDate = DateTime.UtcNow.ToString(),
-                        CVC = [.. faker.Random.Number(100, 999).ToString()],
-                    },
-                PaymentMethod.Check
-                    => new CheckPayment()
-                    {
-                        Student = student,
-                        PaymentPeriod = paymentperiod,
-                        CheckNumber = faker.Random.Number(1000, 9999).ToString(),
-                        BankName = "Bank1",
-                        BranchCode = faker.Random.Number(1000, 9999).ToString(),
-                    },
-                _ => throw new Exception("Invalid payment method"),
+                        PaymentMethod.Bank
+                            => new BankPayment
+                            {
+                                Student = student,
+                                PaymentPeriod = paymentperiod,
+                                BankName = "Bank1",
+                                AccountNumber = faker.Random.Number(1000, 9999).ToString(),
+                                BranchCode = faker.Random.Number(1000, 9999).ToString(),
+                                // iban length is 26
+                                IBAN = genIban(),
+                            },
+                        PaymentMethod.DebitCard
+                            => new DebitCardPayment
+                            {
+                                Student = student,
+                                PaymentPeriod = paymentperiod,
+                                CardNumber = "1234 5678 1234 5678",
+                                CardHolderName = "cardholder 1",
+                                ExpiryDate = DateTime.UtcNow.ToString(),
+                                CVC = [.. faker.Random.Number(100, 999).ToString()],
+                            },
+                        PaymentMethod.Check
+                            => new CheckPayment()
+                            {
+                                Student = student,
+                                PaymentPeriod = paymentperiod,
+                                CheckNumber = faker.Random.Number(1000, 9999).ToString(),
+                                BankName = "Bank1",
+                                BranchCode = faker.Random.Number(1000, 9999).ToString(),
+                            },
+                        _
+                            =>
+                            // reset payment method to cash if none selected
+                            new CashPayment
+                            {
+                                Student = student,
+                                CashierName = "cashier 1",
+                                ReceiptNumber = faker.Random.Number(1000, 9999).ToString(),
+                                ReceiptIssuer = "issuer 1",
+                                ReceiptDate = DateTime.UtcNow,
+                                PaymentPeriod = paymentperiod,
+                            },
+                    }
             };
             payment.CreatedAt = DateTime.Now;
             payment.UpdatedAt = DateTime.Now;
             payment.PaymentDate = DateTime.Now;
             payment.Amount = faker.Random.Number(100, 1000);
             // set status randomly  from PaymentStatus enum
-            payment.Status = (PaymentStatus)
-                faker.Random.Number(0, Enum.GetNames(typeof(PaymentStatus)).Length - 1);
-
             payment.Receipt = new(
                 path: null, // i will this nullability in below SeedEntityAsync()
                 name: "Receipt of " + payment.Student?.FirstName,
@@ -318,8 +325,14 @@ namespace OgrenciAidatSistemi.Data.DBSeeders
                 .FirstOrDefault();
             if (possible_school != null)
             {
-                entity.Student.StudentId = _studentService.GenerateStudentId(possible_school);
+                entity.Student.School = possible_school;
+
+                entity.School = possible_school;
             }
+
+            entity.Student.StudentId = _studentService.GenerateStudentId(entity.School);
+            entity.Student.EmailAddress = entity.Student.StudentId + $"@mail.school.com";
+            entity.Student.ContactInfo.Email = entity.Student.EmailAddress;
 
             if (_verboseLogging)
                 _logger.LogInformation(

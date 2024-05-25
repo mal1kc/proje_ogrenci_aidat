@@ -1,4 +1,4 @@
-@model IQueryable<Payment>
+@model IEnumerable<Payment>
 @{
     ViewData["Title"] = "Payments";
     var usrRole = ViewBag.UserRole;
@@ -99,7 +99,7 @@
         </tr>
     </thead>
     <tbody>
-        @foreach (var item in Model)
+        @foreach (Payment item in Model)
         {
             <tr>
                 <td>@Html.DisplayFor(modelItem => item.Id)</td>

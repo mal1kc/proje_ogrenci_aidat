@@ -18,9 +18,9 @@ namespace OgrenciAidatSistemi.Migrations
                     Id = table
                         .Column<int>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
+                    Name = table.Column<string>(type: "TEXT", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "TEXT", nullable: false),
-                    UpdatedAt = table.Column<DateTime>(type: "TEXT", nullable: false),
-                    Name = table.Column<string>(type: "TEXT", nullable: false)
+                    UpdatedAt = table.Column<DateTime>(type: "TEXT", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -37,7 +37,7 @@ namespace OgrenciAidatSistemi.Migrations
                         .Annotation("Sqlite:Autoincrement", true),
                     PasswordHash = table.Column<string>(type: "TEXT", nullable: false),
                     EmailAddress = table.Column<string>(type: "TEXT", nullable: false),
-                    Role = table.Column<int>(type: "INTEGER", nullable: false, defaultValue: 0),
+                    Role = table.Column<int>(type: "INTEGER", nullable: false, defaultValue: 1),
                     FirstName = table.Column<string>(type: "TEXT", nullable: false),
                     LastName = table.Column<string>(type: "TEXT", nullable: true),
                     CreatedAt = table.Column<DateTime>(type: "TEXT", nullable: false),
@@ -56,11 +56,11 @@ namespace OgrenciAidatSistemi.Migrations
                     Id = table
                         .Column<int>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
-                    CreatedAt = table.Column<DateTime>(type: "TEXT", nullable: false),
-                    UpdatedAt = table.Column<DateTime>(type: "TEXT", nullable: false),
                     Name = table.Column<string>(type: "TEXT", nullable: false),
                     SchoolId = table.Column<int>(type: "INTEGER", nullable: true),
-                    GradeLevel = table.Column<int>(type: "INTEGER", nullable: false)
+                    GradeLevel = table.Column<int>(type: "INTEGER", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "TEXT", nullable: false),
+                    UpdatedAt = table.Column<DateTime>(type: "TEXT", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -82,11 +82,11 @@ namespace OgrenciAidatSistemi.Migrations
                     Id = table
                         .Column<int>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
+                    StartDate = table.Column<DateOnly>(type: "TEXT", nullable: false),
+                    EndDate = table.Column<DateOnly>(type: "TEXT", nullable: false),
+                    SchoolId = table.Column<int>(type: "INTEGER", nullable: true),
                     CreatedAt = table.Column<DateTime>(type: "TEXT", nullable: false),
-                    UpdatedAt = table.Column<DateTime>(type: "TEXT", nullable: false),
-                    StartDate = table.Column<DateTime>(type: "TEXT", nullable: false),
-                    EndDate = table.Column<DateTime>(type: "TEXT", nullable: false),
-                    SchoolId = table.Column<int>(type: "INTEGER", nullable: true)
+                    UpdatedAt = table.Column<DateTime>(type: "TEXT", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -196,7 +196,7 @@ namespace OgrenciAidatSistemi.Migrations
                     StudentId = table.Column<string>(type: "TEXT", nullable: false),
                     SchoolId = table.Column<int>(type: "INTEGER", nullable: true),
                     GradLevel = table.Column<int>(type: "INTEGER", nullable: false),
-                    IsGraduated = table.Column<bool>(type: "INTEGER", nullable: false),
+                    IsLeftSchool = table.Column<bool>(type: "INTEGER", nullable: false),
                     ContactInfoId = table.Column<int>(type: "INTEGER", nullable: true)
                 },
                 constraints: table =>
@@ -260,14 +260,14 @@ namespace OgrenciAidatSistemi.Migrations
                         .Column<int>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
                     StudentId = table.Column<int>(type: "INTEGER", nullable: true),
-                    CreatedAt = table.Column<DateTime>(type: "TEXT", nullable: false),
-                    UpdatedAt = table.Column<DateTime>(type: "TEXT", nullable: false),
-                    StartDate = table.Column<DateTime>(type: "TEXT", nullable: false),
-                    EndDate = table.Column<DateTime>(type: "TEXT", nullable: false),
+                    StartDate = table.Column<DateOnly>(type: "TEXT", nullable: false),
+                    EndDate = table.Column<DateOnly>(type: "TEXT", nullable: false),
                     PerPaymentAmount = table.Column<decimal>(type: "TEXT", nullable: false),
                     TotalAmount = table.Column<decimal>(type: "TEXT", nullable: false),
                     WorkYearId = table.Column<int>(type: "INTEGER", nullable: true),
-                    Occurrence = table.Column<int>(type: "INTEGER", nullable: false)
+                    Occurrence = table.Column<int>(type: "INTEGER", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "TEXT", nullable: false),
+                    UpdatedAt = table.Column<DateTime>(type: "TEXT", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -296,8 +296,6 @@ namespace OgrenciAidatSistemi.Migrations
                     Id = table
                         .Column<int>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
-                    CreatedAt = table.Column<DateTime>(type: "TEXT", nullable: false),
-                    UpdatedAt = table.Column<DateTime>(type: "TEXT", nullable: false),
                     StudentId = table.Column<int>(type: "INTEGER", nullable: true),
                     PaymentDate = table.Column<DateTime>(type: "TEXT", nullable: false),
                     PaymentMethod = table.Column<int>(type: "INTEGER", nullable: false),
@@ -305,11 +303,6 @@ namespace OgrenciAidatSistemi.Migrations
                     Amount = table.Column<decimal>(type: "TEXT", nullable: false),
                     Status = table.Column<int>(type: "INTEGER", nullable: false),
                     SchoolId = table.Column<int>(type: "INTEGER", nullable: true),
-                    PaymentType = table.Column<string>(
-                        type: "TEXT",
-                        maxLength: 13,
-                        nullable: false
-                    ),
                     BankPayment_BankName = table.Column<string>(type: "TEXT", nullable: true),
                     AccountNumber = table.Column<string>(type: "TEXT", nullable: true),
                     BankPayment_BranchCode = table.Column<string>(type: "TEXT", nullable: true),
@@ -324,7 +317,9 @@ namespace OgrenciAidatSistemi.Migrations
                     CardNumber = table.Column<string>(type: "TEXT", nullable: true),
                     CardHolderName = table.Column<string>(type: "TEXT", nullable: true),
                     ExpiryDate = table.Column<string>(type: "TEXT", nullable: true),
-                    CVC = table.Column<string>(type: "TEXT", nullable: true)
+                    CVC = table.Column<string>(type: "TEXT", nullable: true),
+                    CreatedAt = table.Column<DateTime>(type: "TEXT", nullable: false),
+                    UpdatedAt = table.Column<DateTime>(type: "TEXT", nullable: false)
                 },
                 constraints: table =>
                 {

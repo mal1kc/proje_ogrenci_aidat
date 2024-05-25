@@ -10,6 +10,7 @@ namespace OgrenciAidatSistemi.Models
 {
     public enum PaymentMethod
     {
+        UnPaid, // when only not paid
         Cash,
         Bank,
         DebitCard,
@@ -22,7 +23,6 @@ namespace OgrenciAidatSistemi.Models
         Unpaid,
 
         Verified,
-        Partial
     }
 
     public abstract class Payment : BaseDbModel, ISearchableModel<Payment>
@@ -101,9 +101,21 @@ namespace OgrenciAidatSistemi.Models
             UpdatedAt = DateTime.Now;
             PaymentDate = DateTime.Now;
             Status = PaymentStatus.Unpaid; // default status
+            PaymentMethod = PaymentMethod.UnPaid;
         }
 
         public abstract PaymentView ToView(bool ignoreBidirectNav = false);
+    }
+
+    // only for distinguishing between paid and non-paid payment
+    public abstract class PaidPayment : Payment
+    {
+        public PaidPayment()
+        {
+            Status = PaymentStatus.Paid;
+        }
+
+        public abstract PaidPayment Copy();
     }
 
     public abstract class PaymentView : IBaseDbModelView
@@ -119,7 +131,32 @@ namespace OgrenciAidatSistemi.Models
         public PaymentStatus? Status { get; set; }
     }
 
-    public class BankPayment : Payment
+    public class UnPaidPayment : Payment
+    {
+        public UnPaidPayment()
+        {
+            PaymentMethod = PaymentMethod.UnPaid;
+        }
+
+        public override PaymentView ToView(bool ignoreBidirectNav = false)
+        {
+            return new UnPaidPaymentView
+            {
+                Id = Id,
+                PaymentMethod = PaymentMethod,
+                Student = ignoreBidirectNav ? null : Student?.ToView(ignoreBidirectNav: true),
+                PaymentDate = PaymentDate,
+                Amount = Amount,
+                Status = Status,
+                CreatedAt = CreatedAt,
+                UpdatedAt = UpdatedAt
+            };
+        }
+    }
+
+    internal class UnPaidPaymentView : PaymentView { }
+
+    public class BankPayment : PaidPayment
     {
         public required string BankName { get; set; }
         public required string AccountNumber { get; set; }
@@ -150,6 +187,17 @@ namespace OgrenciAidatSistemi.Models
                 IBAN = IBAN
             };
         }
+
+        public override PaidPayment Copy()
+        {
+            return new BankPayment
+            {
+                BankName = BankName,
+                AccountNumber = AccountNumber,
+                BranchCode = BranchCode,
+                IBAN = IBAN
+            };
+        }
     }
 
     public class BankPaymentView : PaymentView
@@ -160,7 +208,7 @@ namespace OgrenciAidatSistemi.Models
         public string IBAN { get; set; }
     }
 
-    public class CheckPayment : Payment
+    public class CheckPayment : PaidPayment
     {
         public required string CheckNumber { get; set; }
         public required string BankName { get; set; }
@@ -188,6 +236,16 @@ namespace OgrenciAidatSistemi.Models
                 BranchCode = BranchCode
             };
         }
+
+        public override PaidPayment Copy()
+        {
+            return new CheckPayment
+            {
+                CheckNumber = CheckNumber,
+                BankName = BankName,
+                BranchCode = BranchCode
+            };
+        }
     }
 
     public class CheckPaymentView : PaymentView
@@ -202,7 +260,7 @@ namespace OgrenciAidatSistemi.Models
         }
     }
 
-    public class DebitCardPayment : Payment
+    public class DebitCardPayment : PaidPayment
     {
         public required string CardNumber { get; set; }
         public required string CardHolderName { get; set; }
@@ -233,6 +291,17 @@ namespace OgrenciAidatSistemi.Models
                 CVC = CVC
             };
         }
+
+        public override PaidPayment Copy()
+        {
+            return new DebitCardPayment
+            {
+                CardNumber = CardNumber,
+                CardHolderName = CardHolderName,
+                ExpiryDate = ExpiryDate,
+                CVC = CVC
+            };
+        }
     }
 
     public class DebitCardPaymentView : PaymentView
@@ -248,7 +317,7 @@ namespace OgrenciAidatSistemi.Models
         }
     }
 
-    public class CashPayment : Payment
+    public class CashPayment : PaidPayment
     {
         public required string CashierName { get; set; }
         public required string ReceiptNumber { get; set; }
@@ -272,6 +341,17 @@ namespace OgrenciAidatSistemi.Models
                 Status = Status,
                 CreatedAt = CreatedAt,
                 UpdatedAt = UpdatedAt,
+                CashierName = CashierName,
+                ReceiptNumber = ReceiptNumber,
+                ReceiptDate = ReceiptDate,
+                ReceiptIssuer = ReceiptIssuer
+            };
+        }
+
+        public override PaidPayment Copy()
+        {
+            return new CashPayment
+            {
                 CashierName = CashierName,
                 ReceiptNumber = ReceiptNumber,
                 ReceiptDate = ReceiptDate,
@@ -312,7 +392,6 @@ namespace OgrenciAidatSistemi.Models
                 PaymentStatus.Paid => "Ödenmiş",
                 PaymentStatus.Unpaid => "Ödenmemiş",
                 PaymentStatus.Verified => "Doğrulanmış",
-                PaymentStatus.Partial => "Kısmi",
                 _ => "Bilinmiyor"
             };
         }
@@ -352,7 +431,8 @@ namespace OgrenciAidatSistemi.Models
             {
                 PaymentMethod.Cash,
                 new string[] { "CashierName", "ReceiptNumber", "ReceiptDate", "ReceiptIssuer" }
-            }
+            },
+            { PaymentMethod.UnPaid, Array.Empty<string>() }
         };
 
         public static string[] GetFields(PaymentMethod paymentMethod) => Fields[paymentMethod];
@@ -364,7 +444,8 @@ namespace OgrenciAidatSistemi.Models
                 { PaymentMethod.Bank, typeof(BankPayment) },
                 { PaymentMethod.Check, typeof(CheckPayment) },
                 { PaymentMethod.DebitCard, typeof(DebitCardPayment) },
-                { PaymentMethod.Cash, typeof(CashPayment) }
+                { PaymentMethod.Cash, typeof(CashPayment) },
+                { PaymentMethod.UnPaid, typeof(UnPaidPayment) }
             };
 
             var truthFlags = new List<bool>();

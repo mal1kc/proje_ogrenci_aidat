@@ -15,15 +15,14 @@
 
 - [X] studentId generator
 - [x] add Message tempData for all views
-- [ ] add payment verification panel for sch admin
-- [ ] add payment panel for student
-- [ ] add workYear management panel for sch admin
-- [ ] add paymentperiod management panel for sch admin (create, edit, delete) ++
+- [ ] add payment verification panel for sch admin (implement)
+- [ ] add payment panel for student (improve usability)
+- [ ] add workYear management panel for sch admin (improve usability)
+- [ ] add paymentperiod management panel for sch admin ( improve usability)
 - [ ] add all models to delete , edit , create panel for site admin (some of them must be debug only) +++
 
     - [ ] payment
-        - [ ] edit (only school admin (only payment verification))
-        - [ ] create (only student)
+        - [ ] edit (makePayment , verify payment)
         - [x] detail
         - [x] delete (only site admin (debug only))
         - [x] list
@@ -71,17 +70,20 @@
         - [X] list
     - [X] grade not necessary
 
-- [ ] add services for retrieving related data for students and school admins - (studentService, schoolAdminService)
-- [ ] crete paymentPeriod service for auto create payments for students and save to db 
+- [X] crete paymentPeriod service for auto create payments for students and save to db
 - [X] try to add school id as claim for school admin and student , and for site admin it should be 0 or null
 - [X] rewrite ModelQueryableHelper to use predefined search methods and sort methods
-- [ ] implement exportService for exporting data to excel or similar formats
+- [x] implement exportService for exporting data to excel or similar formats
 - [x] change errorController pages (404, 500, 403, 401) 
     - [ ] add error handling for all controllers and services
 
-- [ ] improve look by adding dark/light color-mode
+- [x] improve look by adding dark/light color-mode
 
 - [X] remove _dependentSeeder , seeder not improved unless they break
+
+- [ ] fix signing redirection // Account/login -> Home/index
+
+- [ ] remove admin layout and use only _layout (not useful)
 
 ## todo , maybe
 

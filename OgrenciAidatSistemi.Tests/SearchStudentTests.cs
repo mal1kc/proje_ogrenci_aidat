@@ -8,11 +8,11 @@ using OgrenciAidatSistemi.Services;
 
 namespace OgrenciAidatSistemi.Tests
 {
-    public class TestSearchStudent : IDisposable
+    public class SearchStudentTests : IDisposable
     {
         private readonly DbContextOptions<AppDbContext> _options;
 
-        private readonly ILogger<TestSearchStudent> _logger;
+        private readonly ILogger<SearchStudentTests> _logger;
 
         private readonly IConfiguration _configuration;
 
@@ -27,7 +27,7 @@ namespace OgrenciAidatSistemi.Tests
 
         private readonly QueryableModelHelper<Student> studentSearchHelper;
 
-        public TestSearchStudent()
+        public SearchStudentTests()
         {
             // Use an in-memory database for testing
 
@@ -88,7 +88,7 @@ namespace OgrenciAidatSistemi.Tests
         }
 
         // TODO: override finalizer only if 'Dispose(bool disposing)' has code to free unmanaged resources
-        ~TestSearchStudent()
+        ~SearchStudentTests()
         {
             // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
             Dispose(disposing: false);

@@ -25,6 +25,8 @@ namespace OgrenciAidatSistemi.Data
 
         public DbSet<CheckPayment> CheckPayments { get; set; }
 
+        public DbSet<UnPaidPayment> NonPaidPayments { get; set; }
+
         public DbSet<WorkYear> WorkYears { get; set; }
         public DbSet<Grade> Grades { get; set; }
 
@@ -42,10 +44,11 @@ namespace OgrenciAidatSistemi.Data
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<CashPayment>().HasBaseType<Payment>();
-            modelBuilder.Entity<BankPayment>().HasBaseType<Payment>();
-            modelBuilder.Entity<CheckPayment>().HasBaseType<Payment>();
-            modelBuilder.Entity<DebitCardPayment>().HasBaseType<Payment>();
+            modelBuilder.Entity<CashPayment>().HasBaseType<PaidPayment>();
+            modelBuilder.Entity<BankPayment>().HasBaseType<PaidPayment>();
+            modelBuilder.Entity<CheckPayment>().HasBaseType<PaidPayment>();
+            modelBuilder.Entity<DebitCardPayment>().HasBaseType<PaidPayment>();
+            modelBuilder.Entity<UnPaidPayment>().HasBaseType<Payment>();
 
             modelBuilder
                 .Entity<User>()
@@ -73,21 +76,12 @@ namespace OgrenciAidatSistemi.Data
             // Configure discriminator column (if needed)
             modelBuilder
                 .Entity<Payment>()
-                .HasDiscriminator<string>("PaymentType")
-                .HasValue<CashPayment>("Cash")
-                .HasValue<BankPayment>("Bank")
-                .HasValue<DebitCardPayment>("DebitCard")
-                .HasValue<CheckPayment>("Check");
-
-            // Student and SchoolAdmin are User but they differ from SiteAdmin
-            // SA has username they don't
-
-            /* modelBuilder */
-            /*     .Entity<User>() */
-            /*     .HasDiscriminator<string>("UserType") */
-            /*     .HasValue<Student>("Student") */
-            /*     .HasValue<SchoolAdmin>("SchoolAdmin") */
-            /*     .HasValue<SiteAdmin>("SiteAdmin"); */
+                .HasDiscriminator<PaymentMethod>("PaymentMethod")
+                .HasValue<CashPayment>(PaymentMethod.Cash)
+                .HasValue<BankPayment>(PaymentMethod.Bank)
+                .HasValue<DebitCardPayment>(PaymentMethod.DebitCard)
+                .HasValue<CheckPayment>(PaymentMethod.Check)
+                .HasValue<UnPaidPayment>(PaymentMethod.UnPaid);
 
             modelBuilder.Entity<User>().Property(u => u.Role).HasConversion<int>();
 
@@ -107,6 +101,7 @@ namespace OgrenciAidatSistemi.Data
             modelBuilder.Entity<Payment>().HasOne(p => p.Student);
             modelBuilder.Entity<Payment>().HasOne(p => p.PaymentPeriod).WithMany(pp => pp.Payments);
             modelBuilder.Entity<Payment>().HasOne(p => p.Receipt);
+
             modelBuilder
                 .Entity<Payment>()
                 .HasOne(p => p.Student)
@@ -117,17 +112,14 @@ namespace OgrenciAidatSistemi.Data
                 .Entity<WorkYear>()
                 .HasMany(pp => pp.PaymentPeriods)
                 .WithOne(pp => pp.WorkYear);
+
             modelBuilder.Entity<WorkYear>().HasOne(wy => wy.School).WithMany(s => s.WorkYears);
 
             modelBuilder.Entity<PaymentPeriod>().HasOne(pp => pp.WorkYear);
 
             modelBuilder.Entity<Receipt>().HasIndex(fp => fp.Path).IsUnique();
 
-            modelBuilder.Entity<ContactInfo>().Property(c => c.Email).IsRequired();
-
-            // delete rules
-
-            // if school deleted delete all related models to school
+            // delete all related entities when deleting a school
             modelBuilder
                 .Entity<School>()
                 .HasMany(s => s.Students)
