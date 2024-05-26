@@ -61,7 +61,9 @@ internal class Program
         {
             IConfiguration configuration = app.Configuration;
 
-            AppDbContext? ctx = app.Services.CreateScope().ServiceProvider.GetService<AppDbContext>();
+            AppDbContext? ctx = app
+                .Services.CreateScope()
+                .ServiceProvider.GetService<AppDbContext>();
             _ = ctx?.Database.EnsureCreated();
 
             if (!app.Environment.IsDevelopment())
@@ -98,40 +100,42 @@ internal class Program
 
                 if (configuration.GetSection("SeedData").GetValue("SeedDB", true) == true)
                 {
-                    var _verbs = configuration.GetSection("SeedData").GetValue("VerboseLogging", false);
+                    var _verbs = configuration
+                        .GetSection("SeedData")
+                        .GetValue("VerboseLogging", false);
                     Console.WriteLine("Seeding Database");
 
                     List<IDbSeeder<AppDbContext>> DBseeders =
                     [
                         new SchoolAdminDBSeeder(
-                    context: ctx,
-                    configuration: configuration,
-                    logger: logger,
-                    maxSeedCount: 10,
-                    randomSeed: true
-                ),
-                new SchoolDBSeeder(
-                    context: ctx,
-                    configuration: configuration,
-                    logger: logger,
-                    maxSeedCount: 10,
-                    randomSeed: true
-                ),
-                new StudentDBSeeder(
-                    context: ctx,
-                    configuration: configuration,
-                    logger: logger,
-                    studentService: studentService,
-                    maxSeedCount: 40,
-                    randomSeed: true
-                ),
-                new PaymentDBSeeder(
-                    context: ctx,
-                    configuration: configuration,
-                    logger: logger,
-                    studentService: studentService,
-                    randomSeed: true
-                )
+                            context: ctx,
+                            configuration: configuration,
+                            logger: logger,
+                            maxSeedCount: 10,
+                            randomSeed: true
+                        ),
+                        new SchoolDBSeeder(
+                            context: ctx,
+                            configuration: configuration,
+                            logger: logger,
+                            maxSeedCount: 10,
+                            randomSeed: true
+                        ),
+                        new StudentDBSeeder(
+                            context: ctx,
+                            configuration: configuration,
+                            logger: logger,
+                            studentService: studentService,
+                            maxSeedCount: 40,
+                            randomSeed: true
+                        ),
+                        new PaymentDBSeeder(
+                            context: ctx,
+                            configuration: configuration,
+                            logger: logger,
+                            studentService: studentService,
+                            randomSeed: true
+                        )
                     ];
                     if (_verbs)
                     {
@@ -172,7 +176,10 @@ internal class Program
             _ = app.UseSession();
             _ = app.UseAuthentication();
             _ = app.UseAuthorization();
-            _ = app.MapControllerRoute(name: "default", pattern: "{controller=Home}/{action=Index}/{id?}");
+            _ = app.MapControllerRoute(
+                name: "default",
+                pattern: "{controller=Home}/{action=Index}/{id?}"
+            );
             _ = app.UseCors(builder => builder.AllowAnyOrigin());
 
             _ = app.UseEndpoints(endpoints =>
@@ -188,7 +195,7 @@ internal class Program
 #if DEBUG
             "appsettings.Development.json",
 #else
-    "appsettings.json",
+            "appsettings.json",
 #endif
             optional: false,
             reloadOnChange: false

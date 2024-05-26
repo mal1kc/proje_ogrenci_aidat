@@ -30,7 +30,7 @@ namespace OgrenciAidatSistemi.Tests
 
         private readonly HashSet<PaymentPeriod> _paymentPeriods;
 
-        private readonly HashSet<NonPaidPayment> _nonPaidPayments;
+        private readonly HashSet<UnPaidPayment> _unPaidPayments;
 
         private readonly StudentService _studentService;
 
@@ -69,7 +69,7 @@ namespace OgrenciAidatSistemi.Tests
 
             _paidseedData ??= [];
             _paymentPeriods = [];
-            _nonPaidPayments = [];
+            _unPaidPayments = [];
 
             var seedData = _paymentDBSeeder
                 .GetSeedData()
@@ -141,7 +141,7 @@ namespace OgrenciAidatSistemi.Tests
                 var amount =
                     _paidseedData.FirstOrDefault(p => p.PaymentPeriod == paymentPeriod)?.Amount
                     ?? paymentPeriod.PerPaymentAmount;
-                NonPaidPayment payment =
+                UnPaidPayment payment =
                     new()
                     {
                         Amount = amount,
@@ -151,7 +151,7 @@ namespace OgrenciAidatSistemi.Tests
                 try
                 {
                     _dbContext.Payments.Add(payment);
-                    _nonPaidPayments.Add(payment);
+                    _unPaidPayments.Add(payment);
                 }
                 catch (Exception e)
                 {
@@ -169,7 +169,7 @@ namespace OgrenciAidatSistemi.Tests
             {
                 var paymentPeriod = paidPayment.PaymentPeriod;
                 var nonPaidPayment =
-                    _nonPaidPayments.FirstOrDefault(p => p.PaymentPeriod == paymentPeriod)
+                    _unPaidPayments.FirstOrDefault(p => p.PaymentPeriod == paymentPeriod)
                     ?? throw new Exception("non-paid payment not found");
 
                 bool result = await _paymentService.MakePayment(nonPaidPayment, paidPayment);
@@ -194,7 +194,7 @@ namespace OgrenciAidatSistemi.Tests
             {
                 var paymentPeriod = invalidPayment.PaymentPeriod;
                 var nonPaidPayment =
-                    _nonPaidPayments.FirstOrDefault(p => p.PaymentPeriod == paymentPeriod)
+                    _unPaidPayments.FirstOrDefault(p => p.PaymentPeriod == paymentPeriod)
                     ?? throw new Exception("non-paid payment not found");
 
                 bool result = await _paymentService.MakePayment(nonPaidPayment, invalidPayment);

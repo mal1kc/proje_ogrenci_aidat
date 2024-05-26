@@ -25,7 +25,7 @@ namespace OgrenciAidatSistemi.Data
 
         public DbSet<CheckPayment> CheckPayments { get; set; }
 
-        public DbSet<UnPaidPayment> NonPaidPayments { get; set; }
+        public DbSet<UnPaidPayment> UnPaidPayments { get; set; }
 
         public DbSet<WorkYear> WorkYears { get; set; }
         public DbSet<Grade> Grades { get; set; }
