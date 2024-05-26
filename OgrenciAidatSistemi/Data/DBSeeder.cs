@@ -1,5 +1,4 @@
 using Microsoft.EntityFrameworkCore;
-using OgrenciAidatSistemi.Models.Interfaces;
 
 namespace OgrenciAidatSistemi.Data
 {

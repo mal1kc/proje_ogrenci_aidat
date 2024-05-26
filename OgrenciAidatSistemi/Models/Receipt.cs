@@ -1,4 +1,3 @@
-using System.Security.Cryptography;
 using OgrenciAidatSistemi.Models.Interfaces;
 
 namespace OgrenciAidatSistemi.Models

@@ -1,6 +1,5 @@
 using Bogus;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.VisualBasic;
 using OgrenciAidatSistemi.Models;
 using OgrenciAidatSistemi.Services;
 #pragma warning disable CS8604 // Possible null reference argument.

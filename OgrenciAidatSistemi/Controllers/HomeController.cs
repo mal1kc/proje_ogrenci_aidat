@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using DocumentFormat.OpenXml.Drawing;
 using Microsoft.AspNetCore.Mvc;
 using OgrenciAidatSistemi.Models;
 
@@ -33,5 +34,21 @@ namespace OgrenciAidatSistemi.Controllers
                 }
             );
         }
+
+        public IActionResult Login()
+        {
+            return View();
+        }
+
+        public IActionResult SignIn()
+        {
+            return RedirectToAction("Login");
+        }
+
+        public IActionResult Contact()
+        {
+            return View();
+        }
+        
     }
 }

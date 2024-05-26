@@ -17,6 +17,7 @@ internal class Program
                 .AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
                 .AddCookie(options =>
                 {
+                    options.LoginPath = "/Home/Login";
                     options.Cookie.Name = Constants.AuthenticationCookieName;
                     options.AccessDeniedPath = Constants.AuthenticationAccessDeniedPath;
                     options.Events = new CookieAuthenticationEvents

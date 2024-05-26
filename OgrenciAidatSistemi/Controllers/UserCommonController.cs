@@ -1,6 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
 using OgrenciAidatSistemi.Data;
-using OgrenciAidatSistemi.Models;
 using OgrenciAidatSistemi.Services;
 
 namespace OgrenciAidatSistemi.Controllers

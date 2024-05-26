@@ -1,6 +1,5 @@
 using Microsoft.EntityFrameworkCore;
 using OgrenciAidatSistemi.Models;
-using OgrenciAidatSistemi.Models.Interfaces;
 #pragma warning disable CS8604 // Possible null reference argument.
 namespace OgrenciAidatSistemi.Data
 {

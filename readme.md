@@ -39,6 +39,7 @@
         - [X] detail
         - [x] list  
     - [ ] student  (only school admin, site admin)
+        - [ ] myProfile
         - [ ] edit
         - [X] create
         - [X] delete
@@ -51,6 +52,7 @@
         - [x] detail
         - [x] list (only site admin)
     - [ ] schoolAdmin (only school admin, site admin)
+        - [ ] myProfile
         - [ ] edit
         - [x] create 
         - [x] delete
@@ -81,9 +83,9 @@
 
 - [X] remove _dependentSeeder , seeder not improved unless they break
 
-- [ ] fix signing redirection // Account/login -> Home/index
+- [X] fix signing redirection // Account/login -> Home/index
 
-- [ ] remove admin layout and use only _layout (not useful)
+- [X] remove admin layout and use only _layout (not useful)
 
 ## todo , maybe
 

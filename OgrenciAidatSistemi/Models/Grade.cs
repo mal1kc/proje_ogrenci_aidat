@@ -1,4 +1,3 @@
-using System.Linq.Expressions;
 using OgrenciAidatSistemi.Models.Interfaces;
 
 namespace OgrenciAidatSistemi.Models

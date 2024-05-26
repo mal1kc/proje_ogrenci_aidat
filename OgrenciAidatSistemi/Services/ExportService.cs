@@ -1,18 +1,14 @@
 using System.Data;
 using System.Reflection;
 using ClosedXML.Excel;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using OgrenciAidatSistemi.Data;
 using OgrenciAidatSistemi.Helpers;
-using OgrenciAidatSistemi.Models;
-using OgrenciAidatSistemi.Models.Interfaces;
 
 namespace OgrenciAidatSistemi.Services
 {
-    public class ExportService(DbContext context, ILogger<ExportService> logger)
+    public class ExportService(AppDbContext context, ILogger<ExportService> logger)
     {
-        private readonly DbContext _context = context;
+        private readonly AppDbContext _context = context;
         private readonly ILogger _logger = logger;
 
         public static DataTable ToDataTable<T>(IEnumerable<T> items)

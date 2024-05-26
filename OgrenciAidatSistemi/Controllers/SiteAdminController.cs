@@ -1,13 +1,10 @@
 using System.Data;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using OgrenciAidatSistemi.Data;
-using OgrenciAidatSistemi.Data.Extensions;
 using OgrenciAidatSistemi.Helpers;
 using OgrenciAidatSistemi.Helpers.Controller;
 using OgrenciAidatSistemi.Models;
-using OgrenciAidatSistemi.Models.Interfaces;
 using OgrenciAidatSistemi.Services;
 
 namespace OgrenciAidatSistemi.Controllers

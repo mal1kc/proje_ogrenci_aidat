@@ -1,4 +1,3 @@
-using Bogus;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -7,7 +6,6 @@ using OgrenciAidatSistemi.Data;
 using OgrenciAidatSistemi.Data.DBSeeders;
 using OgrenciAidatSistemi.Models;
 using OgrenciAidatSistemi.Services;
-using Xunit;
 
 namespace OgrenciAidatSistemi.Tests
 {

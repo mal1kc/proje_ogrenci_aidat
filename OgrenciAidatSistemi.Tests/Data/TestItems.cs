@@ -1,5 +1,3 @@
-using Microsoft.EntityFrameworkCore;
-
 namespace OgrenciAidatSistemi.Tests.Data
 {
     public class TestItem

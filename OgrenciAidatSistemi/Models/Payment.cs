@@ -1,7 +1,3 @@
-using System.Linq.Expressions;
-using System.Text.Json;
-using System.Text.Json.Serialization;
-using OgrenciAidatSistemi.Models;
 using OgrenciAidatSistemi.Models.Interfaces;
 
 #pragma warning disable CS8618 // Non-nullable field is uninitialized. Consider declaring as nullable.

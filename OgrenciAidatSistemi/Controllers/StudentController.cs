@@ -4,7 +4,6 @@ using Microsoft.EntityFrameworkCore;
 using OgrenciAidatSistemi.Data;
 using OgrenciAidatSistemi.Helpers;
 using OgrenciAidatSistemi.Models;
-using OgrenciAidatSistemi.Models.Interfaces;
 using OgrenciAidatSistemi.Services;
 
 namespace OgrenciAidatSistemi.Controllers

@@ -8,6 +8,16 @@
 			"group": "build",
 			"problemMatcher": [],
 			"label": "dotnet: build ${workspaceFolder}/OgrenciAidatSistemi/OgrenciAidatSistemi.csproj"
+		},
+		{
+			"type": "shell",
+			"label": "dotnet: watch ${workspaceFolder}/OgrenciAidatSistemi/OgrenciAidatSistemi.csproj",
+			"command": "dotnet watch --project ${workspaceFolder}/OgrenciAidatSistemi/OgrenciAidatSistemi.csproj run",
+			"group": {
+				"kind": "build",
+				"isDefault": true
+			},
+			"problemMatcher": [],
 		}
 	]
 }

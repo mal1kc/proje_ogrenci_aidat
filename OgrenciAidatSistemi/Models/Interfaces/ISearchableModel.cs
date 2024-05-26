@@ -1,5 +1,4 @@
 using System.Linq.Expressions;
-using OgrenciAidatSistemi.Helpers;
 
 namespace OgrenciAidatSistemi.Models.Interfaces
 {

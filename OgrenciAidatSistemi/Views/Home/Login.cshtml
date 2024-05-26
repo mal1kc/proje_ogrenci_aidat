@@ -1,0 +1,26 @@
+@{
+    ViewData["Title"] = "Login";
+}
+
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <h2 class="text-center">Sign In</h2>
+            <div class="d-flex flex-column align-items-center form-group mt-3">
+                <a asp-action="SignIn" asp-controller="SchoolAdmin" class="btn btn-primary btn-wide mb-3">School Admin Sign In</a>
+                <a asp-action="SignIn" asp-controller="Student" class="btn btn-primary btn-wide mb-3">Student Sign In</a>
+                <a asp-action="Index" asp-controller="Home" class="btn btn-secondary btn-wide mb-1">Go to Home</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
+
+<style>
+.btn-wide {
+    width: 100%;
+}
+</style>
