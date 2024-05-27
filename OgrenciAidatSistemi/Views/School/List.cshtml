@@ -1,69 +1,50 @@
 @model IEnumerable<School>
 @{
+    Layout = "~/Views/Shared/_ListLayout.cshtml";
     ViewData["Title"] = "List of Schools";
+    ViewBag.AspAction = "List";
+    ViewBag.AspController = "School";
 }
 
-<h2>List of Schools <a asp-action="Create" class="btn btn-sm btn-primary float-end">Create New</a></h2>
+@section CreateNewWithTitle
 
-<form asp-action="List" method="get">
-    <div class="row">
-        <div class="col-md-6">
-            <div class="input-group mb-3">
-                <span class="input-group-text">Search:</span>
-                <input type="text" class="form-control" name="searchString" value="@ViewData["CurrentSearchString"]" />
-            </div>
-        </div>
-        <div class="col-md-6">
-            <div class="input-group mb-3">
-                <span class="input-group-text">in</span>
-                <select class="form-select" name="searchField">
+{
+    <h2>@ViewData["Title"]<a asp-action="Create" class="btn btn-sm btn-primary float-end">Create New</a></h2>
+}
+@section SearchFormOptions {
+    <select class="form-select" name="searchField">
 
-                    @if (ViewData["CurrentSearchField"] != null)
+        @if (ViewData["CurrentSearchField"] != null)
+        {
+            <option value='@ViewData["CurrentSearchField"]' selected>@ViewData["CurrentSearchField"]</option>
+        }
+        <option value="">All</option>
+        <option value="id">Id</option>
+        <option value="name">Name</option>
+        <!-- Add more search fields as needed -->
+    </select>
+}
 
-
-
-                    {
-                        <option value='@ViewData["CurrentSearchField"]' selected>@ViewData["CurrentSearchField"]</option>
-                    }
-                    <option value="">All</option>
-                    <option value="id">Id</option>
-                    <option value="name">Name</option>
-                    <!-- Add more search fields as needed -->
-                </select>
-                <button type="submit" class="btn btn-primary">Search</button>
-            </div>
-        </div>
-    </div>
-
-</form>
-
-<table class="table">
+@section Listings {
     <thead>
         <tr>
             <th>
-                <a asp-action="List" asp-route-sortOrder="@ViewData["IdSortParam"]"
-                    asp-route-searchString="@ViewData["CurrentSearchString"]">Id</a>
+                <list-page-link-item class="btn-sort" asp-action="List" sort-order="@ViewData["IdSortOrder"]">Id</list-page-link-item>
             </th>
             <th>
-                <a asp-action="List" asp-route-sortOrder="@ViewData["NameSortParam"]"
-                    asp-route-searchString="@ViewData["CurrentSearchString"]">Name</a>
+                <list-page-link-item class="btn-sort" asp-action="List" sort-order="@ViewData["NameSortOrder"]">Name</list-page-link-item>
             </th>
             <th>
-                <a asp-action="List" asp-route-sortOrder="@ViewData["CreatedAtSortParam"]"
-                    asp-route-searchString="@ViewData["CurrentSearchString"]">Created At</a>
+                <list-page-link-item class="btn-sort" asp-action="List" sort-order="@ViewData["CreatedAtSortOrder"]">Created At</list-page-link-item>
             </th>
             <th>
-                <a asp-action="List" asp-route-sortOrder="@ViewData["UpdatedAtSortParam"]"
-                    asp-route-searchString="@ViewData["CurrentSearchString"]">Updated At</a>
+                <list-page-link-item class="btn-sort" asp-action="List" sort-order="@ViewData["UpdatedAtSortOrder"]">Updated At</list-page-link-item>
             </th>
             <th></th> <!-- column for buttons edit | details | delete -->
         </tr>
     </thead>
     <tbody>
         @foreach (var item in Model)
-
-
-
         {
             <tr>
                 <td>
@@ -79,59 +60,21 @@
                     @Html.DisplayFor(modelItem => item.UpdatedAt)
                 </td>
                 <!-- Add more columns as needed -->
-
                 <td>
-                    <a href="@Url.Action("Edit", new { id = item.Id})">Edit</a>
-                    |
-                    <a href="@Url.Action("Details", new { id = item.Id})">Details</a>
-                    |
-                    <a href="@Url.Action("Delete", new { id = item.Id })">Delete</a>
+                    <div class="btn-group">
+                        <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-primary " title="Edit">
+                            &#9998;
+                        </a>
+                        <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-info " title="Details">
+                            &#128269;
+                        </a>
+                        <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-sm btn-danger " title="Delete">
+                            &#10006;
+                        </a>
+                    </div>
                 </td>
 
             </tr>
         }
     </tbody>
-</table>
-
-<nav aria-label="Page navigation">
-    <ul class="pagination">
-        @if (ViewData["CurrentPageIndex"] != null)
-
-
-
-        {
-
-
-
-            int currentPageIndex = (int)ViewData["CurrentPageIndex"];
-
-
-
-            int totalPages = (int)ViewData["TotalPages"];
-
-            <li class="page-item @(currentPageIndex <= 1 ? "disabled" : "")">
-                <a class="page-link" asp-action="List" asp-route-pageIndex="1">First</a>
-            </li>
-            <li class="page-item @(currentPageIndex <= 1 ? "disabled" : "")">
-                <a class="page-link" asp-action="List" asp-route-pageIndex="@(currentPageIndex - 1)">Previous</a>
-            </li>
-
-            @for (int i = 1; i <= totalPages; i++)
-
-
-
-            {
-                <li class="page-item @(i == currentPageIndex ? "active" : "")">
-                    <a class="page-link" asp-action="List" asp-route-pageIndex="@i">@i</a>
-                </li>
-            }
-
-            <li class="page-item @(currentPageIndex >= totalPages ? "disabled" : "")">
-                <a class="page-link" asp-action="List" asp-route-pageIndex="@(currentPageIndex + 1)">Next</a>
-            </li>
-            <li class="page-item @(currentPageIndex >= totalPages ? "disabled" : "")">
-                <a class="page-link" asp-action="List" asp-route-pageIndex="@totalPages">Last</a>
-            </li>
-        }
-    </ul>
-</nav>
+}

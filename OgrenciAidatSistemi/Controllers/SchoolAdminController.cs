@@ -8,24 +8,17 @@ using OgrenciAidatSistemi.Services;
 
 namespace OgrenciAidatSistemi.Controllers
 {
-    public class SchoolAdminController : Controller
+    public class SchoolAdminController(
+        ILogger<SchoolAdminController> logger,
+        AppDbContext dbContext,
+        UserService userService
+    ) : Controller
     {
-        private readonly ILogger<SchoolAdminController> _logger;
+        private readonly ILogger<SchoolAdminController> _logger = logger;
 
-        private readonly AppDbContext _dbContext;
+        private readonly AppDbContext _dbContext = dbContext;
 
-        private readonly UserService _userService;
-
-        public SchoolAdminController(
-            ILogger<SchoolAdminController> logger,
-            AppDbContext dbContext,
-            UserService userService
-        )
-        {
-            _logger = logger;
-            _dbContext = dbContext;
-            _userService = userService;
-        }
+        private readonly UserService _userService = userService;
 
         [Authorize(Roles = Configurations.Constants.userRoles.SchoolAdmin)]
         public IActionResult Index()

@@ -1,6 +1,9 @@
 @model IQueryable<Payment>
 @{
     ViewData["Title"] = "Payments";
+    Layout = "~/Views/Shared/_ListLayout.cshtml";
+    ViewBag.AspAction = "List";
+    ViewBag.AspController = "Payment";
     var usrRole = ViewBag.UserRole;
     if (usrRole == null)
     {
@@ -13,174 +16,135 @@
 
 <h2>@ViewData["Title"] <a asp-action="Create" class="btn btn-sm btn-primary float-end">Create New</a></h2>
 
-<form asp-action="List" method="get">
-    <div class="row">
-        <div class="col-md-6">
-            <div class="input-group mb-3">
-                <span class="input-group-text">Search:</span>
-                <input type="text" class="form-control" name="searchString" value="@ViewData["CurrentSearchString"]" />
-            </div>
-        </div>
-        <div class="col-md-6">
-            <div class="input-group mb-3">
-                <span class="input-group-text">in</span>
-                <select class="form-select" name="searchField">
 
-                    @if (ViewData["CurrentSearchField"] != null)
-                    {
-                        <option value='@ViewData["CurrentSearchField"]' selected>@ViewData["CurrentSearchField"]</option>
-                    }
-                    <option value="">All</option>
-                    <option value="Id">Payment Id</option>
-                    <option value="PaymentDate">Payment Date</option>
-                    <option value="PaymentMethod">Payment Method</option>
-                    <option value="PaymentPeriodId">Payment Period</option>
-                    <option value="Amount">Amount</option>
-                    <option value="Status">Status</option>
-                    <!-- Add more search fields as needed -->
-                </select>
-                <button type="submit" class="btn btn-primary">Search</button>
-            </div>
-        </div>
-    </div>
-
-</form>
-
-<table class="table">
-    <thead>
-        <tr>
-            <th>
-                <a asp-action="List" asp-route-sortOrder="@(ViewData["IdSortParam"]?.ToString())"
-                    asp-route-searchString="@ViewData["CurrentSearchString"]?.ToString()">Payment Id</a>
-            </th>
-            @if (showStudentIdColumn)
-            {
-                <th>
-                    <a asp-action="List" asp-route-sortOrder="@(ViewData["StudentIdSortParam"]?.ToString())"
-                        asp-route-searchString="@ViewData["CurrentSearchString"]?.ToString()">Student Id</a>
-                </th>
-            }
-            @if (showSchoolIdColumn)
-            {
-                <th>
-                    <a asp-action="List" asp-route-sortOrder="@(ViewData["SchoolIdSortParam"]?.ToString())"
-                        asp-route-searchString="@ViewData["CurrentSearchString"]?.ToString()">School</a>
-                </th>
-            }
-            <th>
-                <a asp-action="List" asp-route-sortOrder="@(ViewData["DateSortParam"]?.ToString())"
-                    asp-route-searchString="@ViewData["CurrentSearchString"]?.ToString()">Payment Date</a>
-            </th>
-            <th>
-                <a asp-action="List" asp-route-sortOrder="@(ViewData["MethodSortParam"]?.ToString())"
-                    asp-route-searchString="@ViewData["CurrentSearchString"]?.ToString()">Payment Method</a>
-            </th>
-            <th>
-                <a asp-action="List" asp-route-sortOrder="@(ViewData["PeriodSortParam"]?.ToString())"
-                    asp-route-searchString="@ViewData["CurrentSearchString"]?.ToString()">Payment Period</a>
-            </th>
-            <th>
-                <a asp-action="List" asp-route-sortOrder="@(ViewData["AmountSortParam"]?.ToString())"
-                    asp-route-searchString="@ViewData["CurrentSearchString"]?.ToString()">Amount</a>
-            </th>
-            <th>
-                <a asp-action="List" asp-route-sortOrder="@(ViewData["StatusSortParam"]?.ToString())"
-                    asp-route-searchString="@ViewData["CurrentSearchString"]?.ToString()">Status</a>
-            </th>
-            @if (showIsVerifiedColumn)
-            {
-                <th>
-                    <a asp-action="List" asp-route-sortOrder="@(ViewData["IsVerifiedSortParam"]?.ToString())"
-                        asp-route-searchString="@ViewData["CurrentSearchString"]?.ToString()">Is Verified</a>
-                </th>
-            }
-            <th></th> <!-- column for buttons edit | details | delete -->
-            <!-- Add other fields as needed -->
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (Payment item in Model)
+@section SearchFormOptions {
+    <select class="form-select" name="searchField">
+        @if (ViewData["CurrentSearchField"] != null)
         {
-            <tr>
-                <td>@Html.DisplayFor(modelItem => item.Id)</td>
-                @if (showStudentIdColumn)
-                {
-                    @if (item.Student != null)
-                    {
-                        <td>@Html.DisplayFor(modelItem => item.Student.StudentId)</td>
-                    }
-                    else
-                    {
-                        <td> Student info not found</td>
-                    }
-                }
+            <option value='@ViewData["CurrentSearchField"]' selected>@ViewData["CurrentSearchField"]</option>
+        }
+        <option value="">All</option>
+        <option value="Id">Payment Id</option>
+        <option value="PaymentDate">Payment Date</option>
+        <option value="PaymentMethod">Payment Method</option>
+        <option value="PaymentPeriodId">Payment Period</option>
+        <option value="Amount">Amount</option>
+        <option value="Status">Status</option>
+        <!-- Add more search fields as needed -->
+    </select>
+}
 
+@section Listings {
+        <thead>
+            <tr>
+            <th>
+                <list-page-link-item class="btn-sort" asp-action="List" sort-order="@ViewData["IdSortOrder"]">Id</list-page-link-item>
+            </th>
+               @if (showStudentIdColumn)
+                {
+                    <th>
+                        <list-page-link-item class="btn-sort" asp-action="List" sort-order="@ViewData["StudentIdSortOrder"]">Student Id</list-page-link-item>
+                    </th>
+                }
                 @if (showSchoolIdColumn)
                 {
-                    @if (item.School != null)
-                    {
-                        <td>
-                        <partial name="_SchoolViewPartial" model="item.School.ToView(true)" />
-                        </td>
-                    }
-                    else
-                    {
-                        <td> School info not found</td>
-                    }
+                    <th>
+                        <list-page-link-item class="btn-sort" asp-action="List" sort-order="@ViewData["SchoolIdSortOrder"]">School</list-page-link-item>
+                    </th>
                 }
-
-
-                <td>@Html.DisplayFor(modelItem => item.PaymentDate)</td>
-                <td>@Html.DisplayFor(modelItem => item.PaymentMethod)</td>
-                <td>@Html.DisplayFor(modelItem => item.PaymentPeriodId)</td>
-                <td>@Html.DisplayFor(modelItem => item.Amount)</td>
-                <td>@Html.DisplayFor(modelItem => item.Status)</td>
+                <th>
+                    <list-page-link-item class="btn-sort" asp-action="List" sort-order="@ViewData["PaymentDateSortOrder"]">Payment Date</list-page-link-item>
+                </th>
+                <th>
+                    <list-page-link-item class="btn-sort" asp-action="List" sort-order="@ViewData["PaymentMethodSortOrder"]">
+                        Payment Method
+                    </list-page-link-item>
+                </th>
+                <th>
+                    <list-page-link-item class="btn-sort" asp-action="List" sort-order="@ViewData["PeriodSortOrder"]">Payment Period</list-page-link-item>
+                </th>
+                <th>
+                    <list-page-link-item class="btn-sort" asp-action="List" sort-order="@ViewData["AmountSortOrder"]">Amount</list-page-link-item>
+                </th>
+                <th>
+                    <list-page-link-item class="btn-sort" asp-action="List" sort-order="@ViewData["StatusSortOrder"]">Status</list-page-link-item>
+                </th>
                 @if (showIsVerifiedColumn)
                 {
-                    <td>@Html.DisplayFor(modelItem => item.IsVerified)</td>
+                    <th>
+                        <list-page-link-item class="btn-sort" asp-action="List" sort-order="@ViewData["IsVerifiedSortOrder"]">Is Verified</list-page-link-item>
+                    </th>
                 }
-                <td>
-                    <a href="@Url.Action("Edit", new { id = item.Id})">Edit</a>
-                    |
-                    <a href="@Url.Action("Details", new { id = item.Id})">Details</a>
-                    @if (ViewBag.IsDebug)
-                    {
-                        <a href="@Url.Action("Delete", new { id = item.Id })">Delete</a>
-                    }
-                </td>
+                <th></th> <!-- column for buttons edit | details | delete -->
                 <!-- Add other fields as needed -->
             </tr>
-        }
-    </tbody>
-</table>
-
-<nav aria-label="Page navigation">
-    <ul class="pagination">
-        @if (ViewData["CurrentPageIndex"] != null)
-        {
-            int currentPageIndex = (int)ViewData["CurrentPageIndex"];
-            int totalPages = (int)ViewData["TotalPages"];
-
-            <li class="page-item @(currentPageIndex <= 1 ? "disabled" : "")">
-                <a class="page-link" asp-action="List" asp-route-pageIndex="1">First</a>
-            </li>
-            <li class="page-item @(currentPageIndex <= 1 ? "disabled" : "")">
-                <a class="page-link" asp-action="List" asp-route-pageIndex="@(currentPageIndex - 1)">Previous</a>
-            </li>
-
-            @for (int i = 1; i <= totalPages; i++)
+        </thead>
+        <tbody>
+            @foreach (Payment item in Model)
             {
-                <li class="page-item @(i == currentPageIndex ? "active" : "")">
-                    <a class="page-link" asp-action="List" asp-route-pageIndex="@i">@i</a>
-                </li>
-            }
+                <tr>
+                    <td>@Html.DisplayFor(modelItem => item.Id)</td>
+                    @if (showStudentIdColumn)
+                    {
+                        @if (item.Student != null)
+                        {
+                            <td>@Html.DisplayFor(modelItem => item.Student.StudentId)</td>
+                        }
+                        else
+                        {
+                            <td> Student info not found</td>
+                        }
+                    }
 
-            <li class="page-item @(currentPageIndex >= totalPages ? "disabled" : "")">
-                <a class="page-link" asp-action="List" asp-route-pageIndex="@(currentPageIndex + 1)">Next</a>
-            </li>
-            <li class="page-item @(currentPageIndex >= totalPages ? "disabled" : "")">
-                <a class="page-link" asp-action="List" asp-route-pageIndex="@totalPages">Last</a>
-            </li>
-        }
-    </ul>
-</nav>
+                    @if (showSchoolIdColumn)
+                    {
+                        @if (item.School != null)
+                        {
+                            <td>
+                                <partial name="_SchoolViewPartial" model="item.School.ToView(true)" />
+                            </td>
+                        }
+                        else
+                        {
+                            <td> School info not found</td>
+                        }
+                    }
+
+
+                    <td>@Html.DisplayFor(modelItem => item.PaymentDate)</td>
+                    <td>@Html.DisplayFor(modelItem => item.PaymentMethod)</td>
+                    <td>@Html.DisplayFor(modelItem => item.PaymentPeriodId)</td>
+                    <td>@Html.DisplayFor(modelItem => item.Amount)</td>
+                    <td>@Html.DisplayFor(modelItem => item.Status)</td>
+                    @if (showIsVerifiedColumn)
+                    {
+                        <td>@Html.DisplayFor(modelItem => item.IsVerified)</td>
+                    }
+                    <td>
+                    <div class="d-flex d-md-inline-block justify-content-center">
+                        <a asp-action="Edit" asp-route-id="@item.Id"
+                        class="btn btn-sm btn-primary " 
+                          title="Edit">
+                            &#9998;                       
+                            </a>
+                        <a asp-action="Details" asp-route-id="@item.Id"
+                        class="btn btn-sm btn-info " 
+                         title="Details">
+                            &#8505;
+                        </a>
+
+                        @if (ViewBag.IsDebug)
+                        {
+                            <a asp-action="Delete" asp-route-id="@item.Id" 
+                            class="btn btn-sm btn-danger " 
+                             title="Delete">
+                                &#10006;
+                            </a>
+                        }
+                    </div>
+                    </td>
+                    <!-- Add other fields as needed -->
+                </tr>
+            }
+        </tbody>
+    }

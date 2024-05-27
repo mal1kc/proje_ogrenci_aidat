@@ -131,7 +131,7 @@ namespace OgrenciAidatSistemi.Helpers
             // validate sortOrder check '_' is exist and split it check field and type is valid
             string? sortField = null;
             string? sortType = null;
-            if (!string.IsNullOrEmpty(sortOrder) && sortOrder.Contains("_"))
+            if (!string.IsNullOrEmpty(sortOrder) && sortOrder.Contains('_'))
             {
                 var parts = sortOrder.Split('_');
                 if (parts.Length == 2)
@@ -156,12 +156,12 @@ namespace OgrenciAidatSistemi.Helpers
                 sortType = null;
             }
 
-            // generate ViewData {Field}SortParam for view
+            // generate ViewData {Field}SortOrder for view
             foreach (var field in _searchConfig.AllowedFieldsForSort)
             {
-                // example result: FirstNameSortParam = FirstName_desc or FirstName_asc
+                // example result: FirstNameSortOrder = FirstName_desc or FirstName_asc
 
-                ViewData[$"{field}SortParam"] =
+                ViewData[$"{field}SortOrder"] =
                     sortOrder == null
                         ? $"{field}_asc"
                         : field == sortField
@@ -172,9 +172,7 @@ namespace OgrenciAidatSistemi.Helpers
 
                 if (field == sortField)
                 {
-                    ViewData["CurrentSortField"] = field;
-                    ViewData["CurrentSortType"] = sortType;
-                    ViewData["CurrentSortOrder"] = sortOrder;
+                    ViewData["CurrentSortOrder"] = ViewData[$"{field}SortOrder"];
                 }
             }
 

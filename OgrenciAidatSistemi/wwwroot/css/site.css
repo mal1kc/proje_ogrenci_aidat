@@ -77,6 +77,64 @@ body {
   transform: scaleY(-1);
 }
 
+/* For WebKit browsers */
+::-webkit-scrollbar {
+  width: 10px;
+}
 
-/* apply color-mode */
+::-webkit-scrollbar-track {
+  background: var(--bs-body-bg);
+}
 
+::-webkit-scrollbar-thumb {
+  background: var(--bs-primary);
+  border-radius: 5px; /* Add this line */
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--bs-primary);
+}
+
+/* For Firefox */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--bs-primary) var(--bs-body-bg);
+}
+
+.navbar-toggler {
+    width: 60px; /* Adjust this value as needed */
+}
+
+#color-mode-toggle-btn{
+  position: fixed;
+  bottom: 1rem;
+  right: 1rem;
+  z-index: 1000;
+}
+
+.btn-sort {
+  font-size: 0.875rem;
+  padding: .25rem .5rem;
+  margin-right: 0.25rem;
+  margin-bottom: 0;
+  color: var(--bs-primary);
+  background-color: var(--bs-primary-bg);
+  border-color: var(--bs-border-color);
+  text-decoration: none; /* Remove underline */
+}
+
+.btn-sort:hover {
+  transform: rotate(180deg);
+  color: var(--bs-primary-text-emphasis);
+}
+
+.pagination-margin {
+    margin-bottom: 5rem; /* Adjust this value as needed */
+}
+
+th {
+  a {
+    cursor: pointer;
+  }
+  white-space: nowrap;
+}

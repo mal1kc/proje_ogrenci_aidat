@@ -112,9 +112,9 @@ namespace OgrenciAidatSistemi.Models
     public class SchoolAdminView : UserView
     {
         public SchoolView? School { get; set; }
-        public int SchoolId { get; set; }
+        public int? SchoolId { get; set; }
 
-        public ContactInfoView ContactInfo { get; set; }
+        public ContactInfoView? ContactInfo { get; set; }
 
         public override bool CheckUserExists(AppDbContext dbctx)
         {

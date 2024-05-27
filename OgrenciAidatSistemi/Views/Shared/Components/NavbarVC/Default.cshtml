@@ -1,23 +1,20 @@
 @{
    var User = ViewBag.User;
+    var stopwatch = new System.Diagnostics.Stopwatch();
 }
 @using OgrenciAidatSistemi.Configurations;
-<nav class="navbar navbar-expand-sm navbar-toggleable-sm border-bottom box-shadow mb-3">
-
+<nav class="navbar navbar-expand-md navbar-toggleable-sm border-bottom box-shadow mb-3">
     <div class="container-fluid">
-        <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">@Constants.AppName</a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
-                    aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-        <button class="navbar-toggler ms-auto" type="button" data-bs-toggle="collapse" data-bs-target="#collapseNavbar">
-            <span class="navbar-toggler-icon"></span>
-        </button>
+  <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">@Constants.AppName</a>
+  <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
+    aria-expanded="false" aria-label="Toggle navigation">
+    <span class="navbar-toggler-icon"></span>
+  </button>
 
 @{
   if (User != null)
   {
-        <div class="navbar-collapse collapse" id="collapseNavbar">
+  <div class="navbar-collapse collapse" id="collapseNavbar">
             <ul class="navbar-nav">
              @{
               switch(User.GetType().Name)
@@ -135,3 +132,11 @@
         </div>
     </div>
 </nav>
+
+@{
+  stopwatch.Stop();
+  var render_time = stopwatch.ElapsedMilliseconds;
+}
+<script>
+  console.log("NavbarVC render time: " + @render_time + " ms");
+</script>

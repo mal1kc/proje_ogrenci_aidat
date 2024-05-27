@@ -1,5 +1,6 @@
 @{
 
+    var stopWatch = System.Diagnostics.Stopwatch.StartNew();
 }
 <!DOCTYPE html>
 <html lang="en">
@@ -11,8 +12,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - @Constants.AppName</title>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
-    @* if local fonts are used, then the fonts folder must be copied to wwwroot folder
-    <link rel="stylesheet" href="~/lib/bootstrap-icons/font/bootstrap-icons.min.css" /> *@
     <link rel="stylesheet"
         href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.11.2/font/bootstrap-icons.min.css"
         integrity="sha512-D1liES3uvDpPrgk7vXR/hR/sukGn7EtDWEyvpdLsyalQYq6v6YUsTUJmku7B4rcuQ21rf0UTksw2i/2Pdjbd3g=="
@@ -46,20 +45,26 @@
         </main>
     </div>
 
-    <footer class="border-top footer text-muted">
+    <footer class="border-top footer text-muted mt-5 text-center">
         <div class="container">
-            &copy; 2024 - @Constants.AppName - @Constants.AppVersion
+            &copy; 2024 - @Constants.AppName - @Constants.AppVersion | page rendered in @stopWatch.ElapsedMilliseconds ms.
 
-            <button id="Colorscheme_btnSwitch" class="btn btn-primary">Switch Color Scheme</button>
+            <button id="color-mode-toggle-btn" class="btn btn-secondary btn-sm">Switch Color Scheme</button>
+
+            <div class="text-center mt-3">
+                <a asp-action="About" asp-controller="Home">About</a>
+            </div>
+
+            @* render the time taken to render the page *@
+
         </div>
     </footer>
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="~/js/color-mode.js" asp-append-version="true"></script>
+    <script src="~/js/colormode.js" asp-append-version="true"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
     @RenderSection("jslibs", required: false)
     @RenderSection("scripts", required: false)
     <script src="~/js/collapse.js" asp-append-version="true"></script>
 </body>
-
 </html>

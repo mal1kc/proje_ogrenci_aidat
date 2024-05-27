@@ -1,0 +1,101 @@
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+    // for find bugs easily in the future
+    // changed Home/Index
+    ViewBag.AspAction ??= "Index";
+    ViewBag.AspController ??= "Home";
+
+
+    @* if (ViewBag.queryDict == null)
+    {
+        ViewBag.queryDict = ViewHelpers.GenListQuery(ViewData);
+    } *@
+
+    var stopwatch = System.Diagnostics.Stopwatch.StartNew();
+}
+
+@RenderSection("CreateNewWithTitle", required: false)
+
+<form asp-action="@ViewBag.AspAction" asp-controller="@ViewBag.AspController" method="get">
+    <div class="row">
+        <div class="col-md-6">
+            <div class="input-group mb-3">
+                <span class="input-group-text">Search:</span>
+                <input type="text" class="form-control" name="searchString" value="@ViewData["CurrentSearchString"]" />
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="input-group mb-3">
+                <span class="input-group-text">in</span>
+
+                @RenderSection("SearchFormOptions", required: true)
+                <button type="submit" class="btn btn-primary">Search</button>
+            </div>
+        </div>
+    </div>
+
+</form>
+
+
+<div class="overflow-auto">
+    <table class="table">
+        @await RenderSectionAsync("Listings", required: true)
+    </table>
+</div>
+
+
+<nav aria-label="Page navigation" class="pagination-margin">
+    <ul class="pagination justify-content-center">
+        @if (ViewData["CurrentPageIndex"] != null)
+        {
+            int currentPageIndex = (int)(ViewData["CurrentPageIndex"] ?? 1);
+            int totalPages = (int)(ViewData["TotalPages"] ?? 1);
+
+            <li class="page-item @(currentPageIndex <= 1 ? "disabled" : "")">
+                <list-page-link-item asp-action="@ViewBag.AspAction"
+                                     asp-controller="@ViewBag.AspController"
+                                     page-index="1"
+                                     text="First"></list-page-link-item>
+            </li>
+            <li class="page-item @(currentPageIndex <= 1 ? "disabled" : "")">
+                <list-page-link-item asp-action="@ViewBag.AspAction"
+                                     asp-controller="@ViewBag.AspController"
+                                     page-index="@(currentPageIndex - 1)"
+                                     text="Previous"></list-page-link-item>
+            </li>
+
+            @for (int i = 1; i <= totalPages; i++)
+            {
+                <li class="page-item @(i == currentPageIndex ? "active" : "")">
+                    <list-page-link-item asp-action="@ViewBag.AspAction"
+                                         asp-controller="@ViewBag.AspController"
+                                         page-index="@i"
+                                         text="@i"></list-page-link-item>
+                </li>
+            }
+
+            <li class="page-item @(currentPageIndex >= totalPages ? "disabled" : "")">
+                <list-page-link-item asp-action="@ViewBag.AspAction"
+                                     asp-controller="@ViewBag.AspController"
+                                     page-index="@(currentPageIndex + 1)"
+                                     text="Next"></list-page-link-item>
+            </li>
+            <li class="page-item @(currentPageIndex >= totalPages ? "disabled" : "")">
+                <list-page-link-item asp-action="@ViewBag.AspAction"
+                                     asp-controller="@ViewBag.AspController"
+                                     page-index="@totalPages"
+                                     text="Last"></list-page-link-item>
+            </li>
+        }
+    </ul>
+</nav>
+
+@{
+    stopwatch.Stop();
+    var elapsed = stopwatch.ElapsedMilliseconds;
+}
+
+<script>
+    console.log("render time of of list layout: @elapsed ms");
+</script>

@@ -87,6 +87,10 @@
 
 - [X] remove admin layout and use only _layout (not useful)
 
+- [ ] ordered pagination not seems to work as expected (fix)
+
+- [ ] in listings fix role based column visibility (not working as expected)
+
 ## todo , maybe
 
 - [X] move partial views to shared folder + add partial views for all possible models (done 5-6 commits before check)
@@ -98,4 +102,4 @@
 
 - [X] ( possible fix at [[./OgrenciAidatSistemi/Services/UserService.cs:220]] ) if a user is deleted, or not exist in db , if it is logged in, its still logged in, fix this
     - in this condition, user related panels but navbar is not shown , logged status is not shown ( not easily detectable)
-- [ ] list view links does not carry search parameters or sort parameters to next page (prob easy fix)
+- [X] list view links does not carry search parameters or sort parameters to next page (prob easy fix)

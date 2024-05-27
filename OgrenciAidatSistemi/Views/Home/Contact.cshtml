@@ -6,9 +6,37 @@
     <div class="row justify-content-center">
         <div class="col-md-6">
             <h2 class="text-center">Contact Information</h2>
-            <p>This application is not fully completed and there are no current plans for future development. It serves as a demonstration of my coding abilities.</p>
+            <p>This application is not fully completed and there are no current plans for future development. It serves
+                as a demonstration of my coding abilities.</p>
             <p>For more information about my work, please visit my GitHub profile:</p>
-            <p><a href="https://github.com/yourusername" target="_blank">https://github.com/mal1kc</a></p>
+            <div class="card github-profile">
+                <img src="https://github.com/mal1kc.png" alt="GitHub Profile Photo" class="github-profile-photo">
+                <div class="github-username"><a href="https://github.com/mal1kc" target="_blank">mal1kc</a></div>
+            </div>
+
         </div>
     </div>
 </div>
+
+<style>
+    .github-profile {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: center;
+        gap: 1rem;
+        padding: 1rem;
+        min-height: 32%;
+    }
+
+    .github-profile-photo {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+    }
+
+    .github-username {
+        font-family: 'Iosevka', Courier, monospace;
+        font-size: 1.2rem;
+    }
+</style>

@@ -21,8 +21,11 @@ namespace OgrenciAidatSistemi.Services
                 .ToListAsync();
 
             // for each student create a payment for each payment period
+            int counter = 0;
             foreach (var paymentPeriod in paymentPeriods)
             {
+                var stopwatch = System.Diagnostics.Stopwatch.StartNew(); // start timer
+
                 UnPaidPayment payment =
                     new()
                     {
@@ -31,6 +34,16 @@ namespace OgrenciAidatSistemi.Services
                         Student = paymentPeriod.Student,
                     };
                 _context.Payments.Add(payment);
+
+                stopwatch.Stop(); // stop timer
+
+                counter++;
+                if (counter % 100 == 0) // log every 100 creations
+                {
+                    _logger.LogInformation(
+                        $"Created 100 payments in {stopwatch.ElapsedMilliseconds} ms"
+                    );
+                }
             }
             try
             {

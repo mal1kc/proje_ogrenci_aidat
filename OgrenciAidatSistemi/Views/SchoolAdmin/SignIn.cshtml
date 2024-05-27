@@ -1,0 +1,43 @@
+@model SchoolAdminView
+
+@{
+    ViewData["Title"] = "School Admin Sign In";
+}
+
+
+<div class="container">
+    <div class="row justify-content-center">
+
+        <div class="col-md-6">
+            <h2>@ViewData["Title"]</h2>
+
+            <form asp-action="SignIn" onsubmit="return checkOnSubmit()">
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                <div class="form-group">
+                    <label class="control-label" for="EmailAddress">Email</label>
+                    <input class="form-control" type="text" data-val="true"
+                        data-val-required="The Email field is required." id="EmailAddress" name="EmailAddress" value="">
+                    <span class="text-danger field-validation-valid" data-valmsg-for="EmailAddress"
+                        data-valmsg-replace="true"></span>
+                </div>
+                <div class="form-group">
+                    <label asp-for="Password" class="control-label"></label>
+                    <input asp-for="Password" type="password" class="form-control" />
+                    <span asp-validation-for="Password" class="text-danger"></span>
+                </div>
+
+
+                <div class="d-flex flex-column align-items-center form-group mt-3">
+
+                    <input type="submit" value="Sign In" class="btn btn-primary mb-3 w-50" id="signInButton" onsubmit="return checkOnSubmit()" />
+                    <a asp-action="Index" asp-controller="Home" class="btn btn-secondary mb-1 w-50"
+                        id="cancelButton">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
