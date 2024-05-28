@@ -1,4 +1,5 @@
 using OgrenciAidatSistemi.Models.Interfaces;
+using OgrenciAidatSistemi.Models.ViewModels;
 
 namespace OgrenciAidatSistemi.Models
 {
@@ -16,6 +17,7 @@ namespace OgrenciAidatSistemi.Models
 
         public static ModelSearchConfig<Receipt> SearchConfig =>
             new(
+                defaultSortMethod: s => s.CreatedAt,
                 sortingMethods: new()
                 {
                     { "Id", static s => s.Id },
@@ -99,22 +101,5 @@ namespace OgrenciAidatSistemi.Models
                 PaymentId = PaymentId
             };
         }
-    }
-
-    public class ReceiptView : IBaseDbModelView
-    {
-        public int Id { get; set; }
-        public string? Path { get; set; }
-        public string? Name { get; set; }
-        public string? Extension { get; set; }
-        public string? ContentType { get; set; }
-        public long Size { get; set; }
-        public string? Description { get; set; }
-        public User? CreatedBy { get; set; }
-        public string? FileHash { get; set; }
-        public DateTime CreatedAt { get; set; }
-        public DateTime UpdatedAt { get; set; }
-        public PaymentView? Payment { get; set; }
-        public int? PaymentId { get; set; }
     }
 }

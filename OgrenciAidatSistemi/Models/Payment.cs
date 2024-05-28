@@ -1,4 +1,5 @@
 using OgrenciAidatSistemi.Models.Interfaces;
+using OgrenciAidatSistemi.Models.ViewModels;
 
 #pragma warning disable CS8618 // Non-nullable field is uninitialized. Consider declaring as nullable.
 
@@ -43,16 +44,30 @@ namespace OgrenciAidatSistemi.Models
         // TODO: add subclass search config ot way to implement search config for subclasses
         public static ModelSearchConfig<Payment> SearchConfig =>
             new(
+                defaultSortMethod: s => s.PaymentDate,
                 sortingMethods: new()
                 {
                     { "PaymentDate", static s => s.PaymentDate },
-                    { "Amount", static s => s.Amount },
+                    { "Amount", static s => (int)s.Amount },
                     { "Status", static s => s.Status },
                     { "CreatedAt", static s => s.CreatedAt },
-                    { "UpdatedAt", static s => s.UpdatedAt }
+                    { "UpdatedAt", static s => s.UpdatedAt },
+                    { "StudentId", static s => s.Student == null ? s.PaymentDate : s.Student.Id },
+                    { "PaymentPeriodId", static s => s.PaymentPeriodId },
+                    { "SchoolId", static s => s.School == null ? s.PaymentDate : s.School.Id },
+                    { "PaymentMethod", static s => s.PaymentMethod },
+                    { "ReceiptId", static s => s.Receipt == null ? s.PaymentDate : s.Receipt.Id },
+                    // {"IsVerified", static s => s.IsVerified ? 1 : 0} fails to sort prob needs fix at QueryableModelHelper
                 },
                 searchMethods: new()
                 {
+                    {
+                        "PaymentID",
+                        static (s, searchString) =>
+                            s
+                                .Id.ToString()
+                                .Contains(searchString, StringComparison.OrdinalIgnoreCase)
+                    },
                     {
                         "PaymentDate",
                         static (s, searchString) =>
@@ -87,15 +102,29 @@ namespace OgrenciAidatSistemi.Models
                             s
                                 .UpdatedAt.ToString("yyyy-MM")
                                 .Contains(searchString, StringComparison.OrdinalIgnoreCase)
+                    },
+                    {
+                        "PaymentMethod",
+                        static (s, searchString) =>
+                            s
+                                .PaymentMethod.ToString()
+                                .Contains(searchString, StringComparison.OrdinalIgnoreCase)
+                    },
+                    {
+                        "PaymentPeriodId",
+                        static (s, searchString) =>
+                            s
+                                .PaymentPeriodId.ToString()
+                                .Contains(searchString, StringComparison.OrdinalIgnoreCase)
                     }
                 }
             );
 
         public Payment()
         {
-            CreatedAt = DateTime.Now;
-            UpdatedAt = DateTime.Now;
-            PaymentDate = DateTime.Now;
+            CreatedAt = DateTime.UtcNow;
+            UpdatedAt = DateTime.UtcNow;
+            PaymentDate = DateTime.UtcNow;
             Status = PaymentStatus.Unpaid; // default status
             PaymentMethod = PaymentMethod.UnPaid;
         }
@@ -112,19 +141,6 @@ namespace OgrenciAidatSistemi.Models
         }
 
         public abstract PaidPayment Copy();
-    }
-
-    public abstract class PaymentView : IBaseDbModelView
-    {
-        public int Id { get; set; }
-        public PaymentMethod PaymentMethod { get; set; }
-        public StudentView? Student { get; set; }
-        public DateTime PaymentDate { get; set; }
-        public decimal Amount { get; set; }
-        public DateTime CreatedAt { get; set; }
-        public DateTime UpdatedAt { get; set; }
-
-        public PaymentStatus? Status { get; set; }
     }
 
     public class UnPaidPayment : Payment
@@ -149,8 +165,6 @@ namespace OgrenciAidatSistemi.Models
             };
         }
     }
-
-    internal class UnPaidPaymentView : PaymentView { }
 
     public class BankPayment : PaidPayment
     {
@@ -196,14 +210,6 @@ namespace OgrenciAidatSistemi.Models
         }
     }
 
-    public class BankPaymentView : PaymentView
-    {
-        public string BankName { get; set; }
-        public string AccountNumber { get; set; }
-        public string BranchCode { get; set; }
-        public string IBAN { get; set; }
-    }
-
     public class CheckPayment : PaidPayment
     {
         public required string CheckNumber { get; set; }
@@ -241,18 +247,6 @@ namespace OgrenciAidatSistemi.Models
                 BankName = BankName,
                 BranchCode = BranchCode
             };
-        }
-    }
-
-    public class CheckPaymentView : PaymentView
-    {
-        public string CheckNumber { get; set; }
-        public string BankName { get; set; }
-        public string BranchCode { get; set; }
-
-        public CheckPaymentView()
-        {
-            PaymentMethod = PaymentMethod.Check;
         }
     }
 
@@ -300,19 +294,6 @@ namespace OgrenciAidatSistemi.Models
         }
     }
 
-    public class DebitCardPaymentView : PaymentView
-    {
-        public string CardNumber { get; set; }
-        public string CardHolderName { get; set; }
-        public string ExpiryDate { get; set; }
-        public char[] CVC { get; set; }
-
-        public DebitCardPaymentView()
-        {
-            PaymentMethod = PaymentMethod.DebitCard;
-        }
-    }
-
     public class CashPayment : PaidPayment
     {
         public required string CashierName { get; set; }
@@ -356,14 +337,6 @@ namespace OgrenciAidatSistemi.Models
         }
     }
 
-    public class CashPaymentView : PaymentView
-    {
-        public string CashierName { get; set; }
-        public string ReceiptNumber { get; set; }
-        public DateTime ReceiptDate { get; set; }
-        public string ReceiptIssuer { get; set; }
-    }
-
     public static class PaymentMethodExtensions
     {
         public static string ToFriendlyString(this PaymentMethod paymentMethod)
@@ -376,86 +349,6 @@ namespace OgrenciAidatSistemi.Models
                 PaymentMethod.Check => "Çek",
                 _ => "Bilinmiyor"
             };
-        }
-    }
-
-    public static class PaymentStatusExtensions
-    {
-        public static string ToFriendlyString(this PaymentStatus paymentStatus)
-        {
-            return paymentStatus switch
-            {
-                PaymentStatus.Paid => "Ödenmiş",
-                PaymentStatus.Unpaid => "Ödenmemiş",
-                PaymentStatus.Verified => "Doğrulanmış",
-                _ => "Bilinmiyor"
-            };
-        }
-    }
-
-    public static class PaymentExtensions
-    {
-        public static PaymentView ToView(this Payment payment, bool ignoreBidirectNav = false)
-        {
-            return payment switch
-            {
-                BankPayment bankPayment => bankPayment.ToView(ignoreBidirectNav),
-                CheckPayment checkPayment => checkPayment.ToView(ignoreBidirectNav),
-                DebitCardPayment debitCardPayment => debitCardPayment.ToView(ignoreBidirectNav),
-                CashPayment cashPayment => cashPayment.ToView(ignoreBidirectNav),
-                _ => throw new NotImplementedException()
-            };
-        }
-    }
-
-    public static class PaymentMethodSpecificFields
-    {
-        public static Dictionary<PaymentMethod, string[]> Fields = new Dictionary<
-            PaymentMethod,
-            string[]
-        >
-        {
-            {
-                PaymentMethod.Bank,
-                new string[] { "BankName", "AccountNumber", "BranchCode", "IBAN" }
-            },
-            { PaymentMethod.Check, new string[] { "CheckNumber", "BankName", "BranchCode" } },
-            {
-                PaymentMethod.DebitCard,
-                new string[] { "CardNumber", "CardHolderName", "ExpiryDate", "CVC" }
-            },
-            {
-                PaymentMethod.Cash,
-                new string[] { "CashierName", "ReceiptNumber", "ReceiptDate", "ReceiptIssuer" }
-            },
-            { PaymentMethod.UnPaid, Array.Empty<string>() }
-        };
-
-        public static string[] GetFields(PaymentMethod paymentMethod) => Fields[paymentMethod];
-
-        public static bool ValidateFields()
-        {
-            var paymentTypeDict = new Dictionary<PaymentMethod, Type>
-            {
-                { PaymentMethod.Bank, typeof(BankPayment) },
-                { PaymentMethod.Check, typeof(CheckPayment) },
-                { PaymentMethod.DebitCard, typeof(DebitCardPayment) },
-                { PaymentMethod.Cash, typeof(CashPayment) },
-                { PaymentMethod.UnPaid, typeof(UnPaidPayment) }
-            };
-
-            var truthFlags = new List<bool>();
-
-            foreach (var (paymentMethod, type) in paymentTypeDict)
-            {
-                var fields = GetFields(paymentMethod);
-                var properties = type.GetProperties();
-
-                var truthFlag = fields.All(field => properties.Any(prop => prop.Name == field));
-                truthFlags.Add(truthFlag);
-            }
-
-            return truthFlags.All(flag => flag);
         }
     }
 }

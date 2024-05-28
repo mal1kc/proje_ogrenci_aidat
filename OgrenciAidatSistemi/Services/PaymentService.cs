@@ -9,6 +9,8 @@ namespace OgrenciAidatSistemi.Services
         private readonly AppDbContext _context = context;
         private readonly ILogger _logger = logger;
 
+        private readonly int _loggerInterval = 100;
+
         public async Task CreatePayments()
         {
             var currentTime = DateOnly.FromDateTime(DateTime.Today);
@@ -26,19 +28,36 @@ namespace OgrenciAidatSistemi.Services
             {
                 var stopwatch = System.Diagnostics.Stopwatch.StartNew(); // start timer
 
-                UnPaidPayment payment =
-                    new()
-                    {
-                        Amount = paymentPeriod.PerPaymentAmount,
-                        PaymentPeriod = paymentPeriod,
-                        Student = paymentPeriod.Student,
-                    };
-                _context.Payments.Add(payment);
+                // Check if a payment for this period already exists
+                var existingPayment = paymentPeriod.Payments?.FirstOrDefault(p =>
+                    (
+                        paymentPeriod.Occurrence == Occurrence.Monthly
+                            && p.PaymentDate.Month == DateTime.Now.Month
+                        || paymentPeriod.Occurrence == Occurrence.Daily
+                            && p.PaymentDate.Date == DateTime.Now.Date
+                        || paymentPeriod.Occurrence == Occurrence.Weekly
+                            && p.PaymentDate.GetWeekOfYear() == DateTime.Now.GetWeekOfYear()
+                        || paymentPeriod.Occurrence == Occurrence.Yearly
+                            && p.PaymentDate.Year == DateTime.Now.Year
+                    )
+                );
+                if (existingPayment == null)
+                {
+                    UnPaidPayment payment =
+                        new()
+                        {
+                            Amount = paymentPeriod.PerPaymentAmount,
+                            PaymentPeriod = paymentPeriod,
+                            Student = paymentPeriod.Student,
+                            School = paymentPeriod.Student.School,
+                        };
+                    _context.Payments.Add(payment);
+                }
 
                 stopwatch.Stop(); // stop timer
 
                 counter++;
-                if (counter % 100 == 0) // log every 100 creations
+                if (counter % _loggerInterval == 0)
                 {
                     _logger.LogInformation(
                         $"Created 100 payments in {stopwatch.ElapsedMilliseconds} ms"

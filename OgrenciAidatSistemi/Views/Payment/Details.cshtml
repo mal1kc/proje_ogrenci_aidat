@@ -1,3 +1,4 @@
+@using OgrenciAidatSistemi.Models.Extensions
 @model PaymentView
 
 <div class="container mt-5">
@@ -17,7 +18,7 @@
                     @Html.DisplayNameFor(model => model.PaymentDate)
                 </dt>
 
-                <dd class="col-sm-10">
+                <dd class="col-sm-10 date">
                     @Html.DisplayFor(model => model.PaymentDate)
                 </dd>
 

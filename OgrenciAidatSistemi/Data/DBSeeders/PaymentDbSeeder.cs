@@ -51,13 +51,13 @@ namespace OgrenciAidatSistemi.Data.DBSeeders
             {
                 Email = student.EmailAddress,
                 PhoneNumber = "+90 555 555 55 55",
-                CreatedAt = DateTime.Now,
-                UpdatedAt = DateTime.Now,
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow,
             };
-            student.CreatedAt = DateTime.Now;
-            student.UpdatedAt = DateTime.Now;
-            student.School.CreatedAt = DateTime.Now;
-            student.School.UpdatedAt = DateTime.Now;
+            student.CreatedAt = DateTime.UtcNow;
+            student.UpdatedAt = DateTime.UtcNow;
+            student.School.CreatedAt = DateTime.UtcNow;
+            student.School.UpdatedAt = DateTime.UtcNow;
             // moved this to SeedEntityAsync because it needs school from db
             // student.StudentId = _studentService.GenerateStudentId(student.School);
             // student.EmailAddress = student.StudentId + $"@mail.school.com";
@@ -66,17 +66,19 @@ namespace OgrenciAidatSistemi.Data.DBSeeders
             var school = student.School;
             PaymentPeriod paymentperiod = new PaymentPeriod
             {
-                Payments = new HashSet<Payment>(),
                 Student = student,
                 WorkYear = new WorkYear
                 {
                     StartDate = DateOnly.FromDateTime(DateTime.Today),
                     EndDate = DateOnly.FromDateTime(DateTime.Today + TimeSpan.FromDays(180)), // 6 months
-                    CreatedAt = DateTime.Now,
-                    UpdatedAt = DateTime.Now,
+                    CreatedAt = DateTime.UtcNow,
+                    UpdatedAt = DateTime.UtcNow,
                 },
-                CreatedAt = DateTime.Now,
-                UpdatedAt = DateTime.Now,
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow,
+                Occurrence = Occurrence.Monthly,
+                StartDate = DateOnly.FromDateTime(DateTime.Today),
+                EndDate = DateOnly.FromDateTime(DateTime.Today + TimeSpan.FromDays(30)),
             };
             Payment payment = paymentStatus switch
             {
@@ -129,9 +131,9 @@ namespace OgrenciAidatSistemi.Data.DBSeeders
                             },
                     }
             };
-            payment.CreatedAt = DateTime.Now;
-            payment.UpdatedAt = DateTime.Now;
-            payment.PaymentDate = DateTime.Now;
+            payment.CreatedAt = DateTime.UtcNow;
+            payment.UpdatedAt = DateTime.UtcNow;
+            payment.PaymentDate = DateTime.UtcNow;
             payment.Amount = faker.Random.Number(100, 1000);
             // set status randomly  from PaymentStatus enum
             payment.Receipt = new(
@@ -223,7 +225,7 @@ namespace OgrenciAidatSistemi.Data.DBSeeders
 
             _context.Payments ??= _context.Set<Payment>();
 
-            var tenminutesago = DateTime.Now - TimeSpan.FromMinutes(10);
+            var tenminutesago = DateTime.UtcNow - TimeSpan.FromMinutes(10);
             // need to take each payment type separately
 
 #pragma warning disable CS8604
@@ -293,14 +295,14 @@ namespace OgrenciAidatSistemi.Data.DBSeeders
                 entity.PaymentPeriod.WorkYear.School = entity.Student.School;
                 entity.PaymentPeriod.WorkYear.PaymentPeriods = new HashSet<PaymentPeriod>();
 
-                entity.PaymentPeriod.WorkYear.CreatedAt = DateTime.Now;
-                entity.PaymentPeriod.WorkYear.UpdatedAt = DateTime.Now;
+                entity.PaymentPeriod.WorkYear.CreatedAt = DateTime.UtcNow;
+                entity.PaymentPeriod.WorkYear.UpdatedAt = DateTime.UtcNow;
             }
 
             entity.PaymentPeriod.PerPaymentAmount = entity.Amount;
             entity.PaymentPeriod.Occurrence = Occurrence.Monthly;
-            entity.PaymentPeriod.CreatedAt = DateTime.Now;
-            entity.PaymentPeriod.UpdatedAt = DateTime.Now;
+            entity.PaymentPeriod.CreatedAt = DateTime.UtcNow;
+            entity.PaymentPeriod.UpdatedAt = DateTime.UtcNow;
             if (entity.Receipt.Path == null)
             {
                 _context.Receipts ??= _context.Set<Receipt>();

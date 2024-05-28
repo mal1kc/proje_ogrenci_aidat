@@ -179,15 +179,15 @@ namespace OgrenciAidatSistemi.Data
             if (await _context.SiteAdmins.AnyAsync(a => a.EmailAddress == entity.EmailAddress))
                 return;
 
-            entity.CreatedAt = DateTime.Now;
-            entity.UpdatedAt = DateTime.Now;
+            entity.CreatedAt = DateTime.UtcNow;
+            entity.UpdatedAt = DateTime.UtcNow;
 
             await _context.SiteAdmins.AddAsync(entity);
             _seedCount++;
         }
 
-        private List<SiteAdmin> _seedData = new List<SiteAdmin>
-        {
+        private List<SiteAdmin> _seedData =
+        [
             new SiteAdmin
             {
                 Username = "mal1kc",
@@ -196,6 +196,6 @@ namespace OgrenciAidatSistemi.Data
                 EmailAddress = "admin@example.com",
                 PasswordHash = SiteAdmin.ComputeHash("Aadmin123")
             }
-        };
+        ];
     }
 }

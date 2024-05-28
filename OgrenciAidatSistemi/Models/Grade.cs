@@ -1,4 +1,5 @@
 using OgrenciAidatSistemi.Models.Interfaces;
+using OgrenciAidatSistemi.Models.ViewModels;
 
 namespace OgrenciAidatSistemi.Models
 {
@@ -8,8 +9,9 @@ namespace OgrenciAidatSistemi.Models
         public School? School { get; set; }
         public int GradeLevel { get; set; }
         public ISet<Student>? Students { get; set; }
-        public ModelSearchConfig<Grade> SearchConfig =>
+        public static ModelSearchConfig<Grade> SearchConfig =>
             new(
+                defaultSortMethod: s => s.CreatedAt,
                 sortingMethods: new()
                 {
                     { "Name", static s => s.Name },
@@ -68,33 +70,6 @@ namespace OgrenciAidatSistemi.Models
                 this.CreatedAt,
                 this.UpdatedAt
             );
-        }
-    }
-
-    public class GradeView : IBaseDbModelView
-    {
-        public int Id { get; set; }
-        public string Name { get; set; }
-        public int GradeLevel { get; set; }
-        public ISet<StudentView>? Students { get; set; }
-        public DateTime CreatedAt { get; set; }
-        public DateTime UpdatedAt { get; set; }
-
-        public GradeView(
-            int id,
-            string name,
-            int gradeLevel,
-            ISet<StudentView>? students,
-            DateTime createdAt,
-            DateTime updatedAt
-        )
-        {
-            Id = id;
-            Name = name;
-            GradeLevel = gradeLevel;
-            Students = students;
-            CreatedAt = createdAt;
-            UpdatedAt = updatedAt;
         }
     }
 }

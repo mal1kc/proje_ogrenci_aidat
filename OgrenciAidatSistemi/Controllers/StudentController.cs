@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using OgrenciAidatSistemi.Data;
 using OgrenciAidatSistemi.Helpers;
 using OgrenciAidatSistemi.Models;
+using OgrenciAidatSistemi.Models.ViewModels;
 using OgrenciAidatSistemi.Services;
 
 namespace OgrenciAidatSistemi.Controllers
@@ -26,12 +27,41 @@ namespace OgrenciAidatSistemi.Controllers
         [Authorize(Roles = Configurations.Constants.userRoles.Student)]
         public async Task<IActionResult> Index()
         {
-            var student = await GetLoggedInStudent();
-            if (student == null)
-            {
+            var signed_user = await _userService.GetCurrentUserAsync();
+            // get student with payments and paymentperiod and grades from db
+            if (signed_user == null)
                 return RedirectToAction("SignIn");
-            }
-            return View(student.ToView());
+
+            var student = _dbContext
+                .Students.Include(s => s.School)
+                .Where(s => s.Id == signed_user.Id)
+                .FirstOrDefault();
+
+            if (student == null)
+                return RedirectToAction("SignIn");
+
+            student.Payments = await _dbContext
+                .Payments.Where(pp => pp.Student != null && pp.Student.Id == student.Id)
+                .OrderByDescending(p => p.CreatedAt)
+                .Take(5)
+                .ToListAsync();
+
+            student.PaymentPeriods = await _dbContext
+                .PaymentPeriods.Include(g => g.WorkYear)
+                .Where(pp => pp.Student != null && pp.Student.Id == student.Id)
+                .OrderByDescending(pp => pp.EndDate)
+                .Take(10)
+                .ToListAsync();
+
+            student.Grades = await _dbContext
+                .Grades.Where(g => g.Students.Any(st => st.Id == student.Id))
+                .OrderByDescending(g => g.CreatedAt)
+                .Take(5)
+                .ToListAsync();
+
+            StudentView studentView = student.ToView();
+
+            return View(studentView);
         }
 
         public async Task<IActionResult> SignIn()
@@ -197,8 +227,8 @@ namespace OgrenciAidatSistemi.Controllers
                     LastName = studentView.LastName,
                     PasswordHash = _userService.HashPassword(studentView.Password),
                     School = school,
-                    CreatedAt = DateTime.Now,
-                    UpdatedAt = DateTime.Now,
+                    CreatedAt = DateTime.UtcNow,
+                    UpdatedAt = DateTime.UtcNow,
                     ContactInfo = new ContactInfo
                     {
                         Email = studentView.EmailAddress,

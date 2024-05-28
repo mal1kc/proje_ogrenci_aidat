@@ -5,6 +5,7 @@ using OgrenciAidatSistemi.Data;
 using OgrenciAidatSistemi.Helpers;
 using OgrenciAidatSistemi.Helpers.Controller;
 using OgrenciAidatSistemi.Models;
+using OgrenciAidatSistemi.Models.ViewModels;
 using OgrenciAidatSistemi.Services;
 
 namespace OgrenciAidatSistemi.Controllers
@@ -24,7 +25,7 @@ namespace OgrenciAidatSistemi.Controllers
         private readonly AppDbContext _dbContext = dbContext;
         private readonly UserService _userService = userService;
 
-        [Authorize(Roles = Configurations.Constants.userRoles.SiteAdmin)]
+        [Authorize]
         [DebugOnly]
         public IActionResult List(
             string? searchString = null,
@@ -147,21 +148,42 @@ namespace OgrenciAidatSistemi.Controllers
 
         // GET: Payment/Detais/5
 
-        [Authorize(Roles = Configurations.Constants.userRoles.SiteAdmin)]
+        [Authorize]
         public IActionResult Details(int? id)
         {
+            var (role, schoolId) = _userService.GetUserRoleAndSchoolId().Result;
+            Payment? payment = null;
+            switch (role)
+            {
+                case UserRole.SiteAdmin:
+                    payment = _dbContext
+                        .Payments.Include(p => p.Student)
+                        .FirstOrDefault(p => p.Id == id);
+                    break;
+                case UserRole.SchoolAdmin:
+                    if (schoolId.HasValue)
+                    {
+                        payment = _dbContext
+                            .Payments.Include(p => p.Student)
+                            .FirstOrDefault(p =>
+                                p.Id == id && p.School != null && p.School.Id == schoolId.Value
+                            );
+                    }
+                    break;
+                case UserRole.Student:
+                    payment = _dbContext
+                        .Payments.Include(p => p.Student)
+                        .FirstOrDefault(p =>
+                            p.Id == id
+                            && p.Student != null
+                            && p.Student.Id == _userService.GetCurrentUserID()
+                        );
+                    break;
+                default:
+                    return Unauthorized();
+            }
             if (id == null)
                 return NotFound();
-
-            if (_dbContext.Payments == null)
-            {
-                _logger.LogError("Payments table is null");
-                return NotFound();
-            }
-
-            var payment = _dbContext
-                .Payments.Include(p => p.Student)
-                .FirstOrDefault(p => p.Id == id);
 
             if (payment == null)
                 return NotFound();

@@ -86,8 +86,8 @@
                         @item.CreatedBy
                     </td>
                 }
-                <td>
-                    @(item.Payment?.CreatedAt != null ? item.Payment.CreatedAt.ToString() : "Unknown")
+                <td class="date">
+                    @(item.Payment?.CreatedAt != null ? item.Payment.CreatedAt.ToString("o") : "Unknown")
                 </td>
                 <td>
                     @(item.Payment?.PaymentMethod != null ? item.Payment.PaymentMethod : "Unknown")

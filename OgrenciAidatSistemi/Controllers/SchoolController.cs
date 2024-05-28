@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using OgrenciAidatSistemi.Data;
 using OgrenciAidatSistemi.Helpers;
 using OgrenciAidatSistemi.Models;
+using OgrenciAidatSistemi.Models.ViewModels;
 using OgrenciAidatSistemi.Services;
 
 namespace OgrenciAidatSistemi.Controllers
@@ -83,8 +84,8 @@ namespace OgrenciAidatSistemi.Controllers
                 {
                     Name = schoolView.Name,
                     Students = null,
-                    CreatedAt = DateTime.Now,
-                    UpdatedAt = DateTime.Now
+                    CreatedAt = DateTime.UtcNow,
+                    UpdatedAt = DateTime.UtcNow
                 };
                 _dbContext.Schools.Add(school);
                 await _dbContext.SaveChangesAsync();

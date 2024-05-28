@@ -1,4 +1,5 @@
 using Coravel;
+using Coravel.Scheduling.Schedule.Interfaces;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using NReco.Logging.File;
 using OgrenciAidatSistemi.Configurations;
@@ -13,6 +14,12 @@ internal class Program
     {
         void RegisterServices(IServiceCollection services, IConfiguration configuration)
         {
+            // **Transient**: A new instance is created every time a service is requested. This is useful for lightweight, stateless services.
+
+            //  **Scoped**: A new instance is created once per scope. A scope is created on each request in an ASP.NET Core application, so you can think of scoped lifetime as per request.
+
+            //  **Singleton**: A single instance is created and that same instance is used every time the service is requested.
+
             _ = services
                 .AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
                 .AddCookie(options =>
@@ -55,6 +62,8 @@ internal class Program
             _ = services.AddScoped<StudentService>();
             _ = services.AddScoped<ExportService>();
             _ = services.AddScoped<PaymentService>();
+            // _ = services.AddTransient<PaymentCreatorInvocable>();
+            _ = services.AddScoped<PaymentCreatorInvocable>();
             _ = services.AddScheduler();
         }
 
@@ -160,14 +169,20 @@ internal class Program
                 }
                 Console.WriteLine("Database Seeded");
 
-                var provider = app.Services.UseScheduler(scheduler =>
-                {
-                    scheduler
-                        .Schedule<PaymentCreatorInvokable>()
-                        .Daily()
-                        .RunOnceAtStart()
-                        .PreventOverlapping("PaymentCreator");
-                });
+                var provider = app
+                    .Services.UseScheduler(scheduler =>
+                    {
+                        scheduler
+                            .Schedule<PaymentCreatorInvocable>()
+#if DEBUG
+                            .EveryThirtyMinutes()
+#else
+                            .Daily()
+#endif
+                            .RunOnceAtStart()
+                            .PreventOverlapping("PaymentCreator");
+                    })
+                    .LogScheduledTaskProgress(app.Services.GetService<ILogger<IScheduler>>());
             }
 
             _ = app.UseHttpsRedirection();
@@ -209,7 +224,10 @@ internal class Program
         await ConfigureAppAsync(app);
 
         #region "some pre-run validations"
-        if (OgrenciAidatSistemi.Models.PaymentMethodSpecificFields.ValidateFields() == false)
+        if (
+            OgrenciAidatSistemi.Models.Extensions.PaymentMethodSpecificFields.ValidateFields()
+            == false
+        )
         {
             throw new Exception("PaymentMethodSpecificFields is not valid");
         }

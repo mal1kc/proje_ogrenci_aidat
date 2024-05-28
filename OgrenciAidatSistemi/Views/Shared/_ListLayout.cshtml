@@ -22,7 +22,8 @@
         <div class="col-md-6">
             <div class="input-group mb-3">
                 <span class="input-group-text">Search:</span>
-                <input type="text" class="form-control" name="searchString" value="@ViewData["CurrentSearchString"]" />
+                <input type="text" class="form-control" name="searchString" value="@ViewData["CurrentSearchString"]" id="searchInput" />
+                <div id="tooltip" style="display: none; position: absolute; top: -20px;">For dates search use this 'yyyy-MM' format</div>
             </div>
         </div>
         <div class="col-md-6">
@@ -34,8 +35,22 @@
             </div>
         </div>
     </div>
-
 </form>
+
+@section Scripts {
+    <script>
+        var searchInput = document.getElementById('searchInput');
+        var tooltip = document.getElementById('tooltip');
+
+        searchInput.addEventListener('focus', function() {
+            tooltip.style.display = 'block';
+        });
+
+        searchInput.addEventListener('blur', function() {
+            tooltip.style.display = 'none';
+        });
+    </script>
+}
 
 
 <div class="overflow-auto">
@@ -95,7 +110,18 @@
     stopwatch.Stop();
     var elapsed = stopwatch.ElapsedMilliseconds;
 }
+    <script>
+        var searchInput = document.getElementById('searchInput');
+        var tooltip = document.getElementById('tooltip');
 
-<script>
-    console.log("render time of of list layout: @elapsed ms");
-</script>
+        searchInput.addEventListener('focus', function() {
+            tooltip.style.display = 'block';
+        });
+
+        searchInput.addEventListener('blur', function() {
+            tooltip.style.display = 'none';
+        });
+    </script>
+    <script>
+        console.log("render time of of list layout: @elapsed ms");
+    </script>

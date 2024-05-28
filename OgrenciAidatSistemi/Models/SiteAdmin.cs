@@ -1,7 +1,7 @@
 using System.ComponentModel.DataAnnotations.Schema;
 using OgrenciAidatSistemi.Configurations;
-using OgrenciAidatSistemi.Data;
 using OgrenciAidatSistemi.Models.Interfaces;
+using OgrenciAidatSistemi.Models.ViewModels;
 
 namespace OgrenciAidatSistemi.Models
 {
@@ -12,6 +12,7 @@ namespace OgrenciAidatSistemi.Models
 
         public static ModelSearchConfig<SiteAdmin> SearchConfig =>
             new(
+                defaultSortMethod: s => s.CreatedAt,
                 sortingMethods: new()
                 {
                     { "Id", static s => s.Id },
@@ -115,47 +116,5 @@ namespace OgrenciAidatSistemi.Models
                 UpdatedAt = UpdatedAt
             };
         }
-    }
-
-    public class SiteAdminView : UserView
-    {
-        public string Username { get; set; }
-
-        public override bool CheckUserExists(AppDbContext dbctx)
-        {
-            if (dbctx.SiteAdmins == null)
-            {
-                throw new System.Exception("SiteAdmins table is null");
-            }
-            return dbctx.SiteAdmins.Any(admin =>
-                admin.Username == Username || admin.EmailAddress == EmailAddress
-            );
-        }
-
-        public override bool CheckEmailAddressExists(AppDbContext dbctx)
-        {
-            if (dbctx.SiteAdmins == null)
-            {
-                throw new System.Exception("SiteAdmins table is null");
-            }
-            return dbctx.SiteAdmins.Any(admin => admin.EmailAddress == EmailAddress);
-        }
-
-        public override UserViewValidationResult ValidateFieldsSignIn()
-        {
-            if (!CheckNamesLenght())
-                return UserViewValidationResult.InvalidName;
-            return base.ValidateFieldsSignIn();
-        }
-    }
-
-    public static class SiteAdminSearchConfig
-    {
-        public static string[] AllowedFieldsForSearch =>
-            new string[] { "Username", "FirstName", "LastName", "EmailAddress" };
-        public static string[] AllowedFieldsForSort =>
-            new string[] { "Id", "CreatedAt", "UpdatedAt" }
-                .Concat(AllowedFieldsForSearch)
-                .ToArray();
     }
 }

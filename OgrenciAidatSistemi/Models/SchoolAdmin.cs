@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations.Schema;
-using OgrenciAidatSistemi.Data;
 using OgrenciAidatSistemi.Models.Interfaces;
+using OgrenciAidatSistemi.Models.ViewModels;
 
 namespace OgrenciAidatSistemi.Models
 {
@@ -13,6 +13,7 @@ namespace OgrenciAidatSistemi.Models
 
         public static ModelSearchConfig<SchoolAdmin> SearchConfig =>
             new(
+                defaultSortMethod: s => s.CreatedAt,
                 sortingMethods: new()
                 {
                     { "Id", static s => s.Id },
@@ -106,32 +107,6 @@ namespace OgrenciAidatSistemi.Models
                 ContactInfo =
                     this.ContactInfo?.ToView() ?? new ContactInfoView { Email = this.EmailAddress }
             };
-        }
-    }
-
-    public class SchoolAdminView : UserView
-    {
-        public SchoolView? School { get; set; }
-        public int? SchoolId { get; set; }
-
-        public ContactInfoView? ContactInfo { get; set; }
-
-        public override bool CheckUserExists(AppDbContext dbctx)
-        {
-            if (dbctx.SchoolAdmins == null)
-            {
-                throw new System.Exception("SchoolAdmins table is null");
-            }
-            return dbctx.SchoolAdmins.Any(s => s.EmailAddress == EmailAddress);
-        }
-
-        public override bool CheckEmailAddressExists(AppDbContext dbctx)
-        {
-            if (dbctx.SchoolAdmins == null)
-            {
-                throw new System.Exception("SchoolAdmins table is null");
-            }
-            return dbctx.SchoolAdmins.Any(s => s.EmailAddress == EmailAddress);
         }
     }
 }

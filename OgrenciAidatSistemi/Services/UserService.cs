@@ -176,9 +176,9 @@ namespace OgrenciAidatSistemi.Services
         {
             var claims = new List<Claim>
             {
-                new Claim(ClaimTypes.Email, user.EmailAddress),
-                new Claim(ClaimTypes.Role, UserRoleExtensions.GetRoleString(role)),
-                new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
+                new(ClaimTypes.Email, user.EmailAddress),
+                new(ClaimTypes.Role, UserRoleExtensions.GetRoleString(role)),
+                new(ClaimTypes.NameIdentifier, user.Id.ToString()),
             };
             switch (user.Role)
             {

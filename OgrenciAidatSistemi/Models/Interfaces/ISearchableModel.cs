@@ -4,10 +4,11 @@ namespace OgrenciAidatSistemi.Models.Interfaces
 {
     public interface ISearchableModel<T>
     {
-        public static ModelSearchConfig<T> SearchConfig { get; }
+        public static ModelSearchConfig<T>? SearchConfig { get; }
     }
 
     public class ModelSearchConfig<T>(
+        Expression<Func<T, object>> defaultSortMethod,
         Dictionary<string, Expression<Func<T, object>>> sortingMethods,
         Dictionary<string, Func<T, string, bool>> searchMethods
     )
@@ -17,5 +18,6 @@ namespace OgrenciAidatSistemi.Models.Interfaces
         public Dictionary<string, Expression<Func<T, object>>> SortingMethods { get; } =
             sortingMethods;
         public Dictionary<string, Func<T, string, bool>> SearchMethods { get; } = searchMethods;
+        public Expression<Func<T, object>> DefaultSortMethod { get; } = defaultSortMethod;
     }
 }

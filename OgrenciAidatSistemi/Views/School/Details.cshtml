@@ -25,14 +25,14 @@
                 <dt class="col-sm-2 text-nowrap">
                     @Html.DisplayNameFor(model => model.CreatedAt)
                 </dt>
-                <dd class="col-sm-10">
+                <dd class="col-sm-10 date">
                     @Html.DisplayFor(model => model.CreatedAt)
                 </dd>
 
                 <dt class="col-sm-2 text-nowrap">
                     @Html.DisplayNameFor(model => model.UpdatedAt)
                 </dt>
-                <dd class="col-sm-10">
+                <dd class="col-sm-10 date">
                     @Html.DisplayFor(model => model.UpdatedAt)
                 </dd>
 
@@ -66,9 +66,9 @@
     </div>
 
     <p class="mt-5">
-        <a asp-action="Edit" class="btn btn-primary">Edit</a>
+        <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary">Edit</a>
         <a asp-action="List" class="btn btn-secondary">Back to List</a>
 
-        <a asp-action="Detete" class="btn btn-danger float-end">Delete</a>
+        <a asp-action="Detete" asp-route-id="@Model.Id"  class="btn btn-danger float-end">Delete</a>
     </p>
 </div>

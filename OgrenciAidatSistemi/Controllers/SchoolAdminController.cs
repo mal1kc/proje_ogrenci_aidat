@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using OgrenciAidatSistemi.Data;
 using OgrenciAidatSistemi.Helpers;
 using OgrenciAidatSistemi.Models;
+using OgrenciAidatSistemi.Models.ViewModels;
 using OgrenciAidatSistemi.Services;
 
 namespace OgrenciAidatSistemi.Controllers
@@ -193,8 +194,8 @@ namespace OgrenciAidatSistemi.Controllers
                     LastName = scAdminView.LastName,
                     PasswordHash = _userService.HashPassword(scAdminView.Password),
                     School = school,
-                    CreatedAt = DateTime.Now,
-                    UpdatedAt = DateTime.Now
+                    CreatedAt = DateTime.UtcNow,
+                    UpdatedAt = DateTime.UtcNow
                 };
                 newSchAdmin.ContactInfo = new ContactInfo
                 {

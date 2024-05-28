@@ -122,26 +122,26 @@ namespace OgrenciAidatSistemi.Data
             if (await _context.SchoolAdmins.AnyAsync(a => a.EmailAddress == entity.EmailAddress))
                 return;
 
-            entity.CreatedAt = DateTime.Now;
-            entity.UpdatedAt = DateTime.Now;
+            entity.CreatedAt = DateTime.UtcNow;
+            entity.UpdatedAt = DateTime.UtcNow;
             if (entity.School != null)
             {
                 var dbSchool = await _context.Schools.FirstOrDefaultAsync(s =>
                     s.Name == entity.School.Name
                 );
-                entity.School.CreatedAt = DateTime.Now;
+                entity.School.CreatedAt = DateTime.UtcNow;
                 if (dbSchool != null)
                 {
                     entity.School = dbSchool;
                 }
-                entity.School.UpdatedAt = DateTime.Now;
+                entity.School.UpdatedAt = DateTime.UtcNow;
             }
             await _context.SchoolAdmins.AddAsync(entity);
             _seedCount++;
         }
 
-        private readonly List<SchoolAdmin> _seedData = new List<SchoolAdmin>
-        {
+        private readonly List<SchoolAdmin> _seedData =
+        [
             new SchoolAdmin
             {
                 FirstName = "SchoolAdmin1",
@@ -155,6 +155,6 @@ namespace OgrenciAidatSistemi.Data
                     PhoneNumber = "+90 555 555 55 56",
                 }
             },
-        };
+        ];
     }
 }

@@ -5,6 +5,7 @@ using OgrenciAidatSistemi.Data;
 using OgrenciAidatSistemi.Helpers;
 using OgrenciAidatSistemi.Helpers.Controller;
 using OgrenciAidatSistemi.Models;
+using OgrenciAidatSistemi.Models.ViewModels;
 using OgrenciAidatSistemi.Services;
 
 namespace OgrenciAidatSistemi.Controllers
@@ -172,8 +173,8 @@ namespace OgrenciAidatSistemi.Controllers
                     EmailAddress = siteAdmin.EmailAddress,
                     FirstName = siteAdmin.FirstName,
                     LastName = siteAdmin.LastName,
-                    CreatedAt = DateTime.Now,
-                    UpdatedAt = DateTime.Now
+                    CreatedAt = DateTime.UtcNow,
+                    UpdatedAt = DateTime.UtcNow
                 };
                 _appDbContext.SiteAdmins ??= _appDbContext.Set<SiteAdmin>();
 

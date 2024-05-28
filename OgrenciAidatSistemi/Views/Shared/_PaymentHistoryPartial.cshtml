@@ -1,4 +1,4 @@
-@model HashSet<Payment>
+@model HashSet<PaymentView>
 
 @{
     const string CardName = "paymentHistoryCard";
@@ -41,6 +41,9 @@
 
                     </tbody>
                 </table>
+                        <p class="mt-5">
+                            <a asp-action="List" asp-controller="Payment" class="btn btn-primary">Show All Payments</a>
+                        </p>
             </div>
         </div>
     </div>

@@ -1,8 +1,8 @@
-@model HashSet<PaymentView>
+@model IEnumerable<PaymentView>
 
 @{
-    const string CardName = "paymentListCard";
-    const string partialViewTitle = "Payment List";
+    string CardName = "paymentListCard" + Guid.NewGuid().ToString();
+    string partialViewTitle = "Payment List" + (ViewData["paymentListTitle"] ?? "");
 }
 
 <div class="container-fluid py-0 my-0">
@@ -41,6 +41,9 @@
                         }
                     </tbody>
                 </table>
+                        <p class="mt-5">
+                            <a asp-action="List" asp-controller="Payment" class="btn btn-primary">Show All Payments</a>
+                        </p>
             </div>
         </div>
     </div>

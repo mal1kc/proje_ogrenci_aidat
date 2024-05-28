@@ -3,7 +3,7 @@ using OgrenciAidatSistemi.Services;
 
 namespace OgrenciAidatSistemi.Invokables
 {
-    public class PaymentCreatorInvokable(PaymentService paymentService) : IInvocable
+    public class PaymentCreatorInvocable(PaymentService paymentService) : IInvocable
     {
         private readonly PaymentService _paymentService = paymentService;
 

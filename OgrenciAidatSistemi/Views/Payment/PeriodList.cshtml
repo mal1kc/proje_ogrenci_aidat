@@ -30,29 +30,25 @@
     <thead>
         <tr>
             <th>
-                <list-page-link-item class="btn-sort" asp-action="PeriodList" sort-order="@ViewData["IdSortOrder"]?.ToString()"
-                    asp-route-searchString="@ViewData["CurrentSearchString"]?.ToString()">Period Id</list-page-link-item>
+                <list-page-link-item class="btn-sort" asp-action="PeriodList" sort-order="@ViewData["IdSortOrder"]?.ToString()">Period Id</list-page-link-item>
             </th>
             <th>
-                <list-page-link-item class="btn-sort" asp-action="PeriodList" sort-order="@ViewData["StudentIdSortOrder"]?.ToString()"
-                    asp-route-searchString="@ViewData["CurrentSearchString"]?.ToString()">Student</list-page-link-item>
+                <list-page-link-item class="btn-sort" asp-action="PeriodList" sort-order="@ViewData["StudentIdSortOrder"]?.ToString()">Student</list-page-link-item>
             </th>
             <th>
-                <list-page-link-item class="btn-sort" asp-action="PeriodList" sort-order="@ViewData["StartDateSortOrder"]?.ToString()"
-                    asp-route-searchString="@ViewData["CurrentSearchString"]?.ToString()">Period Start Date</list-page-link-item>
+                <list-page-link-item class="btn-sort" asp-action="PeriodList" sort-order="@ViewData["StartDateSortOrder"]?.ToString()">Period Start Date</list-page-link-item>
             </th>
             <th>
-                <list-page-link-item class="btn-sort" asp-action="PeriodList" sort-order="@ViewData["EndDateSortOrder"]?.ToString()"
-                    asp-route-searchString="@ViewData["CurrentSearchString"]?.ToString()">Period End Date</list-page-link-item>
+                <list-page-link-item class="btn-sort" asp-action="PeriodList" sort-order="@ViewData["EndDateSortOrder"]?.ToString()">Period End Date</list-page-link-item>
             </th>
             <th>
-                <list-page-link-item class="btn-sort" asp-action="PeriodList" sort-order="@ViewData["PerPaymentAmountSortOrder"]?.ToString()"
-                    asp-route-searchString="@ViewData["CurrentSearchString"]?.ToString()">Per Payment Amount</list-page-link-item>
+                <list-page-link-item class="btn-sort" asp-action="PeriodList" sort-order="@ViewData["PerPaymentAmountSortOrder"]?.ToString()">Per Payment Amount</list-page-link-item>
             </th>
             <th>
-                <list-page-link-item class="btn-sort" asp-action="PeriodList" sort-order="@ViewData["TotalAmountSortOrder"]?.ToString()"
-                    asp-route-searchString="@ViewData["CurrentSearchString"]?.ToString()">Total Amount</list-page-link-item>
+                <list-page-link-item class="btn-sort" asp-action="PeriodList" sort-order="@ViewData["TotalAmountSortOrder"]?.ToString()">Total Amount</list-page-link-item>
             </th>
+            <th>
+                <list-page-link-item class="btn-sort" asp-action="PeriodList" sort-order="@ViewData["OccurrenceSortOrder"]?.ToString()">Occurrence</list-page-link-item>
             </tr>
     </thead>
     <tbody>
@@ -63,11 +59,11 @@
                 <td>
                     <partial name="_StudentViewPartial" model="item.Student?.ToView(true)" />
                 </td>
-                <td>@Html.DisplayFor(modelItem => item.StartDate)</td>
-                <td>@Html.DisplayFor(modelItem => item.EndDate)</td>
+                <td class="date">@Html.DisplayFor(modelItem => item.StartDate)</td>
+                <td class="date">@Html.DisplayFor(modelItem => item.EndDate)</td>
                 <td>@Html.DisplayFor(modelItem => item.PerPaymentAmount)</td>
                 <td>@Html.DisplayFor(modelItem => item.TotalAmount)</td>
-                <td>
+                <td>@Html.DisplayFor(modelItem => item.Occurrence)</td>
               <td>
                     <div class="btn-group">
                     <a asp-action="PeriodEdit" asp-route-id="@item.Id"

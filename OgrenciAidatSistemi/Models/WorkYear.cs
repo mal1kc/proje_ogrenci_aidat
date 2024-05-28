@@ -1,4 +1,5 @@
 using OgrenciAidatSistemi.Models.Interfaces;
+using OgrenciAidatSistemi.Models.ViewModels;
 
 namespace OgrenciAidatSistemi.Models
 {
@@ -10,6 +11,7 @@ namespace OgrenciAidatSistemi.Models
         public School? School { get; set; }
         public static ModelSearchConfig<WorkYear> SearchConfig =>
             new(
+                defaultSortMethod: s => s.CreatedAt,
                 sortingMethods: new()
                 {
                     { "Id", static s => s.Id },

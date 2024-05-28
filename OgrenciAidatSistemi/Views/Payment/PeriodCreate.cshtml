@@ -55,7 +55,7 @@
                     <option value="">Çalışma Yılı Seçiniz</option>
                     @foreach (var WorkYear in ViewBag.WorkYears)
                     {
-                        <option value="@WorkYear.Id"> id: @WorkYear.Id -  @WorkYear.StartDate.Month / @WorkYear.StartDate.Year - @WorkYear.EndDate.Month / @WorkYear.EndDate.Year
+                        <option value="@WorkYear.Id"> id: @WorkYear.Id - @WorkYear.StartDate.Month / @WorkYear.StartDate.Year - @WorkYear.EndDate.Month / @WorkYear.EndDate.Year
                             @if (isSiteAdmin == true)
                             {
                                 <text> @WorkYear.School.Name</text>

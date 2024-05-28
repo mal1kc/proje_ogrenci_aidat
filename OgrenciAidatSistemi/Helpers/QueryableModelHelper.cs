@@ -1,4 +1,3 @@
-using System.Linq.Expressions;
 using Microsoft.AspNetCore.Mvc.ViewFeatures;
 using OgrenciAidatSistemi.Models.Interfaces;
 
@@ -13,7 +12,6 @@ namespace OgrenciAidatSistemi.Helpers
     public class QueryableModelHelper<T>
         where T : ISearchableModel<T>
     {
-        private readonly ILogger<QueryableModelHelper<T>> _logger;
         private readonly IQueryable<T> _sourceQueryable;
         private readonly ModelSearchConfig<T> _searchConfig;
         private IQueryable<T> _resultedQueryable;
@@ -23,8 +21,6 @@ namespace OgrenciAidatSistemi.Helpers
             _sourceQueryable = source;
             _searchConfig = searchConfig;
             _resultedQueryable = _sourceQueryable;
-            // TODO: Add logger factory or turn this helper into a service and inject the logger
-            _logger = new Logger<QueryableModelHelper<T>>(new LoggerFactory());
         }
 
         public IQueryable<T> Search(string? searchString, string? searchField = null)
@@ -32,53 +28,36 @@ namespace OgrenciAidatSistemi.Helpers
             if (string.IsNullOrEmpty(searchString) || searchString.Length < 3)
                 return _sourceQueryable;
 
-            var resultQueryable = _sourceQueryable;
-
-            var resultParallel = resultQueryable.AsParallel();
-            if (string.IsNullOrEmpty(searchField))
-            {
-                // if searchField is not specified, search in all fields
-                resultParallel = resultParallel.Where(model =>
-                    _searchConfig.SearchMethods.Values.Any(searchMethod =>
-                        searchMethod(model, searchString)
+            return string.IsNullOrEmpty(searchField)
+                ? _sourceQueryable
+                    .AsParallel()
+                    .Where(model =>
+                        _searchConfig.SearchMethods.Values.Any(searchMethod =>
+                            searchMethod(model, searchString)
+                        )
                     )
-                );
-            }
-            else if (
-                _searchConfig.SearchMethods.TryGetValue(
-                    searchField,
-                    out Func<T, string, bool>? value
-                )
-            )
-            {
-                // if searchField is specified, search in the specified field
-                var searchMethod = value;
-                resultParallel = resultParallel.Where(model => searchMethod(model, searchString));
-            }
-            resultQueryable = resultParallel.AsQueryable();
-
-            return resultQueryable;
+                    .AsQueryable()
+                : _sourceQueryable
+                    .AsParallel()
+                    .Where(model =>
+                        _searchConfig.SearchMethods.TryGetValue(searchField, out var searchMethod)
+                        && searchMethod(model, searchString)
+                    )
+                    .AsQueryable();
         }
 
         public IQueryable<T> Sort(string fieldName, SortOrderEnum sortOrder)
         {
-            // if fieldName is not specified, return the current queryable
-            // || if fieldName is not in the sorting methods, return the current queryable
             if (
                 string.IsNullOrEmpty(fieldName)
-                || !_searchConfig.SortingMethods.TryGetValue(
-                    fieldName,
-                    out Expression<Func<T, object>>? value
-                )
+                || !_searchConfig.SortingMethods.TryGetValue(fieldName, out var sortExpression)
             )
                 return _resultedQueryable;
 
-            var sortMethod = value.Compile();
-
             _resultedQueryable =
                 sortOrder == SortOrderEnum.DESC
-                    ? _resultedQueryable.OrderByDescending(sortMethod).AsQueryable()
-                    : _resultedQueryable.OrderBy(sortMethod).AsQueryable();
+                    ? _resultedQueryable.OrderByDescending(sortExpression)
+                    : _resultedQueryable.OrderBy(sortExpression);
 
             return _resultedQueryable;
         }
@@ -112,6 +91,10 @@ namespace OgrenciAidatSistemi.Helpers
                 _resultedQueryable = Search(searchString, searchField);
             if (!string.IsNullOrEmpty(sortField))
                 _resultedQueryable = Sort(sortField, sortType);
+            else
+            {
+                _resultedQueryable = _resultedQueryable.OrderBy(_searchConfig.DefaultSortMethod);
+            }
             return _resultedQueryable;
         }
 
@@ -128,39 +111,30 @@ namespace OgrenciAidatSistemi.Helpers
             int pageSize = 20
         )
         {
-            // validate sortOrder check '_' is exist and split it check field and type is valid
+            pageIndex = pageIndex < 1 ? 1 : pageIndex;
+            pageSize = pageSize < 1 ? 10 : pageSize;
+            pageSize = pageSize > 100 ? 100 : pageSize;
+
+            // Validate and parse sortOrder
             string? sortField = null;
             string? sortType = null;
-            if (!string.IsNullOrEmpty(sortOrder) && sortOrder.Contains('_'))
+            if (!string.IsNullOrEmpty(sortOrder))
             {
                 var parts = sortOrder.Split('_');
-                if (parts.Length == 2)
+                if (
+                    parts.Length == 2
+                    && _searchConfig.AllowedFieldsForSort.Contains(parts[0])
+                    && (parts[1] == "asc" || parts[1] == "desc")
+                )
                 {
                     sortField = parts[0];
                     sortType = parts[1];
                 }
             }
 
-            if (searchField != null && !_searchConfig.AllowedFieldsForSearch.Contains(searchField))
-            {
-                // if searchField is not in the allowed fields, reset it
-                searchField = null;
-                searchString = null;
-            }
-
-            if (sortType != null && sortType != "asc" && sortType != "desc")
-            {
-                // if sortType is not valid, reset it
-                sortOrder = null;
-                sortField = null;
-                sortType = null;
-            }
-
-            // generate ViewData {Field}SortOrder for view
+            // Generate ViewData for sorting
             foreach (var field in _searchConfig.AllowedFieldsForSort)
             {
-                // example result: FirstNameSortOrder = FirstName_desc or FirstName_asc
-
                 ViewData[$"{field}SortOrder"] =
                     sortOrder == null
                         ? $"{field}_asc"
@@ -185,19 +159,16 @@ namespace OgrenciAidatSistemi.Helpers
                 sortField,
                 sortType == "asc" ? SortOrderEnum.ASC : SortOrderEnum.DESC
             );
+
+            // if order is not specified, sort by default field
+
             var paginatedModel = _resultedQueryable.Skip((pageIndex - 1) * pageSize).Take(pageSize);
 
-            int countOfmodelopResult;
-            // try to evaluate the query before getting the count
-            countOfmodelopResult = _resultedQueryable.Count();
-
-            // _logger.LogError(
-            //     message: "Error : {} while evaluating the query for pagination details : {}",
-            //     _resultedQueryable.Expression.ToString()
+            var countOfModelResult = _resultedQueryable.Count();
 
             ViewData["CurrentPageIndex"] = pageIndex;
-            ViewData["TotalPages"] = (int)Math.Ceiling(countOfmodelopResult / (double)pageSize);
-            ViewData["TotalItems"] = countOfmodelopResult;
+            ViewData["TotalPages"] = (int)Math.Ceiling(countOfModelResult / (double)pageSize);
+            ViewData["TotalItems"] = countOfModelResult;
             ViewData["PageSize"] = pageSize;
 
             return paginatedModel;

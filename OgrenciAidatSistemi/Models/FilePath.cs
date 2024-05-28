@@ -12,8 +12,6 @@ namespace OgrenciAidatSistemi.Models
         string description
     ) : BaseDbModel
     {
-        public int Id { get; set; }
-
         public string? Path { get; set; } = path;
         public string Name { get; set; } = name;
         public string Extension { get; set; } = extension;
@@ -23,9 +21,6 @@ namespace OgrenciAidatSistemi.Models
 
         public User CreatedBy { get; set; }
         public string FileHash { get; set; }
-
-        public DateTime CreatedAt { get; set; } = DateTime.Now;
-        public DateTime UpdatedAt { get; set; } = DateTime.Now;
 
         // get safely data of file asynchrously
         public async Task<byte[]> GetDataAsync()
@@ -41,14 +36,10 @@ namespace OgrenciAidatSistemi.Models
 
         public static string ComputeHash(string filePath)
         {
-            using (var md5 = MD5.Create())
-            {
-                using (var stream = File.OpenRead(filePath))
-                {
-                    var hash = md5.ComputeHash(stream);
-                    return BitConverter.ToString(hash).Replace("-", "").ToLowerInvariant();
-                }
-            }
+            using var md5 = MD5.Create();
+            using var stream = File.OpenRead(filePath);
+            var hash = md5.ComputeHash(stream);
+            return BitConverter.ToString(hash).Replace("-", "").ToLowerInvariant();
         }
 
         public string ComputeHash()

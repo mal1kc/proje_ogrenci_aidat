@@ -1,4 +1,5 @@
 using OgrenciAidatSistemi.Models.Interfaces;
+using OgrenciAidatSistemi.Models.ViewModels;
 
 namespace OgrenciAidatSistemi.Models
 {
@@ -19,29 +20,39 @@ namespace OgrenciAidatSistemi.Models
         public decimal PerPaymentAmount { get; set; }
         public decimal TotalAmount { get; set; }
 
-        public required ISet<Payment> Payments { get; set; }
+        public ICollection<Payment>? Payments { get; set; }
 
         public required WorkYear? WorkYear { get; set; }
         public Occurrence Occurrence { get; set; }
 
+        public bool IsExhausted => EndDate < DateOnly.FromDateTime(DateTime.UtcNow);
+
+        public bool IsActive =>
+            StartDate <= DateOnly.FromDateTime(DateTime.UtcNow)
+            && EndDate >= DateOnly.FromDateTime(DateTime.UtcNow);
+
         public PaymentPeriod()
         {
-            CreatedAt = DateTime.Now;
-            UpdatedAt = DateTime.Now;
+            CreatedAt = DateTime.UtcNow;
+            UpdatedAt = DateTime.UtcNow;
             Occurrence = Occurrence.Monthly; // default occurrence
         }
 
         public static ModelSearchConfig<PaymentPeriod> SearchConfig =>
             new(
+                defaultSortMethod: s => s.CreatedAt,
                 sortingMethods: new()
                 {
                     { "Id", static s => s.Id },
                     { "StartDate", static s => s.StartDate },
                     { "EndDate", static s => s.EndDate },
-                    { "TotalAmount", static s => s.TotalAmount },
-                    { "PerPaymentAmount", static s => s.PerPaymentAmount },
+                    { "TotalAmount", static s => (int)s.TotalAmount },
+                    { "PerPaymentAmount", static s => (int)s.PerPaymentAmount },
                     { "CreatedAt", static s => s.CreatedAt },
                     { "UpdatedAt", static s => s.UpdatedAt },
+                    { "StudentId", static s => s.Student == null ? "" : s.Student.StudentId },
+                    { "WorkYear", static s => s.WorkYear == null ? "" : s.WorkYear.Id },
+                    { "Occurrence", static s => s.Occurrence }
                 },
                 searchMethods: new()
                 {
@@ -119,27 +130,5 @@ namespace OgrenciAidatSistemi.Models
                 PerPaymentAmount = PerPaymentAmount,
             };
         }
-    }
-
-    public class PaymentPeriodView : IBaseDbModelView
-    {
-        public int Id { get; set; }
-
-        public StudentView? Student { get; set; }
-
-        public ISet<PaymentView>? Payments { get; set; }
-
-        public WorkYearView? WorkYear { get; set; }
-        public DateTime CreatedAt { get; set; }
-        public DateTime UpdatedAt { get; set; }
-        public DateOnly StartDate { get; set; }
-        public DateOnly EndDate { get; set; }
-
-        public decimal PerPaymentAmount { get; set; }
-        public decimal TotalAmount { get; set; }
-        public Occurrence Occurrence { get; set; }
-
-        public int? WorkYearId { get; set; }
-        public int? StudentId { get; set; }
     }
 }

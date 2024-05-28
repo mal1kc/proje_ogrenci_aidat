@@ -1,4 +1,5 @@
 using OgrenciAidatSistemi.Models.Interfaces;
+using OgrenciAidatSistemi.Models.ViewModels;
 
 namespace OgrenciAidatSistemi.Models
 {
@@ -13,6 +14,7 @@ namespace OgrenciAidatSistemi.Models
 
         public static ModelSearchConfig<School> SearchConfig =>
             new(
+                defaultSortMethod: s => s.CreatedAt,
                 sortingMethods: new()
                 {
                     { "Id", static s => s.Id },
@@ -69,23 +71,6 @@ namespace OgrenciAidatSistemi.Models
                 CreatedAt = this.CreatedAt,
                 UpdatedAt = this.UpdatedAt
             };
-        }
-    }
-
-    public class SchoolView : IBaseDbModelView
-    {
-        public int Id { get; set; }
-        public string? Name { get; set; }
-        public ISet<SchoolAdminView>? SchoolAdmins { get; set; }
-
-        public ISet<StudentView>? Students { get; set; }
-        public DateTime CreatedAt { get; set; }
-        public DateTime UpdatedAt { get; set; }
-
-        public School ToModel(bool ignoreBidirectNav = false)
-        {
-            // TODO: Implement ToModel to all view models for more manageable code
-            throw new NotImplementedException();
         }
     }
 }

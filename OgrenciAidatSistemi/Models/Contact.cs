@@ -1,7 +1,5 @@
-using System.Text.Json;
-using System.Text.RegularExpressions;
-using OgrenciAidatSistemi.Configurations;
 using OgrenciAidatSistemi.Models.Interfaces;
+using OgrenciAidatSistemi.Models.ViewModels;
 
 namespace OgrenciAidatSistemi.Models
 {
@@ -14,6 +12,7 @@ namespace OgrenciAidatSistemi.Models
 
         public static ModelSearchConfig<ContactInfo> SearchConfig =>
             new(
+                defaultSortMethod: s => s.CreatedAt, // Set the default sort method
                 sortingMethods: new()
                 {
                     { "PhoneNumber", static s => s.PhoneNumber ?? "" },
@@ -55,21 +54,9 @@ namespace OgrenciAidatSistemi.Models
                 }
             );
 
-        static bool ValidateEmail(string email)
-        {
-            string regex = Constants.EmailRegEx;
-            return Regex.IsMatch(email, regex);
-        }
-
-        static bool ValidatePhoneNumber(string phoneNumber)
-        {
-            string regex = Constants.PhoneNumberRegEx;
-            return Regex.IsMatch(phoneNumber, regex);
-        }
-
         public ContactInfoView ToView(bool ignoreBidirectNav = false)
         {
-            return new ContactInfoView
+            return new ContactInfoView()
             {
                 Id = Id,
                 PhoneNumber = PhoneNumber,
@@ -79,18 +66,7 @@ namespace OgrenciAidatSistemi.Models
                 UpdatedAt = UpdatedAt
             };
         }
-    }
 
-    public class ContactInfoView : IBaseDbModelView
-    {
-        public int Id { get; set; }
-        public string? PhoneNumber { get; set; }
-        public IList<string>? Addresses { get; set; }
-        public string? Email { get; set; }
-        public DateTime CreatedAt { get; set; }
-        public DateTime UpdatedAt { get; set; }
-
-        public string ToJson() =>
-            JsonSerializer.Serialize(this, IBaseDbModel.JsonSerializerOptions);
+        // Rest of the code...
     }
 }

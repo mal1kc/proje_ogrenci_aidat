@@ -61,7 +61,7 @@ namespace OgrenciAidatSistemi.Data
             if (_verboseLogging)
             {
                 var students = await _context
-                    .Students.Where(s => s.CreatedAt > DateTime.Now.AddMinutes(-3))
+                    .Students.Where(s => s.CreatedAt > DateTime.UtcNow.AddMinutes(-3))
                     .ToListAsync();
                 _logger.LogInformation(
                     "StudentDBSeeder: AfterSeedDataAsync students: we have {} added in last 3 minutes",
@@ -103,14 +103,14 @@ namespace OgrenciAidatSistemi.Data
                 EmailAddress = "temp@random.com",
                 FirstName = faker.Name.FirstName(),
                 LastName = faker.Name.LastName(),
-                UpdatedAt = DateTime.Now,
+                UpdatedAt = DateTime.UtcNow,
             };
             student.ContactInfo = new ContactInfo
             {
                 Email = student.EmailAddress,
                 PhoneNumber = faker.Phone.PhoneNumber(),
-                CreatedAt = DateTime.Now,
-                UpdatedAt = DateTime.Now,
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow,
             };
             return student;
         }
@@ -134,11 +134,11 @@ namespace OgrenciAidatSistemi.Data
             {
                 Email = entity.EmailAddress,
                 PhoneNumber = "+90 555 555 55 55",
-                CreatedAt = DateTime.Now,
-                UpdatedAt = DateTime.Now,
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow,
             };
-            entity.CreatedAt = DateTime.Now;
-            entity.UpdatedAt = DateTime.Now;
+            entity.CreatedAt = DateTime.UtcNow;
+            entity.UpdatedAt = DateTime.UtcNow;
 
             entity.EmailAddress = entity.StudentId + $"@mail.school.com";
             entity.ContactInfo.Email = entity.EmailAddress;
@@ -173,8 +173,8 @@ namespace OgrenciAidatSistemi.Data
                     Name = "RandomSchool" + faker.Random.Number(100),
                     Students = null
                 };
-                entity.School.CreatedAt = DateTime.Now;
-                entity.School.UpdatedAt = DateTime.Now;
+                entity.School.CreatedAt = DateTime.UtcNow;
+                entity.School.UpdatedAt = DateTime.UtcNow;
             }
 
             // regenerate unique id because we have updated the school

@@ -17,16 +17,16 @@ namespace OgrenciAidatSistemi.Tests
                 {
                     Id = 1,
                     Name = "Item1",
-                    CreatedAt = DateTime.Now,
-                    CreatedDate = DateOnly.FromDateTime(DateTime.Now),
+                    CreatedAt = DateTime.UtcNow,
+                    CreatedDate = DateOnly.FromDateTime(DateTime.UtcNow),
                     Amount = 100.0m
                 },
                 new()
                 {
                     Id = 2,
                     Name = "Item2",
-                    CreatedAt = DateTime.Now,
-                    CreatedDate = DateOnly.FromDateTime(DateTime.Now),
+                    CreatedAt = DateTime.UtcNow,
+                    CreatedDate = DateOnly.FromDateTime(DateTime.UtcNow),
                     Amount = 200.0m
                 }
             }.AsQueryable();
@@ -60,16 +60,16 @@ namespace OgrenciAidatSistemi.Tests
                 {
                     Id = 1,
                     Name = "Item1",
-                    CreatedAt = DateTime.Now,
-                    CreatedDate = DateOnly.FromDateTime(DateTime.Now),
+                    CreatedAt = DateTime.UtcNow,
+                    CreatedDate = DateOnly.FromDateTime(DateTime.UtcNow),
                     Amount = 100.0m
                 },
                 new()
                 {
                     Id = 2,
                     Name = "Item2",
-                    CreatedAt = DateTime.Now,
-                    CreatedDate = DateOnly.FromDateTime(DateTime.Now),
+                    CreatedAt = DateTime.UtcNow,
+                    CreatedDate = DateOnly.FromDateTime(DateTime.UtcNow),
                     Amount = 200.0m
                 }
             }.AsQueryable();
@@ -97,8 +97,8 @@ namespace OgrenciAidatSistemi.Tests
                 {
                     Id = 1,
                     Name = "Item1",
-                    CreatedAt = DateTime.Now,
-                    CreatedDate = DateOnly.FromDateTime(DateTime.Now),
+                    CreatedAt = DateTime.UtcNow,
+                    CreatedDate = DateOnly.FromDateTime(DateTime.UtcNow),
                     Amount = 100.0m,
                     TestSeconds = new TestSecondItem { Name = "Related1" }
                 },
@@ -106,8 +106,8 @@ namespace OgrenciAidatSistemi.Tests
                 {
                     Id = 2,
                     Name = "Item2",
-                    CreatedAt = DateTime.Now,
-                    CreatedDate = DateOnly.FromDateTime(DateTime.Now),
+                    CreatedAt = DateTime.UtcNow,
+                    CreatedDate = DateOnly.FromDateTime(DateTime.UtcNow),
                     Amount = 200.0m,
                     TestSeconds = new TestSecondItem { Name = "Related2" }
                 }
@@ -148,14 +148,14 @@ namespace OgrenciAidatSistemi.Tests
             Assert.Equal("Related2", dataTable.Rows[1]["TestSeconds.Name"]);
 
             Assert.Equal(
-                DateTime.Now.ToString("dd/MM/yyyy"),
+                DateTime.UtcNow.ToString("dd/MM/yyyy"),
                 DateTime
                     .Parse(dataTable.Rows[0]["CreatedAt"].ToString() ?? "0")
                     .ToString("dd/MM/yyyy")
             );
 
             Assert.Equal(
-                DateTime.Now.ToString("dd/MM/yyyy"),
+                DateTime.UtcNow.ToString("dd/MM/yyyy"),
                 DateTime
                     .Parse(dataTable.Rows[0]["CreatedDate"].ToString() ?? "0")
                     .ToString("dd/MM/yyyy")

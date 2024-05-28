@@ -29,16 +29,19 @@
                             <dd class="col-sm-8">@Html.DisplayFor(model => model.Id)</dd>
 
                             <dt class="col-sm-4">Start Date:</dt>
-                            <dd class="col-sm-8">@Model.StartDate.ToShortDateString()</dd>
+                            <dd class="col-sm-8 dateonly">
+                                @Model.StartDate
+                            </dd>
 
                             <dt class="col-sm-4">End Date:</dt>
-                            <dd class="col-sm-8">@Model.EndDate.ToShortDateString()</dd>
+                            <dd class="col-sm-8 dateonly">@Model.EndDate
+                            </dd>
 
                             <dt class="col-sm-4">@Html.DisplayNameFor(model => model.CreatedAt)</dt>
-                            <dd class="col-sm-8">@Html.DisplayFor(model => model.CreatedAt)</dd>
+                            <dd class="col-sm-8 date">@Html.DisplayFor(model => model.CreatedAt)</dd>
 
                             <dt class="col-sm-4">@Html.DisplayNameFor(model => model.UpdatedAt)</dt>
-                            <dd class="col-sm-8">@Html.DisplayFor(model => model.UpdatedAt)</dd>
+                            <dd class="col-sm-8 date">@Html.DisplayFor(model => model.UpdatedAt)</dd>
 
                             @if (Model.School != null)
                             {

@@ -37,4 +37,56 @@ window.addEventListener('DOMContentLoaded', (event) => {
     }
 
     updateButtonText();
-});
+}
+
+
+);
+window.onload = function () {
+    // Get all date elements
+    var dateElements = document.getElementsByClassName('date');
+
+    // Counter for conversions
+    var conversionCount = 0;
+
+    // Convert the dates to the user's local timezone
+    for (var i = 0; i < dateElements.length; i++) {
+        var dateElement = dateElements[i];
+        if (!dateElement.textContent || dateElement.textContent === '' || dateElement.textContent === 'Unknown') {
+            continue;
+        }
+        var originalDate = dateElement.textContent + 'Z'; // Add 'Z' to indicate UTC time
+        var date = new Date(originalDate);
+
+        // Format the date
+        var options = { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false };
+        var convertedDate = date.toLocaleString(navigator.language, options);
+
+        dateElement.textContent = convertedDate;
+
+        // Increment the counter and log if it reaches 3
+        conversionCount++;
+        if (conversionCount === 3) {
+            console.log('Converted 3 dates. Most recent conversion: ' + originalDate + ' -> ' + convertedDate);
+            conversionCount = 0;
+        }
+    }
+
+    var dateOnlyElements = document.getElementsByClassName('dateonly');
+    // example dateonly text (UTC by def): 11/24/2024
+    for (var i = 0; i < dateOnlyElements.length; i++) {
+        var dateElement = dateOnlyElements[i];
+        if (!dateElement.textContent || dateElement.textContent === '' || dateElement.textContent === 'Unknown') {
+            continue;
+        }
+        var originalDate = dateElement.textContent;
+        var dateParts = originalDate.split('/');
+        var date = new Date(Date.UTC(dateParts[2], dateParts[0] - 1, dateParts[1]));
+
+        // Format the date
+        var options = { year: 'numeric', month: '2-digit', day: '2-digit' };
+        var convertedDate = date.toLocaleString(navigator.language, options);
+
+        dateElement.textContent = convertedDate;
+    }
+
+}

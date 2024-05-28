@@ -80,8 +80,8 @@ namespace OgrenciAidatSistemi.Data
             return new School
             {
                 Name = "RandomSchool" + random.Next(100),
-                CreatedAt = DateTime.Now,
-                UpdatedAt = DateTime.Now,
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow,
                 Students = null
             };
         }
@@ -102,8 +102,8 @@ namespace OgrenciAidatSistemi.Data
                 return;
             }
 
-            entity.CreatedAt = DateTime.Now;
-            entity.UpdatedAt = DateTime.Now;
+            entity.CreatedAt = DateTime.UtcNow;
+            entity.UpdatedAt = DateTime.UtcNow;
 
             await _context.Schools.AddAsync(entity);
             _seedCount++;
@@ -114,22 +114,22 @@ namespace OgrenciAidatSistemi.Data
             new()
             {
                 Name = "School 1",
-                CreatedAt = DateTime.Now,
-                UpdatedAt = DateTime.Now,
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow,
                 Students = null
             },
             new()
             {
                 Name = "School 2",
-                CreatedAt = DateTime.Now,
-                UpdatedAt = DateTime.Now,
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow,
                 Students = null
             },
             new()
             {
                 Name = "School 3",
-                CreatedAt = DateTime.Now,
-                UpdatedAt = DateTime.Now,
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow,
                 Students = null
             }
         ];
