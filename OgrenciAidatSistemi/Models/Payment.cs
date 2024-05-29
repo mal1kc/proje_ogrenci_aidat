@@ -10,7 +10,7 @@ namespace OgrenciAidatSistemi.Models
         UnPaid, // when only not paid
         Cash,
         Bank,
-        DebitCard,
+        CreditCard,
         Check
     }
 
@@ -250,16 +250,16 @@ namespace OgrenciAidatSistemi.Models
         }
     }
 
-    public class DebitCardPayment : PaidPayment
+    public class CreditCardPayment : PaidPayment
     {
         public required string CardNumber { get; set; }
         public required string CardHolderName { get; set; }
         public required string ExpiryDate { get; set; }
         public required char[] CVC { get; set; }
 
-        public DebitCardPayment()
+        public CreditCardPayment()
         {
-            PaymentMethod = PaymentMethod.DebitCard;
+            PaymentMethod = PaymentMethod.CreditCard;
         }
 
         public override PaymentView ToView(bool ignoreBidirectNav = false)
@@ -284,7 +284,7 @@ namespace OgrenciAidatSistemi.Models
 
         public override PaidPayment Copy()
         {
-            return new DebitCardPayment
+            return new CreditCardPayment
             {
                 CardNumber = CardNumber,
                 CardHolderName = CardHolderName,
@@ -299,7 +299,6 @@ namespace OgrenciAidatSistemi.Models
         public required string CashierName { get; set; }
         public required string ReceiptNumber { get; set; }
         public required DateTime ReceiptDate { get; set; }
-        public required string ReceiptIssuer { get; set; }
 
         public CashPayment()
         {
@@ -321,7 +320,6 @@ namespace OgrenciAidatSistemi.Models
                 CashierName = CashierName,
                 ReceiptNumber = ReceiptNumber,
                 ReceiptDate = ReceiptDate,
-                ReceiptIssuer = ReceiptIssuer
             };
         }
 
@@ -332,7 +330,6 @@ namespace OgrenciAidatSistemi.Models
                 CashierName = CashierName,
                 ReceiptNumber = ReceiptNumber,
                 ReceiptDate = ReceiptDate,
-                ReceiptIssuer = ReceiptIssuer
             };
         }
     }
@@ -345,7 +342,7 @@ namespace OgrenciAidatSistemi.Models
             {
                 PaymentMethod.Cash => "Nakit",
                 PaymentMethod.Bank => "Banka",
-                PaymentMethod.DebitCard => "Banka/Kredi Kartı",
+                PaymentMethod.CreditCard => "Banka/Kredi Kartı",
                 PaymentMethod.Check => "Çek",
                 _ => "Bilinmiyor"
             };

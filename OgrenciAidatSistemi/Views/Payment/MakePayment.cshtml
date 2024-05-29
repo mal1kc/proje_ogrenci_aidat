@@ -1,0 +1,65 @@
+@model PaymentCreateView
+@{
+    var paymentMethods = ViewBag.PaymentMethods as ICollection<PaymentMethod> ?? new List<PaymentMethod>() { PaymentMethod.CreditCard};
+    var requiredFields = PaymentCreateView.RequiredFields;
+}
+
+<form method="post">
+    <div class="mb-3">
+        <label for="paymentMethod" class="form-label">Payment Method</label>
+        <select id="paymentMethod" name="PaymentMethod" class="form-select">
+            @foreach (var method in paymentMethods)
+            {
+                <option value="@method">@method</option>
+            }
+        </select>
+    </div>
+
+    <div class="mb-3">
+        <label for="receipt" class="form-label">Receipt</label>
+        <input type="file" id="receipt" name="Receipt" class="form-control" />
+    </div>
+
+    <div class="mb-3">
+        <label for="amount" class="form-label">Amount</label>
+        <input readonly type="number" id="amount" name="Amount" value="@Model.Amount" class="form-control" />
+    </div>
+
+    @foreach (var method in paymentMethods)
+    {
+        <div id="@method" style="display: none;">
+            @foreach (var field in requiredFields[method])
+            {
+                if (new List<string> { "PaymentMethod", "Amount" }.Contains(field))
+                {
+                    continue;
+                }
+
+                <div class="mb-3">
+                    <label for="@field" class="form-label">@field</label>
+                    <input type="text" id="@field" name="@field" class="form-control" />
+                </div>
+            }
+        </div>
+    }
+    <button type="submit" class="btn btn-primary">Make Payment</button>
+</form>
+
+<script>
+    const paymentTypes = ['CreditCard', 'Bank', 'Check', 'Cash'];
+    document.addEventListener('DOMContentLoaded', (event) => {
+        document.getElementById('paymentMethod').addEventListener('change', function() {
+            // Hide all payment type specific fields
+            paymentTypes.forEach(function(paymentType) {
+                document.getElementById(paymentType).style.display = 'none';
+            });
+
+            // Show the fields for the selected payment type
+            var selectedPaymentType = this.value;
+            document.getElementById(selectedPaymentType).style.display = 'block';
+        });
+
+        // Trigger the change event on page load to show the correct fields
+        document.getElementById('paymentMethod').dispatchEvent(new Event('change'));
+    });
+</script>

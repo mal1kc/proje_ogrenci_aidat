@@ -16,7 +16,7 @@ namespace OgrenciAidatSistemi.Data
         public DbSet<PaymentPeriod> PaymentPeriods { get; set; }
         public DbSet<CashPayment> CashPayments { get; set; }
         public DbSet<BankPayment> BankPayments { get; set; }
-        public DbSet<DebitCardPayment> DebitCardPayments { get; set; }
+        public DbSet<CreditCardPayment> DebitCardPayments { get; set; }
         public DbSet<CheckPayment> CheckPayments { get; set; }
         public DbSet<UnPaidPayment> UnPaidPayments { get; set; }
         public DbSet<WorkYear> WorkYears { get; set; }
@@ -43,7 +43,7 @@ namespace OgrenciAidatSistemi.Data
             modelBuilder.Entity<CashPayment>().HasBaseType<PaidPayment>();
             modelBuilder.Entity<BankPayment>().HasBaseType<PaidPayment>();
             modelBuilder.Entity<CheckPayment>().HasBaseType<PaidPayment>();
-            modelBuilder.Entity<DebitCardPayment>().HasBaseType<PaidPayment>();
+            modelBuilder.Entity<CreditCardPayment>().HasBaseType<PaidPayment>();
             modelBuilder.Entity<UnPaidPayment>().HasBaseType<Payment>();
 
             // Configure role properties for User and derived types
@@ -74,7 +74,7 @@ namespace OgrenciAidatSistemi.Data
                 .HasDiscriminator<PaymentMethod>("PaymentMethod")
                 .HasValue<CashPayment>(PaymentMethod.Cash)
                 .HasValue<BankPayment>(PaymentMethod.Bank)
-                .HasValue<DebitCardPayment>(PaymentMethod.DebitCard)
+                .HasValue<CreditCardPayment>(PaymentMethod.CreditCard)
                 .HasValue<CheckPayment>(PaymentMethod.Check)
                 .HasValue<UnPaidPayment>(PaymentMethod.UnPaid);
 
@@ -172,7 +172,7 @@ namespace OgrenciAidatSistemi.Data
                 typeof(PaymentPeriod),
                 typeof(CashPayment),
                 typeof(BankPayment),
-                typeof(DebitCardPayment),
+                typeof(CreditCardPayment),
                 typeof(CheckPayment),
                 typeof(UnPaidPayment),
                 typeof(WorkYear),

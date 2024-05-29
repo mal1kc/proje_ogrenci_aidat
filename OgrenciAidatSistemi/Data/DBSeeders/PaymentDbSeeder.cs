@@ -98,8 +98,8 @@ namespace OgrenciAidatSistemi.Data.DBSeeders
                                 // iban length is 26
                                 IBAN = genIban(),
                             },
-                        PaymentMethod.DebitCard
-                            => new DebitCardPayment
+                        PaymentMethod.CreditCard
+                            => new CreditCardPayment
                             {
                                 Student = student,
                                 PaymentPeriod = paymentperiod,
@@ -125,7 +125,6 @@ namespace OgrenciAidatSistemi.Data.DBSeeders
                                 Student = student,
                                 CashierName = "cashier 1",
                                 ReceiptNumber = faker.Random.Number(1000, 9999).ToString(),
-                                ReceiptIssuer = "issuer 1",
                                 ReceiptDate = DateTime.UtcNow,
                                 PaymentPeriod = paymentperiod,
                             },
@@ -238,7 +237,7 @@ namespace OgrenciAidatSistemi.Data.DBSeeders
                 .BankPayments.Where(p => p.CreatedAt > tenminutesago)
                 .ToListAsync();
 
-            ICollection<DebitCardPayment> dbDebitCardPayments = await _context
+            ICollection<CreditCardPayment> dbDebitCardPayments = await _context
                 .DebitCardPayments.Where(p => p.CreatedAt > tenminutesago)
                 .ToListAsync();
 

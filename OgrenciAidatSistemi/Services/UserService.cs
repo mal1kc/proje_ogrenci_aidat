@@ -293,6 +293,38 @@ namespace OgrenciAidatSistemi.Services
             return (role, schoolId);
         }
 
+        public async Task<(UserRole? role, int? id)> GetUserRoleAndId()
+        {
+            var user = await GetCurrentUserAsync();
+            if (user == null || HttpContext == null || HttpContext.User == null)
+            {
+                _logger.LogWarning("User is not signed in");
+                return (null, null);
+            }
+
+            UserRole? role = null;
+            if (HttpContext.User.HasClaim(c => c.Type == ClaimTypes.Role))
+            {
+                var roleValue = HttpContext.User.FindFirst(ClaimTypes.Role)?.Value;
+                if (roleValue != null)
+                {
+                    role = UserRoleExtensions.GetRoleFromString(roleValue);
+                }
+            }
+
+            int? id = null;
+            if (HttpContext.User.HasClaim(c => c.Type == ClaimTypes.NameIdentifier))
+            {
+                var idValue = HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                if (idValue != null)
+                {
+                    id = int.Parse(idValue);
+                }
+            }
+
+            return (role, id);
+        }
+
         public async Task<bool> IsUserSignedIn()
         {
             if (HttpContext == null)

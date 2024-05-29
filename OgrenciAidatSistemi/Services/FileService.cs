@@ -4,22 +4,10 @@ using OgrenciAidatSistemi.Models;
 
 namespace OgrenciAidatSistemi.Services
 {
-    public class FileService
+    public class FileService(ILogger<FileService> logger, IWebHostEnvironment environment)
     {
-        private readonly ILogger<FileService> _logger;
-        private readonly AppDbContext _dbContext;
-        private readonly IWebHostEnvironment _environment;
-
-        public FileService(
-            ILogger<FileService> logger,
-            AppDbContext dbContext,
-            IWebHostEnvironment environment
-        )
-        {
-            _logger = logger;
-            _dbContext = dbContext;
-            _environment = environment;
-        }
+        private readonly ILogger<FileService> _logger = logger;
+        private readonly IWebHostEnvironment _environment = environment;
 
         public async Task<FilePath> UploadFileAsync(IFormFile file, User createdBy)
         {
@@ -38,12 +26,23 @@ namespace OgrenciAidatSistemi.Services
                 Directory.CreateDirectory(uploadsFolder);
             }
 
-            string uniqueFileName = Guid.NewGuid().ToString() + "_" + file.FileName;
-            var filePath = Path.Combine(uploadsFolder, uniqueFileName);
-
-            using (var stream = new FileStream(filePath, FileMode.Create))
+            string uniqueFileName;
+            var filePath = "";
+            do
             {
-                await file.CopyToAsync(stream);
+                uniqueFileName = Guid.NewGuid().ToString() + "_" + file.FileName;
+                filePath = Path.Combine(uploadsFolder, uniqueFileName);
+            } while (File.Exists(filePath));
+
+            using var stream = new MemoryStream();
+            await file.CopyToAsync(stream);
+            stream.Seek(0, SeekOrigin.Begin);
+            var fileHash = ComputeHash(stream);
+
+            using (var fileStream = new FileStream(filePath, FileMode.Create))
+            {
+                stream.Seek(0, SeekOrigin.Begin);
+                await stream.CopyToAsync(fileStream);
             }
 
             var filepath = new FilePath(
@@ -55,45 +54,45 @@ namespace OgrenciAidatSistemi.Services
                 description: "Uploaded file"
             )
             {
+                FileHash = fileHash,
                 CreatedBy = createdBy
             };
 
-            try
-            {
-                filepath.FileHash = ComputeHash(filePath);
-            }
-            catch (Exception e)
-            {
-                _logger.LogError(e, "Error while calculating hash");
-                throw new InvalidOperationException("Error while calculating hash");
-            }
             return filepath;
         }
 
         public async Task<byte[]> DownloadFileAsync(FilePath file)
         {
-            if (file == null)
+            if (file != null)
             {
-                throw new ArgumentNullException(nameof(file));
+                if (!File.Exists(file.Path))
+                {
+                    throw new FileNotFoundException("File not found", file.Path);
+                }
+
+                return await file.GetDataAsync();
             }
 
-            if (!File.Exists(file.Path))
-            {
-                throw new FileNotFoundException("File not found", file.Path);
-            }
-
-            return await file.GetDataAsync();
+            throw new ArgumentNullException(nameof(file));
         }
 
-        private string ComputeHash(string filePath)
+        private static string ComputeHash(MemoryStream memoryStream)
         {
-            using (var md5 = MD5.Create())
+            using var md5 = MD5.Create();
+            var hash = md5.ComputeHash(memoryStream);
+            return BitConverter.ToString(hash).Replace("-", "").ToLowerInvariant();
+        }
+
+        public void DeleteFile(string fileName)
+        {
+            var filePath = Path.Combine(_environment.WebRootPath, "uploads", fileName);
+            if (File.Exists(filePath))
             {
-                using (var stream = File.OpenRead(filePath))
-                {
-                    var hash = md5.ComputeHash(stream);
-                    return BitConverter.ToString(hash).Replace("-", "").ToLowerInvariant();
-                }
+                File.Delete(filePath);
+            }
+            else
+            {
+                throw new FileNotFoundException($"The file {fileName} does not exist.");
             }
         }
     }

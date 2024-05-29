@@ -101,5 +101,19 @@ namespace OgrenciAidatSistemi.Models
                 PaymentId = PaymentId
             };
         }
+
+        public static Receipt FromFilePath(FilePath filePath)
+        {
+            return new(
+                filePath.Path ?? "Unknown",
+                filePath.Name,
+                filePath.Extension,
+                filePath.ContentType,
+                filePath.Size,
+                filePath.Description
+            );
+            { }
+            ;
+        }
     }
 }

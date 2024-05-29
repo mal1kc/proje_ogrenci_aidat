@@ -1,3 +1,4 @@
+using System.Security.Cryptography;
 using Microsoft.EntityFrameworkCore;
 using OgrenciAidatSistemi.Data;
 using OgrenciAidatSistemi.Models;
@@ -82,10 +83,19 @@ namespace OgrenciAidatSistemi.Services
             {
                 return false;
             }
-            // Remove the non-paid payment
+
+            // Remove the unpaid payment
             _context.Payments.Remove(payment);
 
-            // Add the paid payment
+            // Update new payment's properties from non-paid payment
+            newPayment.Student = payment.Student;
+            newPayment.PaymentPeriod = payment.PaymentPeriod;
+            newPayment.School = payment.School;
+            newPayment.PaymentDate = DateTime.UtcNow;
+            newPayment.Status = PaymentStatus.Paid;
+            newPayment.UpdatedAt = DateTime.UtcNow;
+
+            // Add the new payment
             _context.Payments.Add(newPayment);
 
             try

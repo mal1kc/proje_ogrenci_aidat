@@ -43,7 +43,7 @@ namespace OgrenciAidatSistemi.Models.ViewModels
 
         public DebitCardPaymentView()
         {
-            PaymentMethod = PaymentMethod.DebitCard;
+            PaymentMethod = PaymentMethod.CreditCard;
         }
     }
 
@@ -52,7 +52,6 @@ namespace OgrenciAidatSistemi.Models.ViewModels
         public string? CashierName { get; set; }
         public string? ReceiptNumber { get; set; }
         public DateTime? ReceiptDate { get; set; }
-        public string? ReceiptIssuer { get; set; }
 
         public CashPaymentView() => PaymentMethod = PaymentMethod.Cash;
     }

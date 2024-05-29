@@ -60,6 +60,7 @@ namespace OgrenciAidatSistemi.Controllers
                 .ToListAsync();
 
             StudentView studentView = student.ToView();
+            ViewBag.UserRole = signed_user.Role;
 
             return View(studentView);
         }

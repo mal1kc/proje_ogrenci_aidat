@@ -138,3 +138,20 @@ th {
   }
   white-space: nowrap;
 }
+
+.spacer-top {
+  flex: 1;
+  margin-top: 3rem;
+}
+.spacer-bottom {
+    margin-bottom: 3rem;
+}
+
+.spacer {
+  margin: 4rem;
+}
+
+
+
+/* example space usage */
+/* <div class="spacer-top"></div> */

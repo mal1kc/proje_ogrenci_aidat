@@ -24,7 +24,7 @@ namespace OgrenciAidatSistemi.Models.Extensions
             {
                 BankPayment bankPayment => bankPayment.ToView(ignoreBidirectNav),
                 CheckPayment checkPayment => checkPayment.ToView(ignoreBidirectNav),
-                DebitCardPayment debitCardPayment => debitCardPayment.ToView(ignoreBidirectNav),
+                CreditCardPayment debitCardPayment => debitCardPayment.ToView(ignoreBidirectNav),
                 CashPayment cashPayment => cashPayment.ToView(ignoreBidirectNav),
                 _ => throw new NotImplementedException()
             };
@@ -44,13 +44,10 @@ namespace OgrenciAidatSistemi.Models.Extensions
             },
             { PaymentMethod.Check, new string[] { "CheckNumber", "BankName", "BranchCode" } },
             {
-                PaymentMethod.DebitCard,
+                PaymentMethod.CreditCard,
                 new string[] { "CardNumber", "CardHolderName", "ExpiryDate", "CVC" }
             },
-            {
-                PaymentMethod.Cash,
-                new string[] { "CashierName", "ReceiptNumber", "ReceiptDate", "ReceiptIssuer" }
-            },
+            { PaymentMethod.Cash, new string[] { "CashierName", "ReceiptNumber", "ReceiptDate" } },
             { PaymentMethod.UnPaid, Array.Empty<string>() }
         };
 
@@ -62,7 +59,7 @@ namespace OgrenciAidatSistemi.Models.Extensions
             {
                 { PaymentMethod.Bank, typeof(BankPayment) },
                 { PaymentMethod.Check, typeof(CheckPayment) },
-                { PaymentMethod.DebitCard, typeof(DebitCardPayment) },
+                { PaymentMethod.CreditCard, typeof(CreditCardPayment) },
                 { PaymentMethod.Cash, typeof(CashPayment) },
                 { PaymentMethod.UnPaid, typeof(UnPaidPayment) }
             };

@@ -1,48 +1,36 @@
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 using OgrenciAidatSistemi.Data;
 using OgrenciAidatSistemi.Data.DBSeeders;
 using OgrenciAidatSistemi.Models;
 using OgrenciAidatSistemi.Services;
+using Xunit;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace OgrenciAidatSistemi.Tests
 {
-    public class PaymentServiceTests
+    public class PaymentServiceTests : IDisposable
     {
         private readonly DbContextOptions<AppDbContext> _options;
-
-        private readonly ILogger<PaymentServiceTests> _logger;
-
-        private readonly IConfiguration _configuration;
-
-        private readonly AppDbContext _dbContext;
-
         private readonly IServiceProvider _serviceProvider;
-
+        private readonly AppDbContext _dbContext;
         private readonly PaymentService _paymentService;
+        private readonly StudentService _studentService;
         private readonly PaymentDBSeeder _paymentDBSeeder;
 
-        private readonly HashSet<PaidPayment> _paidseedData;
-
-        private readonly HashSet<PaymentPeriod> _paymentPeriods;
-
-        private readonly HashSet<UnPaidPayment> _unPaidPayments;
-
-        private readonly StudentService _studentService;
+        private HashSet<PaidPayment> _paidSeedData;
+        private HashSet<PaymentPeriod> _paymentPeriods;
+        private HashSet<UnPaidPayment> _unPaidPayments;
 
         public PaymentServiceTests()
         {
             // Use an in-memory database for testing
-
             _options = new DbContextOptionsBuilder<AppDbContext>()
                 .UseInMemoryDatabase(databaseName: "TestDatabase")
                 .Options;
-
-            _configuration = Helpers.CreateConfiguration();
-
-            _dbContext = new AppDbContext(_options);
 
             _serviceProvider = new ServiceCollection()
                 .AddLogging()
@@ -51,127 +39,150 @@ namespace OgrenciAidatSistemi.Tests
                 .AddScoped<PaymentService>()
                 .BuildServiceProvider();
 
+            _dbContext = _serviceProvider.GetRequiredService<AppDbContext>();
             _studentService = _serviceProvider.GetRequiredService<StudentService>();
-
             _paymentService = _serviceProvider.GetRequiredService<PaymentService>();
 
             _paymentDBSeeder = new PaymentDBSeeder(
                 context: _dbContext,
-                configuration: _configuration,
+                configuration: Helpers.CreateConfiguration(),
                 logger: Helpers.CreateLogger<PaymentDBSeeder>(),
                 studentService: _studentService,
                 randomSeed: true
             );
 
-            _dbContext.SaveChanges();
+            InitializeSeedData();
+        }
 
-            _paidseedData ??= [];
-            _paymentPeriods = [];
-            _unPaidPayments = [];
+        private void InitializeSeedData()
+        {
+            // Initial seeding
+            _paidSeedData = new HashSet<PaidPayment>();
+            _paymentPeriods = new HashSet<PaymentPeriod>();
+            _unPaidPayments = new HashSet<UnPaidPayment>();
 
-            var seedData = _paymentDBSeeder
-                .GetSeedData()
-                .Where(p => p.PaymentPeriod != null)
-                .ToHashSet();
+            var seedData = _paymentDBSeeder.GetSeedData().Where(p => p.PaymentPeriod != null).ToHashSet();
 
-            // band-aid fix for student service
-            // this looks terrible but it is the only way to make it work
-            // id don't want to rewrite dbSeeders and re-implement dependable seeders etc.
-            // seed student and make sure they have student id and email address
-            // fuck i hate this
-
-            // we copy school and first break relationship
-            // after saving db reconnect it
-            var schools = seedData.Select(pp => pp.Student.School).ToHashSet();
-            foreach (School school in schools)
+            // Separate handling of schools and students
+            var schools = seedData.Select(pp => pp.Student.School).Distinct().ToHashSet();
+            foreach (var school in schools)
             {
                 school.Students = null;
-                school.WorkYears = null;
+                school.WorkYears?.AsParallel().ForAll(wy => wy.PaymentPeriods = null);
                 _dbContext.Schools.Add(school);
             }
 
             _dbContext.SaveChanges();
-            foreach (var (payment, school) in seedData.Zip(schools))
+
+            // Band-aid fix for student service
+            // This looks terrible but it is the only way to make it work
+            // I don't want to rewrite dbSeeders and re-implement dependable seeders etc.
+            // Seed student and make sure they have student ID and email address
+            foreach (var payment in seedData)
             {
-                payment.Student.School = school;
-                payment.Student.StudentId = _studentService.GenerateStudentId(school);
-                payment.Student.EmailAddress = payment.Student.StudentId + $"@mail.school.com";
-                payment.Student.ContactInfo.Email = payment.Student.EmailAddress;
+                var student = payment.Student;
+                var school = schools.First(s => s.Id == student.School.Id);
+                student.School = school;
+                student.StudentId = _studentService.GenerateStudentId(school);
+                student.EmailAddress = $"{student.StudentId}@mail.school.com";
+                student.ContactInfo.Email = student.EmailAddress;
 
                 payment.PaymentPeriod.WorkYear.School = school;
+
+                _dbContext.Students.Add(student);
+                // Note: Do not save payments to DB here, only handle them in tests
             }
 
             _dbContext.SaveChanges();
 
-            foreach (var seedEntity in seedData.Where(p => p is PaidPayment))
+            foreach (var seedEntity in seedData.OfType<PaidPayment>())
             {
-                try
-                {
-                    if (seedEntity is PaidPayment paidPayment)
-                    {
-                        _paidseedData.Add(paidPayment);
-                    }
-                }
-                catch (Exception e)
-                {
-                    _logger.LogError(e, "Error while seeding paid payments");
-                }
+                _paidSeedData.Add(seedEntity);
             }
 
-            foreach (var seedEntity in seedData)
-            {
-                _ = _paymentPeriods.Add(seedEntity.PaymentPeriod);
-            }
+            _paymentPeriods = seedData.Select(p => p.PaymentPeriod).ToHashSet();
 
-            // save _paymentPeriods to the database but not save _seedData payments to the database yet we will use them for testing
             foreach (var paymentPeriod in _paymentPeriods)
             {
-                paymentPeriod.Payments = new HashSet<Payment>();
-                if (paymentPeriod.Payments.Count > 0)
+                var unpaidPayment = new UnPaidPayment
                 {
-                    throw new Exception("not works as expected");
-                }
+                    Amount = _paidSeedData.FirstOrDefault(p => p.PaymentPeriod == paymentPeriod)?.Amount ?? paymentPeriod.PerPaymentAmount,
+                    PaymentPeriod = paymentPeriod,
+                    Student = paymentPeriod.Student,
+                };
+                _unPaidPayments.Add(unpaidPayment);
             }
-
-            // create nonpaid payments for each payment period to later turn them into paid payments
-            foreach (var paymentPeriod in _paymentPeriods)
-            {
-                var amount =
-                    _paidseedData.FirstOrDefault(p => p.PaymentPeriod == paymentPeriod)?.Amount
-                    ?? paymentPeriod.PerPaymentAmount;
-                UnPaidPayment payment =
-                    new()
-                    {
-                        Amount = amount,
-                        PaymentPeriod = paymentPeriod,
-                        Student = paymentPeriod.Student,
-                    };
-                try
-                {
-                    _dbContext.Payments.Add(payment);
-                    _unPaidPayments.Add(payment);
-                }
-                catch (Exception e)
-                {
-                    _logger.LogError(e, "Error while creating non-paid payments");
-                }
-            }
-
-            _dbContext.SaveChanges();
         }
 
         [Fact]
         public async Task MakePayment_ValidPayment_ReturnsTrue()
         {
-            foreach (var paidPayment in _paidseedData)
+            foreach (var paidPayment in _paidSeedData)
             {
-                var paymentPeriod = paidPayment.PaymentPeriod;
-                var nonPaidPayment =
-                    _unPaidPayments.FirstOrDefault(p => p.PaymentPeriod == paymentPeriod)
-                    ?? throw new Exception("non-paid payment not found");
+                var nonPaidPayment = _unPaidPayments.FirstOrDefault(p => p.PaymentPeriod == paidPayment.PaymentPeriod)
+                                     ?? throw new Exception("non-paid payment not found");
+
+                // Save the non-paid payment to the DB for this test case
+                _dbContext.Payments.Add(nonPaidPayment);
+                _dbContext.SaveChanges();
 
                 bool result = await _paymentService.MakePayment(nonPaidPayment, paidPayment);
                 Assert.True(result);
+            }
+        }
+
+        [Fact]
+        public async Task MakePayment_ValidPayment_PaymentIsSaved()
+        {
+            foreach (var paidPayment in _paidSeedData)
+            {
+                var nonPaidPayment = _unPaidPayments.FirstOrDefault(p => p.PaymentPeriod == paidPayment.PaymentPeriod)
+                                     ?? throw new Exception("non-paid payment not found");
+
+                // Save the non-paid payment to the DB for this test case
+                _dbContext.Payments.Add(nonPaidPayment);
+                _dbContext.SaveChanges();
+
+                bool result = await _paymentService.MakePayment(nonPaidPayment, paidPayment);
+                Assert.True(result);
+
+                var savedPayment = await _dbContext.Payments
+                    .OrderByDescending(p => p.PaymentDate)
+                    .FirstOrDefaultAsync(p => p.PaymentPeriod == paidPayment.PaymentPeriod);
+
+                Assert.NotNull(savedPayment);
+            }
+        }
+
+        [Fact]
+        public async Task MakePayment_ValidPayment_PaymentIsPaid()
+        {
+            var paidMethods = new HashSet<PaymentMethod>
+            {
+                PaymentMethod.Cash,
+                PaymentMethod.Bank,
+                PaymentMethod.CreditCard,
+                PaymentMethod.Check,
+            };
+
+            foreach (var paidPayment in _paidSeedData)
+            {
+                var nonPaidPayment = _unPaidPayments.FirstOrDefault(p => p.PaymentPeriod == paidPayment.PaymentPeriod)
+                                     ?? throw new Exception("non-paid payment not found");
+
+                // Save the non-paid payment to the DB for this test case
+                _dbContext.Payments.Add(nonPaidPayment);
+                _dbContext.SaveChanges();
+
+                bool result = await _paymentService.MakePayment(nonPaidPayment, paidPayment);
+                Assert.True(result);
+
+                var savedPayment = await _dbContext.Payments
+                    .OrderByDescending(p => p.PaymentDate)
+                    .FirstOrDefaultAsync(p => p.PaymentPeriod == paidPayment.PaymentPeriod);
+
+                Assert.NotNull(savedPayment);
+                Assert.Contains(savedPayment.PaymentMethod, paidMethods);
             }
         }
 
@@ -181,7 +192,7 @@ namespace OgrenciAidatSistemi.Tests
             // create invalid payments from _paidseedData
             var invalidPayments = new HashSet<PaidPayment>();
 
-            foreach (var paidPayment in _paidseedData)
+            foreach (var paidPayment in _paidSeedData)
             {
                 // create a copy of paid payment and change the amount to make it invalid
                 var invalidPayment = paidPayment.Copy();
@@ -199,5 +210,41 @@ namespace OgrenciAidatSistemi.Tests
                 Assert.False(result);
             }
         }
+
+        [Fact]
+        public async Task MakePayment_InvalidPayment_PaymentIsNotSaved()
+        {
+            // create invalid payments from _paidseedData
+            var invalidPayments = new HashSet<PaidPayment>();
+
+            foreach (var paidPayment in _paidSeedData)
+            {
+                // create a copy of paid payment and change the amount to make it invalid
+                var invalidPayment = paidPayment.Copy();
+                invalidPayment.Amount *= -1;
+            }
+
+            foreach (var invalidPayment in invalidPayments)
+            {
+                var paymentPeriod = invalidPayment.PaymentPeriod;
+                var nonPaidPayment =
+                    _unPaidPayments.FirstOrDefault(p => p.PaymentPeriod == paymentPeriod)
+                    ?? throw new Exception("non-paid payment not found");
+
+                await _paymentService.MakePayment(nonPaidPayment, invalidPayment);
+
+                var savedPayment = await _dbContext.Payments
+                    .OrderByDescending(p => p.PaymentDate)
+                    .FirstOrDefaultAsync(p => p.PaymentPeriod == paymentPeriod);
+
+                Assert.Null(savedPayment);
+            }
+        }
+        public void Dispose()
+        {
+            _dbContext.Database.EnsureDeleted();
+            _dbContext.Dispose();
+        }
     }
 }
+

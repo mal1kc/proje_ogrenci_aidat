@@ -1,19 +1,28 @@
 @using OgrenciAidatSistemi.Models.Extensions
 @model PaymentView
 
+@{
+    ViewData["Title"] = "Payment Details";
+    var usrRole = ViewBag.UserRole;
+    var isMakePaymentShow = usrRole == UserRole.Student;
+    var isIdShow = usrRole == UserRole.SiteAdmin || usrRole == UserRole.SchoolAdmin;
+}
+
 <div class="container mt-5">
     <div class="card">
         <div class="card-body">
             <h5 class="card-title p-2">Payment</h5>
 
             <dl class="row">
-                <dt class="col-sm-2 text-nowrap">
-                    @Html.DisplayNameFor(model => model.Id)
-                </dt>
-                <dd class="col-sm-10">
-                    @Html.DisplayFor(model => model.Id)
-                </dd>
-
+                @if (isIdShow)
+                {
+                    <dt class="col-sm-2 text-nowrap">
+                        @Html.DisplayNameFor(model => model.Id)
+                    </dt>
+                    <dd class="col-sm-10">
+                        @Html.DisplayFor(model => model.Id)
+                    </dd>
+                }
                 <dt class="col-sm-2 text-nowrap">
                     @Html.DisplayNameFor(model => model.PaymentDate)
                 </dt>
@@ -123,7 +132,12 @@
 
         </div>
     </div>
-
+    @if (isMakePaymentShow && Model.Status == PaymentStatus.Unpaid)
+    {
+        <p class="mt-5">
+            <a asp-action="MakePayment" asp-controller="Payment" asp-route-id="@Model.Id" class="btn btn-primary">Make Payment</a>
+        </p>
+    }
 
 
     <p class="mt-5">

@@ -309,7 +309,6 @@ namespace OgrenciAidatSistemi.Migrations
                     CashierName = table.Column<string>(type: "TEXT", nullable: true),
                     ReceiptNumber = table.Column<string>(type: "TEXT", nullable: true),
                     ReceiptDate = table.Column<DateTime>(type: "TEXT", nullable: true),
-                    ReceiptIssuer = table.Column<string>(type: "TEXT", nullable: true),
                     CheckNumber = table.Column<string>(type: "TEXT", nullable: true),
                     BankName = table.Column<string>(type: "TEXT", nullable: true),
                     BranchCode = table.Column<string>(type: "TEXT", nullable: true),

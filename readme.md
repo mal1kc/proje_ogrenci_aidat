@@ -16,8 +16,11 @@
 - [X] studentId generator
 - [x] add Message tempData for all views
 - [ ] implement dashboards for all roles
+    - [ ] site admin dashboard
+    - [ ] school admin dashboard
+    - [X] student dashboard
 - [ ] add payment verification panel for sch admin (implement)
-- [ ] add payment panel for student (improve usability)
+- [X] add payment panel for student (improve usability)
 - [ ] add workYear management panel for sch admin (improve usability)
 - [ ] add paymentperiod management panel for sch admin ( improve usability)
 - [ ] add all models to delete , edit , create panel for site admin (some of them must be debug only) +++

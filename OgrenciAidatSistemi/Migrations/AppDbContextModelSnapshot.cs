@@ -446,10 +446,6 @@ namespace OgrenciAidatSistemi.Migrations
                     b.Property<DateTime>("ReceiptDate")
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("ReceiptIssuer")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
                     b.Property<string>("ReceiptNumber")
                         .IsRequired()
                         .HasColumnType("TEXT");

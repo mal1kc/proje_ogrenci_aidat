@@ -3,6 +3,8 @@
 @{
     string CardName = "paymentListCard" + Guid.NewGuid().ToString();
     string partialViewTitle = "Payment List" + (ViewData["paymentListTitle"] ?? "");
+    var usrRole = ViewBag.UserRole;
+    var isMakePaymentShow = usrRole == UserRole.Student;
 }
 
 <div class="container-fluid py-0 my-0">
@@ -24,7 +26,12 @@
                             <th>Date</th>
                             <th>Amount</th>
                             <th>Method</th>
+                    
                             <td>Details</td>
+                            @if (isMakePaymentShow)
+                            {
+                                <th>Make Payment</th>
+                            }
                         </tr>
                     </thead>
                     <tbody>
@@ -37,6 +44,14 @@
                                 <td>@payment.PaymentMethod</td>
                                 <td><a asp-action="Details" asp-controller="Payment" asp-route-id="@payment.Id">Details</a>
                                 </td>
+                                @if (isMakePaymentShow)
+                                {
+                                    <td> <a asp-controller="Payment" asp-action="MakePayment" asp-route-id="@payment.Id"
+                                            class="btn btn-primary float-start"> &#x1F6D2; </a>
+                                        @* &#x1F6D2; is a Unicode shopping trolley *@
+                                    </td>
+                                }
+
                             </tr>
                         }
                     </tbody>

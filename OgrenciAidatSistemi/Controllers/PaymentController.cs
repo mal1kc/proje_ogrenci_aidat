@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -18,12 +19,18 @@ namespace OgrenciAidatSistemi.Controllers
     public class PaymentController(
         ILogger<PaymentController> logger,
         AppDbContext dbContext,
-        UserService userService
+        UserService userService,
+        PaymentService paymentService,
+        FileService fileService
     ) : Controller
     {
         private readonly ILogger<PaymentController> _logger = logger;
         private readonly AppDbContext _dbContext = dbContext;
         private readonly UserService _userService = userService;
+
+        private readonly PaymentService _paymentService = paymentService;
+
+        private readonly FileService _fileService = fileService;
 
         [Authorize]
         [DebugOnly]
@@ -153,6 +160,7 @@ namespace OgrenciAidatSistemi.Controllers
         {
             var (role, schoolId) = _userService.GetUserRoleAndSchoolId().Result;
             Payment? payment = null;
+            ViewBag.UserRole = role;
             switch (role)
             {
                 case UserRole.SiteAdmin:
@@ -285,6 +293,7 @@ namespace OgrenciAidatSistemi.Controllers
             return View(paymentPeriod.ToView());
         }
 
+        [Authorize(Roles = Configurations.Constants.userRoles.SiteAdmin)]
         public IActionResult PeriodDelete(int? id)
         {
             if (id == null)
@@ -455,6 +464,168 @@ namespace OgrenciAidatSistemi.Controllers
             }
             // redirect to list with sort
             return RedirectToAction(nameof(PeriodList) + "?sortOrder=Id");
+        }
+
+        [Authorize(
+            Roles = Configurations.Constants.userRoles.SiteAdmin
+                + ","
+                + Configurations.Constants.userRoles.SchoolAdmin
+        )]
+        public IActionResult PeriodEdit(int? id)
+        {
+            if (id == null)
+                return NotFound();
+
+            if (_dbContext.PaymentPeriods == null)
+            {
+                _logger.LogError("PaymentPeriods table is null");
+                return NotFound();
+            }
+
+            var paymentPeriod = _dbContext.PaymentPeriods.FirstOrDefault(p => p.Id == id);
+
+            if (paymentPeriod == null)
+                return NotFound();
+
+            return View(paymentPeriod.ToView());
+        }
+
+        [HttpPost]
+        [Authorize(
+            Roles = Configurations.Constants.userRoles.SiteAdmin
+                + ","
+                + Configurations.Constants.userRoles.SchoolAdmin
+        )]
+        [ValidateAntiForgeryToken]
+        public IActionResult PeriodEdit(int id, PaymentPeriodView periodView)
+        {
+            if (id != periodView.Id)
+                return NotFound();
+
+            if (ModelState.IsValid)
+            {
+                var paymentPeriod = _dbContext.PaymentPeriods.FirstOrDefault(p => p.Id == id);
+
+                if (paymentPeriod == null)
+                    return NotFound();
+
+                paymentPeriod.StartDate = periodView.StartDate;
+                paymentPeriod.EndDate = periodView.EndDate;
+                paymentPeriod.PerPaymentAmount = periodView.PerPaymentAmount;
+
+                _dbContext.SaveChanges();
+                return RedirectToAction(nameof(PeriodList));
+            }
+            return View(periodView);
+        }
+
+        [Authorize(Roles = Configurations.Constants.userRoles.Student)]
+        public IActionResult MakePayment(int? id)
+        {
+            if (id == null)
+                return NotFound();
+            var unpaid = _dbContext.Payments.FirstOrDefault(p =>
+                p.Id == id && p.PaymentMethod == PaymentMethod.UnPaid
+            );
+
+            if (unpaid == null || unpaid.PaymentMethod != PaymentMethod.UnPaid)
+            {
+                ViewData["Error"] = "Payment not found or already paid";
+                return NotFound();
+            }
+            try
+            {
+                var paymentCreateView = PaymentCreateView.FromUnPaidPayment((UnPaidPayment)unpaid);
+                // generate list from enum
+                ViewBag.PaymentMethods = new[]
+                {
+                    PaymentMethod.Bank,
+                    PaymentMethod.Check,
+                    PaymentMethod.Cash,
+                    PaymentMethod.CreditCard
+                };
+
+                return View(paymentCreateView);
+            }
+            catch (Exception e)
+            {
+                ViewData["Error"] = "Error while access payment data";
+                _logger.LogError(e, "Error while creating create view from unpaid payment");
+                return NotFound();
+            }
+        }
+
+        [HttpPost]
+        [Authorize(Roles = Configurations.Constants.userRoles.Student)]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> MakePayment(int id, PaymentCreateView paymentView)
+        {
+            if (id != paymentView.Id)
+                return NotFound();
+
+            var (role, usrId) = await _userService.GetUserRoleAndId();
+
+            var usr = _dbContext.Students.FirstOrDefault(s => s.Id == usrId);
+            if (usr == null)
+            {
+                ViewData["Error"] = "User not found";
+                return RedirectToAction("SignIn");
+            }
+
+            if (ModelState.IsValid)
+            {
+                UnPaidPayment? payment = (UnPaidPayment?)
+                    _dbContext.Payments.FirstOrDefault(p =>
+                        p.Id == id && p.PaymentMethod == PaymentMethod.UnPaid
+                    );
+                if (payment == null)
+                {
+                    ViewData["Error"] = "Payment not found or already paid";
+                    return NotFound();
+                }
+                try
+                {
+                    FilePath? receipt_file = null;
+                    try
+                    {
+                        receipt_file = await _fileService.UploadFileAsync(paymentView.Receipt, usr);
+                    }
+                    catch (Exception e)
+                    {
+                        ViewData["Error"] = "Error while uploading receipt";
+                        _logger.LogError(e, "Error while uploading receipt");
+                        return RedirectToAction("MakePayment", new { id });
+                    }
+                    Receipt receipt = Receipt.FromFilePath(receipt_file);
+
+                    var new_payment = paymentView.ToAppropriatePayment();
+                    new_payment.Receipt = receipt;
+                    receipt.Payment = new_payment;
+                    bool result = await _paymentService.MakePayment(payment, new_payment);
+                    if (!result)
+                    {
+                        return NotFound();
+                    }
+                }
+                catch (ValidationException e)
+                {
+                    _logger.LogError(e, "Error while creating payment");
+                    return NotFound();
+                }
+
+                // payment.PaymentMethod = paymentView.PaymentMethod;
+                // payment.PaymentDate = DateTime.UtcNow;
+                // payment.Amount = paymentView.Amount;
+                // payment.Receipt = paymentView.Receipt;
+                // payment.Student = _dbContext.Students.FirstOrDefault(s => s.Id == _userService.GetCurrentUserID());
+                // payment.School = payment.Student?.School;
+                // _dbContext.Payments.Update(payment);
+                // _dbContext.SaveChanges();
+
+
+                return RedirectToAction("Details", new { id });
+            }
+            return View(paymentView.ToUnPaidPayment());
         }
     }
 }
