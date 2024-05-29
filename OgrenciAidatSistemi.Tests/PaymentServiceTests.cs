@@ -1,14 +1,12 @@
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Moq;
 using OgrenciAidatSistemi.Data;
 using OgrenciAidatSistemi.Data.DBSeeders;
 using OgrenciAidatSistemi.Models;
 using OgrenciAidatSistemi.Services;
-using Xunit;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace OgrenciAidatSistemi.Tests
 {
@@ -17,6 +15,8 @@ namespace OgrenciAidatSistemi.Tests
         private readonly DbContextOptions<AppDbContext> _options;
         private readonly IServiceProvider _serviceProvider;
         private readonly AppDbContext _dbContext;
+
+        private readonly FileService _fileService;
         private readonly PaymentService _paymentService;
         private readonly StudentService _studentService;
         private readonly PaymentDBSeeder _paymentDBSeeder;
@@ -31,16 +31,24 @@ namespace OgrenciAidatSistemi.Tests
             _options = new DbContextOptionsBuilder<AppDbContext>()
                 .UseInMemoryDatabase(databaseName: "TestDatabase")
                 .Options;
+            var mockConfiguration = new Mock<IConfiguration>();
+
+            var mockEnvironment = new Mock<IWebHostEnvironment>();
+            mockEnvironment.Setup(m => m.WebRootPath).Returns("testpath"); // Set this to a suitable value for your tests
 
             _serviceProvider = new ServiceCollection()
                 .AddLogging()
                 .AddDbContext<AppDbContext>(options => options.UseInMemoryDatabase("TestDatabase"))
                 .AddScoped<StudentService>()
                 .AddScoped<PaymentService>()
+                .AddScoped<FileService>()
+                .AddSingleton<IWebHostEnvironment>(mockEnvironment.Object)
+                .AddSingleton<IConfiguration>(mockConfiguration.Object)
                 .BuildServiceProvider();
 
             _dbContext = _serviceProvider.GetRequiredService<AppDbContext>();
             _studentService = _serviceProvider.GetRequiredService<StudentService>();
+            _fileService = _serviceProvider.GetRequiredService<FileService>();
             _paymentService = _serviceProvider.GetRequiredService<PaymentService>();
 
             _paymentDBSeeder = new PaymentDBSeeder(
@@ -57,11 +65,14 @@ namespace OgrenciAidatSistemi.Tests
         private void InitializeSeedData()
         {
             // Initial seeding
-            _paidSeedData = new HashSet<PaidPayment>();
-            _paymentPeriods = new HashSet<PaymentPeriod>();
-            _unPaidPayments = new HashSet<UnPaidPayment>();
+            _paidSeedData = [];
+            _paymentPeriods = [];
+            _unPaidPayments = [];
 
-            var seedData = _paymentDBSeeder.GetSeedData().Where(p => p.PaymentPeriod != null).ToHashSet();
+            var seedData = _paymentDBSeeder
+                .GetSeedData()
+                .Where(p => p.PaymentPeriod != null)
+                .ToHashSet();
 
             // Separate handling of schools and students
             var schools = seedData.Select(pp => pp.Student.School).Distinct().ToHashSet();
@@ -106,7 +117,9 @@ namespace OgrenciAidatSistemi.Tests
             {
                 var unpaidPayment = new UnPaidPayment
                 {
-                    Amount = _paidSeedData.FirstOrDefault(p => p.PaymentPeriod == paymentPeriod)?.Amount ?? paymentPeriod.PerPaymentAmount,
+                    Amount =
+                        _paidSeedData.FirstOrDefault(p => p.PaymentPeriod == paymentPeriod)?.Amount
+                        ?? paymentPeriod.PerPaymentAmount,
                     PaymentPeriod = paymentPeriod,
                     Student = paymentPeriod.Student,
                 };
@@ -119,8 +132,10 @@ namespace OgrenciAidatSistemi.Tests
         {
             foreach (var paidPayment in _paidSeedData)
             {
-                var nonPaidPayment = _unPaidPayments.FirstOrDefault(p => p.PaymentPeriod == paidPayment.PaymentPeriod)
-                                     ?? throw new Exception("non-paid payment not found");
+                var nonPaidPayment =
+                    _unPaidPayments.FirstOrDefault(p =>
+                        p.PaymentPeriod == paidPayment.PaymentPeriod
+                    ) ?? throw new Exception("non-paid payment not found");
 
                 // Save the non-paid payment to the DB for this test case
                 _dbContext.Payments.Add(nonPaidPayment);
@@ -136,8 +151,10 @@ namespace OgrenciAidatSistemi.Tests
         {
             foreach (var paidPayment in _paidSeedData)
             {
-                var nonPaidPayment = _unPaidPayments.FirstOrDefault(p => p.PaymentPeriod == paidPayment.PaymentPeriod)
-                                     ?? throw new Exception("non-paid payment not found");
+                var nonPaidPayment =
+                    _unPaidPayments.FirstOrDefault(p =>
+                        p.PaymentPeriod == paidPayment.PaymentPeriod
+                    ) ?? throw new Exception("non-paid payment not found");
 
                 // Save the non-paid payment to the DB for this test case
                 _dbContext.Payments.Add(nonPaidPayment);
@@ -146,8 +163,8 @@ namespace OgrenciAidatSistemi.Tests
                 bool result = await _paymentService.MakePayment(nonPaidPayment, paidPayment);
                 Assert.True(result);
 
-                var savedPayment = await _dbContext.Payments
-                    .OrderByDescending(p => p.PaymentDate)
+                var savedPayment = await _dbContext
+                    .Payments.OrderByDescending(p => p.PaymentDate)
                     .FirstOrDefaultAsync(p => p.PaymentPeriod == paidPayment.PaymentPeriod);
 
                 Assert.NotNull(savedPayment);
@@ -167,8 +184,10 @@ namespace OgrenciAidatSistemi.Tests
 
             foreach (var paidPayment in _paidSeedData)
             {
-                var nonPaidPayment = _unPaidPayments.FirstOrDefault(p => p.PaymentPeriod == paidPayment.PaymentPeriod)
-                                     ?? throw new Exception("non-paid payment not found");
+                var nonPaidPayment =
+                    _unPaidPayments.FirstOrDefault(p =>
+                        p.PaymentPeriod == paidPayment.PaymentPeriod
+                    ) ?? throw new Exception("non-paid payment not found");
 
                 // Save the non-paid payment to the DB for this test case
                 _dbContext.Payments.Add(nonPaidPayment);
@@ -177,8 +196,8 @@ namespace OgrenciAidatSistemi.Tests
                 bool result = await _paymentService.MakePayment(nonPaidPayment, paidPayment);
                 Assert.True(result);
 
-                var savedPayment = await _dbContext.Payments
-                    .OrderByDescending(p => p.PaymentDate)
+                var savedPayment = await _dbContext
+                    .Payments.OrderByDescending(p => p.PaymentDate)
                     .FirstOrDefaultAsync(p => p.PaymentPeriod == paidPayment.PaymentPeriod);
 
                 Assert.NotNull(savedPayment);
@@ -233,13 +252,14 @@ namespace OgrenciAidatSistemi.Tests
 
                 await _paymentService.MakePayment(nonPaidPayment, invalidPayment);
 
-                var savedPayment = await _dbContext.Payments
-                    .OrderByDescending(p => p.PaymentDate)
+                var savedPayment = await _dbContext
+                    .Payments.OrderByDescending(p => p.PaymentDate)
                     .FirstOrDefaultAsync(p => p.PaymentPeriod == paymentPeriod);
 
                 Assert.Null(savedPayment);
             }
         }
+
         public void Dispose()
         {
             _dbContext.Database.EnsureDeleted();
@@ -247,4 +267,3 @@ namespace OgrenciAidatSistemi.Tests
         }
     }
 }
-

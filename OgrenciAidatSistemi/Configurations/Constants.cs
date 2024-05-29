@@ -34,6 +34,6 @@ namespace OgrenciAidatSistemi.Configurations
         public const String AuthenticationAccessDeniedPath = "/Error/Error403";
 
         // 10 MB file size
-        public const int MaxFileSize = 10 * 1024 * 1024;
+        public const long MaxFileSize = 10 * 1024 * 1024;
     }
 }

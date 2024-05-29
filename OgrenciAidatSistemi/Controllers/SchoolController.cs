@@ -101,9 +101,6 @@ namespace OgrenciAidatSistemi.Controllers
         {
             if (id == null || id == 0 || _dbContext.Schools == null)
                 return NotFound();
-            // if is schadmin check schadmin's school then continue
-            // else if site admin continue
-            // else return unauthorized
             School? school = null;
 
             var signedUser = await _userService.GetCurrentUserAsync();
@@ -111,8 +108,6 @@ namespace OgrenciAidatSistemi.Controllers
                 return Unauthorized();
 
             _logger.LogInformation("Signed user: {0}, {1}", signedUser.Id, signedUser.Role);
-
-            // TODO: fix repeated code
 
             switch (signedUser.Role)
             {
@@ -136,7 +131,6 @@ namespace OgrenciAidatSistemi.Controllers
                     if (school == null)
                         return NotFound();
                     break;
-                // other roles are not allowed
                 default:
                     return Unauthorized();
             }

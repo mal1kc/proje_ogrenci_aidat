@@ -1,16 +1,24 @@
+using System.CodeDom.Compiler;
 using System.Security.Cryptography;
+using System.Text;
 using Microsoft.EntityFrameworkCore;
 using OgrenciAidatSistemi.Data;
 using OgrenciAidatSistemi.Models;
 
 namespace OgrenciAidatSistemi.Services
 {
-    public class PaymentService(AppDbContext context, ILogger<PaymentService> logger)
+    public class PaymentService(
+        AppDbContext context,
+        ILogger<PaymentService> logger,
+        FileService fileService
+    )
     {
         private readonly AppDbContext _context = context;
         private readonly ILogger _logger = logger;
 
         private readonly int _loggerInterval = 100;
+
+        private readonly FileService _fileService = fileService;
 
         public async Task CreatePayments()
         {
@@ -108,6 +116,59 @@ namespace OgrenciAidatSistemi.Services
             {
                 _logger.LogError(e, "Error while making payment");
                 return false;
+            }
+        }
+
+        public async Task<Receipt?> GenerateReceipt(PaidPayment payment)
+        {
+            // Create a string builder to build the receipt
+            var receiptData = new StringBuilder();
+
+            // Add the payment details to the receipt
+            receiptData.AppendLine($"Payment ID: {payment.Id}");
+            receiptData.AppendLine($"Amount: {payment.Amount}");
+            receiptData.AppendLine($"Payment Date: {payment.PaymentDate}");
+            receiptData.AppendLine(
+                $"Student: {payment.Student.FirstName} {payment.Student.LastName} ({payment.Student.StudentId})"
+            );
+            receiptData.AppendLine($"School: {payment.School.Name}");
+
+            receiptData.AppendLine(
+                $"Payment Period: {payment.PaymentPeriod.StartDate} - {payment.PaymentPeriod.EndDate}"
+            );
+            receiptData.AppendLine(
+                $"Payment Period Per Payment Amount: {payment.PaymentPeriod.PerPaymentAmount}"
+            );
+            receiptData.AppendLine(
+                $"Payment Period Occurrence: {payment.PaymentPeriod.Occurrence}"
+            );
+            receiptData.AppendLine(
+                $"Payment Period Work Year: {payment.PaymentPeriod.WorkYear.StartDate} - {payment.PaymentPeriod.WorkYear.EndDate}"
+            );
+
+            // Add the receipt data to the receipt object
+
+
+            // Generate a unique file name for the receipt
+            var fileName = $"Receipt_{payment.Id}_{DateTime.Now:yyyyMMddHHmmss}.txt";
+
+            // Write the receipt to a file
+            try
+            {
+                var receiptFilePath = await _fileService.WriteFileAsync(
+                    fileName,
+                    receiptData.ToString(),
+                    payment.Student,
+                    "/receipts"
+                );
+                var receipt = Receipt.FromFilePath(receiptFilePath);
+                receipt.Payment = payment;
+                return receipt;
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e, "Error while generating receipt");
+                return null;
             }
         }
     }

@@ -25,6 +25,8 @@ namespace OgrenciAidatSistemi.Models
         // get safely data of file asynchrously
         public async Task<byte[]> GetDataAsync()
         {
+            if (!File.Exists(Path))
+                throw new FileNotFoundException("File not found", Path);
             byte[] data = []; // empty array of byte
             using (FileStream fs = new(Path, FileMode.Open, FileAccess.Read))
             {
@@ -44,7 +46,22 @@ namespace OgrenciAidatSistemi.Models
 
         public string ComputeHash()
         {
+            if (Path == null)
+                throw new ArgumentNullException(nameof(Path));
             return ComputeHash(Path);
+        }
+
+        internal async Task<MemoryStream> GetDataAsStreamAsync()
+        {
+            var memoryStream = new MemoryStream();
+            if (!File.Exists(Path))
+                throw new FileNotFoundException("File not found", Path);
+            using (var fileStream = new FileStream(Path, FileMode.Open, FileAccess.Read))
+            {
+                await fileStream.CopyToAsync(memoryStream);
+            }
+            memoryStream.Position = 0;
+            return memoryStream;
         }
     }
 }

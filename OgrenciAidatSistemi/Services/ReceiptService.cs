@@ -30,7 +30,7 @@ namespace OgrenciAidatSistemi.Services
             User createdBy
         )
         {
-            FilePath? filePath = null;
+            FilePath? filePath;
             try
             {
                 filePath = await _fileService.UploadFileAsync(file, createdBy);

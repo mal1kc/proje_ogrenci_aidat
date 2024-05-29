@@ -82,7 +82,7 @@ namespace OgrenciAidatSistemi.Models
                 }
             );
 
-        public ReceiptView ToView()
+        public ReceiptView ToView(bool ignoreBidirectNav = false)
         {
             return new()
             {

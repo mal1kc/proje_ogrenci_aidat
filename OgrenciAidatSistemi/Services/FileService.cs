@@ -4,34 +4,74 @@ using OgrenciAidatSistemi.Models;
 
 namespace OgrenciAidatSistemi.Services
 {
-    public class FileService(ILogger<FileService> logger, IWebHostEnvironment environment)
+    public class FileService
     {
-        private readonly ILogger<FileService> _logger = logger;
-        private readonly IWebHostEnvironment _environment = environment;
+        private readonly ILogger<FileService> _logger;
+        private readonly IWebHostEnvironment _environment;
 
-        public async Task<FilePath> UploadFileAsync(IFormFile file, User createdBy)
+        private readonly IConfiguration _configuration;
+
+        private long _maxFileSize;
+
+        private string _uploadsFolder;
+
+        public FileService(
+            ILogger<FileService> logger,
+            IWebHostEnvironment environment,
+            IConfiguration configuration
+        )
         {
+            _logger = logger;
+            _environment = environment;
+            _configuration = configuration;
+
+            _maxFileSize = Configurations.Constants.MaxFileSize;
+            _uploadsFolder = Path.Combine(
+                _configuration?["UploadsFolder"] ?? _environment.WebRootPath,
+                "uploads"
+            );
+
+            if (!Directory.Exists(_uploadsFolder))
+            {
+                Directory.CreateDirectory(_uploadsFolder);
+            }
+
+            var maxUploadFileSizeValue = _configuration?["MaxUploadFileSize"];
             if (
-                file == null
-                || file.Length == 0
-                || file.Length > Configurations.Constants.MaxFileSize
+                maxUploadFileSizeValue != null
+                && long.TryParse(maxUploadFileSizeValue, out var parsedSize)
             )
+            {
+                _maxFileSize = parsedSize;
+            }
+        }
+
+        public async Task<FilePath> UploadFileAsync(
+            IFormFile file,
+            User createdBy,
+            IEnumerable<string>? allowedExtensions = null
+        )
+        {
+            if (allowedExtensions != null)
+            {
+                var extension = Path.GetExtension(file.FileName);
+                if (!allowedExtensions.Contains(extension))
+                {
+                    throw new ArgumentException("File extension is not allowed.");
+                }
+            }
+
+            if (file == null || file.Length == 0 || file.Length > _maxFileSize)
             {
                 throw new ArgumentException("File is empty or exceeds the maximum allowed size.");
             }
 
-            var uploadsFolder = Path.Combine(_environment.WebRootPath, "uploads");
-            if (!Directory.Exists(uploadsFolder))
-            {
-                Directory.CreateDirectory(uploadsFolder);
-            }
-
             string uniqueFileName;
-            var filePath = "";
+            string? filePath;
             do
             {
                 uniqueFileName = Guid.NewGuid().ToString() + "_" + file.FileName;
-                filePath = Path.Combine(uploadsFolder, uniqueFileName);
+                filePath = Path.Combine(_uploadsFolder, uniqueFileName);
             } while (File.Exists(filePath));
 
             using var stream = new MemoryStream();
@@ -76,6 +116,21 @@ namespace OgrenciAidatSistemi.Services
             throw new ArgumentNullException(nameof(file));
         }
 
+        public async Task<MemoryStream> DownloadFileAsStreamAsync(FilePath file)
+        {
+            if (file != null)
+            {
+                if (!File.Exists(file.Path))
+                {
+                    throw new FileNotFoundException("File not found", file.Path);
+                }
+
+                return await file.GetDataAsStreamAsync();
+            }
+
+            throw new ArgumentNullException(nameof(file));
+        }
+
         private static string ComputeHash(MemoryStream memoryStream)
         {
             using var md5 = MD5.Create();
@@ -85,7 +140,7 @@ namespace OgrenciAidatSistemi.Services
 
         public void DeleteFile(string fileName)
         {
-            var filePath = Path.Combine(_environment.WebRootPath, "uploads", fileName);
+            var filePath = Path.Combine(_uploadsFolder, fileName);
             if (File.Exists(filePath))
             {
                 File.Delete(filePath);
@@ -94,6 +149,29 @@ namespace OgrenciAidatSistemi.Services
             {
                 throw new FileNotFoundException($"The file {fileName} does not exist.");
             }
+        }
+
+        public async Task<FilePath> WriteFileAsync(
+            string fileName,
+            string content,
+            User createdBy,
+            string folderPath = "/generated"
+        )
+        {
+            if (string.IsNullOrWhiteSpace(fileName))
+            {
+                throw new ArgumentException("File name cannot be empty.");
+            }
+            var filePath = Path.Combine(_uploadsFolder, folderPath, fileName);
+            await File.WriteAllTextAsync(filePath, content);
+            return new FilePath(
+                path: filePath,
+                name: fileName,
+                extension: Path.GetExtension(fileName),
+                contentType: "text/plain",
+                size: content.Length,
+                description: "Generated file"
+            );
         }
     }
 }
