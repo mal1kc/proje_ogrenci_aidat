@@ -81,11 +81,10 @@ internal class Program
                 app.UseExceptionHandler("/Error");
                 _ = app.UseStatusCodePagesWithReExecute("/Error/{0}");
             }
-            else
-            {
-                Console.WriteLine("Using development error handler");
-                _ = app.UseDeveloperExceptionPage();
-            }
+#if DEBUG
+            Console.WriteLine("Using development error handler");
+            _ = app.UseDeveloperExceptionPage();
+#endif
             if (ctx == null)
             {
                 throw new Exception("AppDbContext is null");
@@ -163,8 +162,6 @@ internal class Program
                         await seeder.AfterSeedAsync();
                     }
 
-                    // schedule payment service
-
                     _ = ctx.SaveChanges();
                 }
                 Console.WriteLine("Database Seeded");
@@ -176,10 +173,10 @@ internal class Program
                             .Schedule<PaymentCreatorInvocable>()
 #if DEBUG
                             .EveryThirtyMinutes()
+                            // .RunOnceAtStart()
 #else
                             .Daily()
 #endif
-                            .RunOnceAtStart()
                             .PreventOverlapping("PaymentCreator");
                     })
                     .LogScheduledTaskProgress(app.Services.GetService<ILogger<IScheduler>>());

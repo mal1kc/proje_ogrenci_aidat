@@ -93,10 +93,11 @@ namespace OgrenciAidatSistemi.Models
                 }
             );
 
-        public StudentView ToView(bool ignoreBidirectNav = false)
+        public override StudentView ToView(bool ignoreBidirectNav = false)
         {
             return new StudentView()
             {
+                Role = Role,
                 Id = Id,
                 StudentId = StudentId,
                 FirstName = FirstName,

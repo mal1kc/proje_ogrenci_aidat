@@ -163,16 +163,19 @@ namespace OgrenciAidatSistemi.Controllers
                 // return empty Queryable
                 receipts ??= _dbContext.Receipts.Where(r => false);
                 var modelList = new QueryableModelHelper<Receipt>(receipts, Receipt.SearchConfig);
-                return View(
-                    modelList.List(
-                        ViewData,
-                        searchString,
-                        searchField,
-                        sortOrder,
-                        pageIndex,
-                        pageSize
-                    )
+                searchField ??= "";
+                searchString ??= "";
+                sortOrder ??= "";
+
+                var result = modelList.List(
+                    ViewData,
+                    searchString.ToSanitizedLowercase(),
+                    searchField.ToSanitizedLowercase(),
+                    sortOrder.ToSanitizedLowercase(),
+                    pageIndex,
+                    pageSize
                 );
+                return View(result);
             }
             catch (Exception ex)
             {

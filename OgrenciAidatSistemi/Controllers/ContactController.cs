@@ -1,32 +1,23 @@
+using DocumentFormat.OpenXml.Math;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using OgrenciAidatSistemi.Data;
 using OgrenciAidatSistemi.Helpers;
+using OgrenciAidatSistemi.Helpers.Controller;
 using OgrenciAidatSistemi.Models;
 using OgrenciAidatSistemi.Services;
 
 namespace OgrenciAidatSistemi.Controllers
 {
-    // TODO: change authorization roles for actions
-    // must be SiteAdmin or SchoolAdmin (for its school and school students) => list, create, edit, delete ,details
-    // or Student (for its own contact info) => details, edit
-
-    public class ContactController : Controller
+    public class ContactController(
+        ILogger<ContactController> logger,
+        AppDbContext dbContext,
+        UserService userService
+    ) : BaseModelController(logger)
     {
-        private readonly ILogger<ContactController> _logger;
-        private readonly AppDbContext _dbContext;
-        private readonly UserService _userService;
-
-        public ContactController(
-            ILogger<ContactController> logger,
-            AppDbContext dbContext,
-            UserService userService
-        )
-        {
-            _logger = logger;
-            _dbContext = dbContext;
-            _userService = userService;
-        }
+        private readonly ILogger<ContactController> _logger = logger;
+        private readonly AppDbContext _dbContext = dbContext;
+        private readonly UserService _userService = userService;
 
         [Authorize(Roles = Configurations.Constants.userRoles.SiteAdmin)]
         public IActionResult List(
@@ -41,20 +32,33 @@ namespace OgrenciAidatSistemi.Controllers
                 _dbContext.Contacts.AsQueryable(),
                 ContactInfo.SearchConfig
             );
-            return View(
-                modelList.List(ViewData, searchString, searchField, sortOrder, pageIndex, pageSize)
+            searchField ??= "";
+            searchString ??= "";
+            sortOrder ??= "";
+            return TryListOrFail(
+                () =>
+                    modelList.List(
+                        ViewData,
+                        searchString.ToSanitizedLowercase(),
+                        searchField.ToSanitizedLowercase(),
+                        sortOrder.ToSanitizedLowercase(),
+                        pageIndex,
+                        pageSize
+                    ),
+                "contact infos"
             );
         }
 
         // GET: Contact/Delete/5
+        [DebugOnly]
         [Authorize(Roles = Configurations.Constants.userRoles.SiteAdmin)]
         public IActionResult Delete(int? id)
         {
-            // TODO: impelment contactinfo delete action
             throw new NotImplementedException("Delete action not implemented");
         }
 
         // POST: Contact/Delete/5
+        [DebugOnly]
         [
             HttpPost,
             ActionName("Delete"),
@@ -63,7 +67,6 @@ namespace OgrenciAidatSistemi.Controllers
         ]
         public IActionResult DeleteConfirmed(int? id)
         {
-            // TODO: implement contactinfo delete action
             throw new NotImplementedException("DeleteConfirmed action not implemented");
         }
     }

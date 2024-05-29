@@ -2,9 +2,8 @@ namespace OgrenciAidatSistemi.Configurations
 {
     public static class Constants
     {
-        // TODO : read all constants (settings) from json or toml file
         public const String AppName = "OgrenciAidatSistemi";
-        public const String AppVersion = "0.0.1";
+        public const String AppVersion = "0.7.0";
         public const String PasswdSalt = "asp_19545s";
         public const short MaxUserNameLength = 124;
         public const short MinUserNameLength = 5;
@@ -22,8 +21,9 @@ namespace OgrenciAidatSistemi.Configurations
         public const String AdminAuthenticationLoginPath =
             "/0e4ec65beafa9ffb05abf95f2299783ba48721134a35a7abe28aab71e0ad15c04543917869ef1ae7241186cf5bd9b28c4270031a910ca8b2d76de995ef1a73ff";
 
-        // TODO : this should be used as const like enum but as str
+#pragma warning disable IDE1006 // Naming Styles
         public static class userRoles
+#pragma warning restore IDE1006 // Naming Styles
         {
             public const String None = "None";
             public const String SiteAdmin = "SiteAdminR";
@@ -31,7 +31,7 @@ namespace OgrenciAidatSistemi.Configurations
             public const String Student = "StudentR";
         }
 
-        public const String AuthenticationAccessDeniedPath = "/Error/Error403";
+        public const String AuthenticationAccessDeniedPath = "/Home/AccessDenied";
 
         // 10 MB file size
         public const long MaxFileSize = 10 * 1024 * 1024;

@@ -1,4 +1,4 @@
-@model HashSet<PaymentView>
+@model IEnumerable<PaymentView>
 
 @{
     const string CardName = "paymentHistoryCard";
@@ -27,7 +27,10 @@
                             <th>Method</th>
                             <th>Status</th>
                             <th>Details</th>
-                            <th>Make Payment</th>
+                            @if (isMakePaymentShow)
+                            {
+                                <th>Make Payment</th>
+                            }
                         </tr>
                     </thead>
                     <tbody>

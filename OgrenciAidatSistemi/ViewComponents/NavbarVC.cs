@@ -2,71 +2,31 @@ using System.Security.Claims;
 using Microsoft.AspNetCore.Mvc;
 using OgrenciAidatSistemi.Data;
 using OgrenciAidatSistemi.Models;
+using OgrenciAidatSistemi.Services;
 #pragma warning disable 8604
 namespace OgrenciAidatSistemi.ViewComponents
 {
-    public class NavbarVC : ViewComponent
+    public class NavbarVC(ILogger<NavbarVC> logger, UserService userService) : ViewComponent
     {
-        private readonly ILogger<NavbarVC> _logger;
-        private readonly AppDbContext _appDbContext;
+        private readonly ILogger<NavbarVC> _logger = logger;
+        private readonly UserService _userService = userService;
 
-        public NavbarVC(ILogger<NavbarVC> logger, AppDbContext appDbContext)
+        public async Task<IViewComponentResult> InvokeAsync()
         {
-            _logger = logger;
-            _appDbContext = appDbContext;
-        }
+            var usr = await _userService.GetCurrentUserAsync();
 
-        public IViewComponentResult Invoke()
-        {
-            if (HttpContext.User.Claims.Any())
+            if (usr != null)
             {
-                String? claimEmail = HttpContext
-                    .User.Claims.FirstOrDefault(claim => claim.Type == ClaimTypes.Email)
-                    ?.Value;
-
-                if (claimEmail == null)
+                try
                 {
-                    return View(null);
+                    var userView = usr.ToView();
+                    ViewBag.User = userView;
                 }
-                String? claimRole = HttpContext
-                    .User.Claims.FirstOrDefault(claim => claim.Type == ClaimTypes.Role)
-                    ?.Value;
-
-                return claimRole switch
+                catch (Exception e)
                 {
-                    "SiteAdminR" => InvokeSiteAdmin(claimEmail),
-                    "StudentR" => InvokeStudent(claimEmail),
-                    _ => View(null)
-                };
+                    _logger.LogError(e, "Error while converting user to view");
+                }
             }
-
-            return View(null);
-        }
-
-        public IViewComponentResult InvokeSiteAdmin(String claimEmail)
-        {
-            SiteAdmin? admin = _appDbContext
-                .SiteAdmins.Where(_admin => _admin.EmailAddress == claimEmail)
-                .FirstOrDefault();
-            ViewBag.User = admin;
-            return View();
-        }
-
-        public IViewComponentResult InvokeStudent(String claimEmail)
-        {
-            Student? student = _appDbContext
-                .Students.Where(_student => _student.EmailAddress == claimEmail)
-                .FirstOrDefault();
-            ViewBag.User = student;
-            return View();
-        }
-
-        public IViewComponentResult InvokeSchoolAdmin(String claimEmail)
-        {
-            SchoolAdmin? schoolAdmin = _appDbContext
-                .SchoolAdmins.Where(_schoolAdmin => _schoolAdmin.EmailAddress == claimEmail)
-                .FirstOrDefault();
-            ViewBag.User = schoolAdmin;
             return View();
         }
     }

@@ -70,7 +70,7 @@ namespace OgrenciAidatSistemi.Services
             string? filePath;
             do
             {
-                uniqueFileName = Guid.NewGuid().ToString() + "_" + file.FileName;
+                uniqueFileName = Guid.NewGuid().ToString() + "_" + SanitizeFileName(file.FileName);
                 filePath = Path.Combine(_uploadsFolder, uniqueFileName);
             } while (File.Exists(filePath));
 
@@ -140,7 +140,8 @@ namespace OgrenciAidatSistemi.Services
 
         public void DeleteFile(string fileName)
         {
-            var filePath = Path.Combine(_uploadsFolder, fileName);
+            var sanitizedFileName = SanitizeFileName(fileName);
+            var filePath = Path.Combine(_uploadsFolder, sanitizedFileName);
             if (File.Exists(filePath))
             {
                 File.Delete(filePath);
@@ -162,7 +163,8 @@ namespace OgrenciAidatSistemi.Services
             {
                 throw new ArgumentException("File name cannot be empty.");
             }
-            var filePath = Path.Combine(_uploadsFolder, folderPath, fileName);
+            var sanitizedFileName = SanitizeFileName(fileName);
+            var filePath = Path.Combine(_uploadsFolder, folderPath, sanitizedFileName);
             await File.WriteAllTextAsync(filePath, content);
             return new FilePath(
                 path: filePath,
@@ -172,6 +174,26 @@ namespace OgrenciAidatSistemi.Services
                 size: content.Length,
                 description: "Generated file"
             );
+        }
+
+        public static string SanitizeFileName(string fileName)
+        {
+            // Remove invalid characters from the file name
+            string invalidChars =
+                new string(Path.GetInvalidFileNameChars()) + new string(Path.GetInvalidPathChars());
+            foreach (char c in invalidChars)
+            {
+                fileName = fileName.Replace(c.ToString(), "");
+            }
+
+            // Remove certain patterns from the file name
+            string[] patterns = { "/.", "..", ".", "~", "/", "\\" };
+            foreach (string pattern in patterns)
+            {
+                fileName = fileName.Replace(pattern, "");
+            }
+
+            return fileName;
         }
     }
 }

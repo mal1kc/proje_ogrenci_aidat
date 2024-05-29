@@ -6,9 +6,9 @@ namespace OgrenciAidatSistemi.Models
     public class School : BaseDbModel, ISearchableModel<School>
     {
         public required string Name { get; set; }
-        public ISet<SchoolAdmin>? SchoolAdmins { get; set; }
-        public ISet<Grade>? Grades { get; set; }
-        public ISet<WorkYear>? WorkYears { get; set; }
+        public ICollection<SchoolAdmin>? SchoolAdmins { get; set; }
+        public ICollection<Grade>? Grades { get; set; }
+        public ICollection<WorkYear>? WorkYears { get; set; }
 
         public required ISet<Student?>? Students { get; set; }
 
@@ -67,7 +67,10 @@ namespace OgrenciAidatSistemi.Models
                         .ToHashSet(),
                 Students = ignoreBidirectNav
                     ? null
-                    : this.Students?.Select(s => s.ToView(ignoreBidirectNav: true)).ToHashSet(),
+                    : this.Students?.Select(s => s.ToView(ignoreBidirectNav: true)).ToList(),
+                WorkYears = ignoreBidirectNav
+                    ? null
+                    : this.WorkYears?.Select(wy => wy.ToView(ignoreBidirectNav: true)).ToList(),
                 CreatedAt = this.CreatedAt,
                 UpdatedAt = this.UpdatedAt
             };

@@ -41,7 +41,6 @@ namespace OgrenciAidatSistemi.Models
 
         public School? School { get; set; }
 
-        // TODO: add subclass search config ot way to implement search config for subclasses
         public static ModelSearchConfig<Payment> SearchConfig =>
             new(
                 defaultSortMethod: s => s.PaymentDate,

@@ -1,10 +1,48 @@
+@model SchoolAdminView
+
 @{
     ViewData["Title"] = "School Admin Dashboard";
+    Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome to Student Aidat(Payment) System</h1>
-    <p>Use the navigation bar to get started.</p>
-    <h1 style="color: red;">TODO: IMPLEMENT THIS DASHBOARD</h1>
-    
+<div class="container mt-5">
+    <h1 class="mb-4">Welcome, @Model.FirstName!</h1>
+
+    <div class="row">
+        <div class="col-lg-3 mb-4">
+            @if(Model.CurrentWorkYear != null){
+                <partial name="_WorkYearDetailPartial" model="@Model.CurrentWorkYear" />
+            }else{
+                <div class="alert alert-warning" role="alert">
+                    There is no active work year.
+                </div>
+            }
+        </div>
+
+        <div class="col-lg-8 mb-4">
+            @{
+                ViewData["paymentHistoryTitle"] = "Last Payments";
+            }
+            <partial name="_PaymentHistoryPartial" model="ViewBag.LastPayments" />
+        </div>
+
+        <div class="col-lg-3 mb-4">
+            @if(Model.School != null){
+                <partial name="_SchoolDetailPartial" model="Model.School" />
+            }else{
+                <div class="alert alert-warning" role="alert">
+                    There is no school assigned to you. Contact the system administrator.
+                </div>
+            }
+        </div>
+
+
+        <div class="col-lg-8 mb-4">
+            @{
+                ViewData["studentsListTitle"] = "Last Updated Students";
+            }
+            <partial name="_StudentListPartial" model="ViewBag.LastStudents" />
+        </div>
+
+    </div>
 </div>

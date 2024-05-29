@@ -15,12 +15,11 @@
     <div class="mb-3">
         <div class="mb-3">
             <label for="SchoolId" class="form-label">School:</label>
-            <select asp-for="SchoolId" class="form-select" id="SchoolId" name="SchoolId">
+            <input type="text" class="search-input" placeholder="Search for schools..">
+            <select asp-for="SchoolId" class="form-select" id="SchoolId" name="SchoolId" data-searchable-select>
                 <option value="">Select School</option>
+
                 @foreach (var School in ViewBag.Schools)
-
-
-
                 {
                     <option value="@School.Id">@School.Name</option>
                 }
@@ -124,15 +123,15 @@
 
             $('#addAddress').click(function () {
                 $('#addressContainer').append(`
-                        <div class="mb-3">
-                            <label class="form-label">Address ${addressIndex + 1}</label>
-                            <input name="Addresses[${addressIndex}]" class="form-control" required />
-                            <button type="button" class="btn btn-danger btn-sm removeAddress float-end">Remove</button>
-                            <div class="invalid-feedback">
-                                Please enter a valid address.
+                            <div class="mb-3">
+                                <label class="form-label">Address ${addressIndex + 1}</label>
+                                <input name="Addresses[${addressIndex}]" class="form-control" required />
+                                <button type="button" class="btn btn-danger btn-sm removeAddress float-end">Remove</button>
+                                <div class="invalid-feedback">
+                                    Please enter a valid address.
+                                </div>
                             </div>
-                        </div>
-                    `);
+                        `);
 
                 addressIndex++;
                 updateLabels();
@@ -173,3 +172,39 @@
             })()
     </script>
 }
+
+<script src="https://cdn.jsdelivr.net/npm/fuse.js@6.4.6/dist/fuse.basic.min.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/fuse.js@6.4.6/dist/fuse.basic.min.js"></script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', (event) => {
+        const selects = document.querySelectorAll('[data-searchable-select]');
+        selects.forEach((select) => {
+            const fuseOptions = {
+                shouldSort: true,
+                threshold: 0.6,
+                keys: ['title']
+            };
+
+            const options = Array.from(select.options).map(option => ({
+                title: option.text,
+                value: option.value
+            }));
+
+            const fuse = new Fuse(options, fuseOptions);
+
+            const input = select.previousElementSibling;
+            input.addEventListener('input', (event) => {
+                const results = fuse.search(event.target.value);
+                select.innerHTML = '';
+                results.forEach(({ item }) => {
+                    const option = document.createElement('option');
+                    option.text = item.title;
+                    option.value = item.value;
+                    select.appendChild(option);
+                });
+            });
+        });
+    });
+</script>

@@ -13,8 +13,10 @@
     var showIsVerifiedColumn = (usrRole != UserRole.None);
     var showSchoolIdColumn = (usrRole == UserRole.SiteAdmin);
 }
-
-<h2>@ViewData["Title"] <a asp-action="Create" class="btn btn-sm btn-primary float-end">Create New</a></h2>
+@section CreateNewWithTitle
+{
+<h2>@ViewData["Title"]</h2>
+}
 
 
 @section SearchFormOptions {
@@ -25,6 +27,7 @@
         }
         <option value="">All</option>
         <option value="Id">Payment Id</option>
+        <option value="StudentId">Student Id</option>
         <option value="PaymentDate">Payment Date</option>
         <option value="PaymentMethod">Payment Method</option>
         <option value="PaymentPeriodId">Payment Period</option>
@@ -101,7 +104,7 @@
                         @if (item.School != null)
                         {
                             <td>
-                                <partial name="_SchoolViewPartial" model="item.School.ToView(true)" />
+                                <partial name="_SchoolDetailPartial" model="item.School.ToView(true)" />
                             </td>
                         }
                         else
@@ -133,7 +136,7 @@
                             &#8505;
                         </a>
 
-                        @if (ViewBag.IsDebug)
+                        @if (ViewBag.IsDebug == true)
                         {
                             <a asp-action="Delete" asp-route-id="@item.Id" 
                             class="btn btn-sm btn-danger " 

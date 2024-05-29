@@ -1,0 +1,95 @@
+@model UserView
+<div class="navbar-collapse collapse" id="collapseNavbar">
+    <ul class="navbar-nav">
+        @{
+            if (@Model.Role == UserRole.SiteAdmin)
+            {
+                <li class="nav-item">
+                    <a class="nav-link" asp-area="" asp-controller="SiteAdmin" asp-action="List">SiteAdmins</a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link" asp-area="" asp-controller="School" asp-action="List">Schools</a>
+                </li>
+
+            }
+            @if (@Model.Role == UserRole.SiteAdmin || @Model.Role == UserRole.SchoolAdmin)
+            {
+                <li class="nav-item">
+                    <a class="nav-link" asp-area="" asp-controller="SchoolAdmin" asp-action="List">SchoolAdmins</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" asp-area="" asp-controller="Student" asp-action="List">Students</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" asp-area="" asp-controller="WorkYear" asp-action="List">WorkYears</a>
+                </li>
+
+            }
+            if (@Model.Role != UserRole.None)
+            {
+                <li class="nav-item">
+                    <a class="nav-link" asp-area="" asp-controller="Payment" asp-action="List">Payments</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" asp-area="" asp-controller="Payment" asp-action="PeriodList">PaymentPeriods</a>
+                </li>
+            }
+            if (@Model.Role == UserRole.Student)
+            {
+                <li class="nav-item">
+                    <a class="nav-link" asp-area="" asp-controller="Receipt" asp-action="List">Receipts</a>
+                </li>
+            }
+        }
+    </ul>
+    <ul class="navbar-nav ms-auto">
+        <li class="nav-item">
+        </li>
+    </ul>
+</div>
+<div>
+    <div class="btn-group dropstart">
+        <button type="button" class="btn">
+            @{
+                switch (@Model.Role)
+                {
+
+                    case UserRole.SiteAdmin:
+                        <a class="nav-link" asp-area="" asp-controller="SiteAdmin" asp-action="AccountDetail">🐼 @Model.FirstName</a>
+                        break;
+
+                    case UserRole.SchoolAdmin:
+                        <a class="nav-link" asp-area="" asp-controller="SchoolAdmin" asp-action="AccountDetail">😊
+                            @Model.FirstName</a>
+                        break;
+
+                    case UserRole.Student:
+                        <a class="nav-link" asp-area="" asp-controller="Student" asp-action="AccountDetail">🎓 @Model.FirstName</a>
+                        break;
+                }
+            }
+        </button>
+
+        <button type="button" class="btn dropdown-toggle dropdown-toggle-split" data-bs-display="static"
+            data-bs-toggle="dropdown" aria-expanded="false">
+        </button>
+        <ul class="dropdown-menu dropdown-menu-start">
+            <li><a class="dropdown-item" href="#">AccountDetail</a></li>
+            <li>
+                <hr class="dropdown-divider">
+            </li>
+            <li><a class="dropdown-item" href="#">Something else here</a></li>
+            <li>
+                <hr class="dropdown-divider">
+            </li>
+            <li>
+                <a class="dropdown-item" asp-area="" asp-controller="UserCommon" asp-action="SignOutUser">SignOut</a>
+            </li>
+        </ul>
+    </div>
+</div>
+
+<script>
+    console.log("NavbarUserPartial you must be @Model.FirstName with role @Model.Role");
+</script>

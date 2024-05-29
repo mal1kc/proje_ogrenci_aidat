@@ -1,3 +1,4 @@
+using DocumentFormat.OpenXml.Math;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -13,7 +14,7 @@ namespace OgrenciAidatSistemi.Controllers
         ILogger<SchoolAdminController> logger,
         AppDbContext dbContext,
         UserService userService
-    ) : Controller
+    ) : BaseModelController(logger)
     {
         private readonly ILogger<SchoolAdminController> _logger = logger;
 
@@ -22,9 +23,54 @@ namespace OgrenciAidatSistemi.Controllers
         private readonly UserService _userService = userService;
 
         [Authorize(Roles = Configurations.Constants.userRoles.SchoolAdmin)]
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
-            return View();
+            var signed_user = await _userService.GetCurrentUserAsync();
+            if (signed_user == null)
+                return RedirectToAction("SignIn");
+
+            var schoolAdmin = await _dbContext
+                .SchoolAdmins.Include(sa => sa.School)
+                .Include(sa => sa.ContactInfo)
+                .Where(sa => sa.Id == signed_user.Id)
+                .FirstOrDefaultAsync();
+            if (schoolAdmin == null)
+                return RedirectToAction("SignIn");
+
+            var lastPayments = await _dbContext
+                .Payments.Include(p => p.Student)
+                .Include(p => p.PaymentPeriod)
+                .OrderByDescending(p => p.CreatedAt)
+                .Where(p =>
+                    p.Student != null
+                    && p.Student.School != null
+                    && p.Student.School.Id == schoolAdmin.School.Id
+                    && p.PaymentMethod != PaymentMethod.UnPaid
+                )
+                .Take(5)
+                .ToListAsync();
+
+            var lastStudents = await _dbContext
+                .Students.OrderByDescending(s => s.CreatedAt)
+                .Where(s => s.School != null && s.School.Id == schoolAdmin.School.Id)
+                .Take(5)
+                .ToListAsync();
+
+            ViewBag.LastPayments = lastPayments.Select(p => p.ToView()).ToList();
+
+            ViewBag.LastStudents = lastStudents.Select(s => s.ToView()).ToList();
+
+            SchoolAdminView schoolAdminView = schoolAdmin.ToView();
+            if (schoolAdminView.School != null)
+                schoolAdminView.School.WorkYears = _dbContext
+                    .WorkYears.OrderByDescending(wy => wy.StartDate)
+                    .Where(wy => wy.School != null && wy.School.Id == schoolAdmin.School.Id)
+                    .Take(5)
+                    .ToList()
+                    .Select(wy => wy.ToView())
+                    .ToList();
+            ViewBag.UserRole = UserRole.SchoolAdmin;
+            return View(schoolAdminView);
         }
 
         public async Task<IActionResult> SignIn()
@@ -42,63 +88,73 @@ namespace OgrenciAidatSistemi.Controllers
             [Bind("EmailAddress", "Password")] SchoolAdminView scAdminView
         )
         {
-            // some idoitic validation
             scAdminView.PasswordVerify = scAdminView.Password;
-            UserViewValidationResult validationResult = scAdminView.ValidateFieldsSignIn();
-            if (validationResult != UserViewValidationResult.FieldsAreValid)
+            if (!ValidateSignIn(scAdminView, out var validationResult))
             {
                 TempData["CantSignIn"] = true;
-                switch (validationResult)
-                {
-                    case UserViewValidationResult.EmailAddressNotMatchRegex:
-                        ModelState.AddModelError("EmailAddress", "invalid email syntax");
-                        break;
-                    case UserViewValidationResult.PasswordEmpty:
-                        ModelState.AddModelError("Password", "Password is empty");
-                        break;
-                }
                 return View(scAdminView);
             }
 
-            // check if user exists
             var passwordHash = _userService.HashPassword(scAdminView.Password);
+            var schAdmin = _dbContext.SchoolAdmins.FirstOrDefault(u =>
+                u.EmailAddress == scAdminView.EmailAddress && u.PasswordHash == passwordHash
+            );
 
-            var schAdmin = _dbContext
-                .SchoolAdmins.Where(u =>
-                    u.EmailAddress == scAdminView.EmailAddress && u.PasswordHash == passwordHash
-                )
-                .FirstOrDefault();
             if (schAdmin == null)
             {
                 ModelState.AddModelError("EmailAddress", "User not found");
+                return View(scAdminView);
             }
-            else
+
+            _logger.LogDebug("User {0} signed in", schAdmin.EmailAddress);
+
+            try
             {
-                _logger.LogDebug("User {0} signed in", schAdmin.EmailAddress);
-                try
+                if (!await _userService.SignInUser(schAdmin, UserRole.SchoolAdmin))
                 {
-                    if (!await _userService.SignInUser(schAdmin, UserRole.SchoolAdmin))
-                    {
-                        TempData["CantSignIn"] = true;
-                        TempData["Error"] = "Error while signing in";
-                    }
-                    else
-                    {
-                        TempData["Message"] = "Signed in successfully";
-                    }
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogError(
-                        "Error while signing in user {0}: {1}",
-                        schAdmin.EmailAddress,
-                        ex.Message
-                    );
                     TempData["CantSignIn"] = true;
-                    return RedirectToAction("SignIn");
+                    TempData["Error"] = "Error while signing in";
+                }
+                else
+                {
+                    TempData["Message"] = "Signed in successfully";
                 }
             }
+            catch (Exception ex)
+            {
+                _logger.LogError(
+                    "Error while signing in user {0}: {1}",
+                    schAdmin.EmailAddress,
+                    ex.Message
+                );
+                TempData["CantSignIn"] = true;
+            }
+
             return RedirectToAction("Index");
+        }
+
+        private bool ValidateSignIn(
+            SchoolAdminView scAdminView,
+            out UserViewValidationResult validationResult
+        )
+        {
+            validationResult = scAdminView.ValidateFieldsSignIn();
+            if (validationResult == UserViewValidationResult.FieldsAreValid)
+            {
+                return true;
+            }
+
+            switch (validationResult)
+            {
+                case UserViewValidationResult.EmailAddressNotMatchRegex:
+                    ModelState.AddModelError("EmailAddress", "invalid email syntax");
+                    break;
+                case UserViewValidationResult.PasswordEmpty:
+                    ModelState.AddModelError("Password", "Password is empty");
+                    break;
+            }
+
+            return false;
         }
 
         /*
@@ -109,8 +165,12 @@ namespace OgrenciAidatSistemi.Controllers
         └ ƒ DeleteConfirmed(int? id)
         */
 
-        [Authorize(Roles = Configurations.Constants.userRoles.SiteAdmin)]
-        public IActionResult List(
+        [Authorize(
+            Roles = Configurations.Constants.userRoles.SiteAdmin
+                + ","
+                + Configurations.Constants.userRoles.SchoolAdmin
+        )]
+        public async Task<IActionResult> List(
             string? searchString = null,
             string? searchField = null,
             string? sortOrder = null,
@@ -118,13 +178,34 @@ namespace OgrenciAidatSistemi.Controllers
             int pageSize = 20
         )
         {
+            var (usrRole, schId) = await _userService.GetUserRoleAndSchoolId();
+            if (usrRole == UserRole.Student)
+                return RedirectToAction("Index", "Home");
+            IQueryable<SchoolAdmin> schoolAdmins = _dbContext.SchoolAdmins.Include(sa => sa.School);
+            if (usrRole == UserRole.SchoolAdmin)
+            {
+                schoolAdmins = schoolAdmins.Where(sa => sa.School.Id == schId);
+            }
             var modelList = new QueryableModelHelper<SchoolAdmin>(
-                _dbContext.SchoolAdmins.Include(sa => sa.School).AsQueryable(),
+                schoolAdmins,
                 SchoolAdmin.SearchConfig
             );
 
-            return View(
-                modelList.List(ViewData, searchString, searchField, sortOrder, pageIndex, pageSize)
+            searchField ??= "";
+            searchString ??= "";
+            sortOrder ??= "";
+
+            return TryListOrFail(
+                () =>
+                    modelList.List(
+                        ViewData,
+                        searchString.ToSanitizedLowercase(),
+                        searchField.ToSanitizedLowercase(),
+                        sortOrder.ToSanitizedLowercase(),
+                        pageIndex,
+                        pageSize
+                    ),
+                "school admins"
             );
         }
 
@@ -230,7 +311,11 @@ namespace OgrenciAidatSistemi.Controllers
             return RedirectToAction("List");
         }
 
-        [Authorize(Roles = Configurations.Constants.userRoles.SiteAdmin)]
+        [Authorize(
+            Roles = Configurations.Constants.userRoles.SiteAdmin
+                + ","
+                + Configurations.Constants.userRoles.SchoolAdmin
+        )]
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null || _dbContext.SchoolAdmins == null)
@@ -260,7 +345,11 @@ namespace OgrenciAidatSistemi.Controllers
         [
             HttpPost,
             ActionName("DeleteConfirmed"),
-            Authorize(Roles = Configurations.Constants.userRoles.SiteAdmin),
+            Authorize(
+                Roles = Configurations.Constants.userRoles.SiteAdmin
+                    + ","
+                    + Configurations.Constants.userRoles.SchoolAdmin
+            ),
             ValidateAntiForgeryToken
         ]
         public async Task<IActionResult> DeleteConfirmed(int? id)
@@ -275,7 +364,11 @@ namespace OgrenciAidatSistemi.Controllers
 
         // GET: SchoolAdmin/Detalis/5
         //  only accessible by site admin
-        [Authorize(Roles = Configurations.Constants.userRoles.SiteAdmin)]
+        [Authorize(
+            Roles = Configurations.Constants.userRoles.SiteAdmin
+                + ","
+                + Configurations.Constants.userRoles.SchoolAdmin
+        )]
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null || _dbContext.SchoolAdmins == null)

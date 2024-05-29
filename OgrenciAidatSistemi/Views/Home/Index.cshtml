@@ -17,6 +17,10 @@
 
     <div class="d-flex flex-column align-items-center">
         <a asp-action="SignIn" asp-controller="Home" class="btn btn-primary mb-3 w-50" id="signInButton">Sign In</a>
+
+        @*  about button *@
+        <a asp-action="About" asp-controller="Home" class="btn btn-primary mb-3 w-50" id="aboutButton">About</a>
         @* contact button *@
-        <a asp-action="Contact" asp-controller="Home" class="btn btn-primary w-50" id="contactButton">Contact</a>
+        <a asp-action="Contact" asp-controller="Home" class="btn btn-primary mb-3 w-50" id="contactButton" style="opacity: 0; color:transparent;" >Contact</a>
+    </div>
 </div>

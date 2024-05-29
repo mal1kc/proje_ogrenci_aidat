@@ -9,6 +9,14 @@ namespace OgrenciAidatSistemi.Models.ViewModels
 
         public ContactInfoView? ContactInfo { get; set; }
 
+        // if the current date is between the start and end date of a work year, return that first work year
+
+        public WorkYearView? CurrentWorkYear =>
+            School?.WorkYears?.FirstOrDefault(static wy =>
+                wy.StartDate <= DateOnly.FromDateTime(DateTime.Now)
+                && wy.EndDate >= DateOnly.FromDateTime(DateTime.Now)
+            );
+
         public override bool CheckUserExists(AppDbContext dbctx)
         {
             if (dbctx.SchoolAdmins == null)

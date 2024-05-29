@@ -103,10 +103,11 @@ namespace OgrenciAidatSistemi.Models
             return ComputeHash(rawData, Constants.AdminPasswordSalt);
         }
 
-        public SiteAdminView ToView()
+        public override SiteAdminView ToView(bool ignoreBidirectNav = false)
         {
             return new SiteAdminView
             {
+                Role = Role,
                 Id = Id,
                 Username = Username,
                 FirstName = FirstName,

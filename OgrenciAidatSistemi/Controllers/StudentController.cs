@@ -1,6 +1,8 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
+using Microsoft.EntityFrameworkCore.Query;
 using OgrenciAidatSistemi.Data;
 using OgrenciAidatSistemi.Helpers;
 using OgrenciAidatSistemi.Models;
@@ -14,7 +16,7 @@ namespace OgrenciAidatSistemi.Controllers
         AppDbContext dbContext,
         UserService userService,
         StudentService studentService
-    ) : Controller
+    ) : BaseModelController(logger)
     {
         private readonly ILogger<StudentController> _logger = logger;
 
@@ -144,8 +146,12 @@ namespace OgrenciAidatSistemi.Controllers
             return RedirectToAction("Index");
         }
 
-        [Authorize(Roles = Configurations.Constants.userRoles.SiteAdmin)]
-        public IActionResult List(
+        [Authorize(
+            Roles = Configurations.Constants.userRoles.SiteAdmin
+                + ","
+                + Configurations.Constants.userRoles.SchoolAdmin
+        )]
+        public async Task<IActionResult> List(
             string? searchString = null,
             string? searchField = null,
             string? sortOrder = null,
@@ -153,146 +159,226 @@ namespace OgrenciAidatSistemi.Controllers
             int pageSize = 20
         )
         {
-            var modelList = new QueryableModelHelper<Student>(
-                _dbContext.Students.Include(s => s.School).AsQueryable(),
-                Student.SearchConfig
-            );
+            var (usrRole, schId) = await _userService.GetUserRoleAndSchoolId();
+            if (usrRole == UserRole.None)
+                return RedirectToAction("SignIn");
 
-            return View(
-                modelList.List(ViewData, searchString, searchField, sortOrder, pageIndex, pageSize)
+            var students = _dbContext.Students.Include(s => s.School).AsQueryable();
+
+            if (usrRole == UserRole.SchoolAdmin)
+            {
+                students = students
+                    .Where(s => s.School != null && s.School.Id == schId)
+                    .AsQueryable();
+            }
+
+            var modelList = new QueryableModelHelper<Student>(students, Student.SearchConfig);
+
+            searchField ??= "";
+            searchString ??= "";
+            sortOrder ??= "";
+            return TryListOrFail(
+                () =>
+                    modelList.List(
+                        ViewData,
+                        searchString.ToSanitizedLowercase(),
+                        searchField.ToSanitizedLowercase(),
+                        sortOrder.ToSanitizedLowercase(),
+                        pageIndex,
+                        pageSize
+                    ),
+                "students"
             );
         }
 
-        [Authorize(Roles = Configurations.Constants.userRoles.SiteAdmin)]
+        [Authorize(
+            Roles = Configurations.Constants.userRoles.SiteAdmin
+                + ","
+                + Configurations.Constants.userRoles.SchoolAdmin
+        )]
         public IActionResult Create()
         {
-            ViewBag.Schools = _dbContext.Schools;
-            return View();
+            var (usrRole, schId) = _userService.GetUserRoleAndSchoolId().Result;
+
+            if (usrRole != UserRole.None && usrRole != UserRole.None && usrRole != UserRole.Student)
+            {
+                IQueryable<School> schools = _dbContext.Schools;
+
+                if (usrRole == UserRole.SchoolAdmin)
+                {
+                    schools = schools.Where(s => s.Id == schId);
+
+                    if (!schools.Any())
+                    {
+                        ViewData["Error"] = "School not found";
+                        _logger.LogError("School not found in db,sch id: {0}", schId);
+                        return RedirectToAction("SignOutUser", "UserCommon");
+                    }
+                }
+
+                ViewBag.Schools = schools;
+
+                return View();
+            }
+
+            ViewData["Error"] = "You are not authorized to this page";
+            return RedirectToAction("Login", "Home");
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        [Authorize(Roles = Configurations.Constants.userRoles.SiteAdmin)]
+        [Authorize(
+            Roles = Configurations.Constants.userRoles.SiteAdmin
+                + ","
+                + Configurations.Constants.userRoles.SchoolAdmin
+        )]
         public async Task<IActionResult> Create(StudentView studentView)
         {
-            ViewBag.Schools = _dbContext.Schools;
-            UserViewValidationResult validationResult = studentView.ValidateFieldsCreate(
-                _dbContext
-            );
-            // check is school exists in db
-            if (validationResult != UserViewValidationResult.FieldsAreValid)
+            var (usrRole, schId) = await _userService.GetUserRoleAndSchoolId();
+
+            if (usrRole == UserRole.None)
             {
-                TempData["CantCreate"] = true;
-                switch (validationResult)
-                {
-                    case UserViewValidationResult.EmailAddressNotMatchRegex:
-                        ModelState.AddModelError("EmailAddress", "invalid email syntax");
-                        break;
-                    case UserViewValidationResult.PasswordsNotMatch:
-                        ModelState.AddModelError("Password", "Passwords do not match");
-                        break;
-                    case UserViewValidationResult.PasswordEmpty:
-                        ModelState.AddModelError("Password", "Password is empty");
-                        break;
-                    case UserViewValidationResult.UserExists:
-                        ModelState.AddModelError("EmailAddress", "User already exists");
-                        break;
-                    case UserViewValidationResult.InvalidName:
-                        ModelState.AddModelError("FirstName", "Invalid first name or last name");
-                        break;
-                    case UserViewValidationResult.EmailAddressExists:
-                        ModelState.AddModelError("EmailAddress", "Email already exists");
-                        break;
-                }
+                return RedirectToAction("SignIn");
+            }
+
+            if (usrRole == UserRole.SchoolAdmin && schId != studentView.SchoolId)
+            {
+                ModelState.AddModelError(
+                    "School",
+                    "You are not authorized to create a student for this school"
+                );
                 return View(studentView);
             }
-            var school = _dbContext
-                .Schools?.Where(s => s.Id == studentView.SchoolId)
-                .FirstOrDefault();
+
+            var validationResult = studentView.ValidateFieldsCreate(_dbContext);
+
+            if (validationResult != UserViewValidationResult.FieldsAreValid)
+            {
+                HandleValidationErrors(validationResult);
+                return View(studentView);
+            }
+
+            var school = _dbContext.Schools.FirstOrDefault(s => s.Id == studentView.SchoolId);
 
             if (school == null)
             {
-                TempData["CantCreate"] = true;
                 ModelState.AddModelError("School", "School is required");
                 return View(studentView);
             }
 
-            // check if user exists
-            _logger.LogDebug("Creating user {}", studentView.EmailAddress);
             try
             {
-                var newStdnt = new Student
-                {
-                    EmailAddress = studentView.EmailAddress,
-                    FirstName = studentView.FirstName,
-                    LastName = studentView.LastName,
-                    PasswordHash = _userService.HashPassword(studentView.Password),
-                    School = school,
-                    CreatedAt = DateTime.UtcNow,
-                    UpdatedAt = DateTime.UtcNow,
-                    ContactInfo = new ContactInfo
-                    {
-                        Email = studentView.EmailAddress,
-                        PhoneNumber = studentView.ContactInfo.PhoneNumber,
-                        Addresses = studentView.ContactInfo.Addresses
-                    },
-                    StudentId = _studentService.GenerateStudentId(school)
-                };
-                _logger.LogDebug("User {0} created", studentView.EmailAddress);
-                _logger.LogDebug("User id generated: {0}", newStdnt.Id);
-                _logger.LogDebug("saving user {0} to db", studentView.EmailAddress);
-
-                _dbContext.Students.Add(newStdnt);
+                var newStudent = CreateNewStudent(studentView, school);
+                _dbContext.Students.Add(newStudent);
                 await _dbContext.SaveChangesAsync();
             }
             catch (Exception ex)
             {
-                _logger.LogError(
-                    "Error while creating user {0}: {1}",
-                    studentView.EmailAddress,
-                    ex.Message
-                );
-                if (ex.InnerException != null)
-                    _logger.LogError("inner exception: {0}", ex.InnerException.Message);
-                if (ex.InnerException?.InnerException != null)
-                    _logger.LogError(
-                        "inner inner exception: {0}",
-                        ex.InnerException.InnerException.Message
-                    );
-                TempData["CantCreate"] = true;
+                LogCreateError(ex, studentView.EmailAddress);
                 return RedirectToAction("Create");
             }
-            // Succes state remove schools from viewbag
-            ViewBag.Schools = null;
+
             return RedirectToAction("List");
         }
 
-        [Authorize(Roles = Configurations.Constants.userRoles.SiteAdmin)]
-        public async Task<IActionResult> Details(int? id)
+        private void HandleValidationErrors(UserViewValidationResult validationResult)
         {
-            if (id == null)
+            TempData["CantCreate"] = true;
+            switch (validationResult)
             {
-                return NotFound();
+                case UserViewValidationResult.EmailAddressNotMatchRegex:
+                    ModelState.AddModelError("EmailAddress", "Invalid email syntax");
+                    break;
+                case UserViewValidationResult.PasswordsNotMatch:
+                    ModelState.AddModelError("Password", "Passwords do not match");
+                    break;
+                case UserViewValidationResult.PasswordEmpty:
+                    ModelState.AddModelError("Password", "Password is empty");
+                    break;
+                case UserViewValidationResult.UserExists:
+                    ModelState.AddModelError("EmailAddress", "User already exists");
+                    break;
+                case UserViewValidationResult.InvalidName:
+                    ModelState.AddModelError("FirstName", "Invalid first name or last name");
+                    break;
+                case UserViewValidationResult.EmailAddressExists:
+                    ModelState.AddModelError("EmailAddress", "Email already exists");
+                    break;
             }
-
-            var student = await _dbContext
-                .Students.Include(s => s.School)
-                .Include(s => s.Payments)
-                .Include(s => s.Grades)
-                .Include(s => s.ContactInfo)
-                .Where(e => e.Id == id)
-                .FirstOrDefaultAsync();
-
-            if (student == null)
-            {
-                return NotFound();
-            }
-
-            return View(student.ToView());
         }
 
-        [Authorize(Roles = Configurations.Constants.userRoles.SiteAdmin)]
-        // TODO: implement school admin access
+        private Student CreateNewStudent(StudentView studentView, School school)
+        {
+            return new Student
+            {
+                EmailAddress = studentView.EmailAddress,
+                FirstName = studentView.FirstName,
+                LastName = studentView.LastName,
+                PasswordHash = _userService.HashPassword(studentView.Password),
+                School = school,
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow,
+                ContactInfo = new ContactInfo
+                {
+                    Email = studentView.EmailAddress,
+                    PhoneNumber = studentView.ContactInfo.PhoneNumber,
+                    Addresses = studentView.ContactInfo.Addresses
+                },
+                StudentId = _studentService.GenerateStudentId(school)
+            };
+        }
+
+        private void LogCreateError(Exception ex, string emailAddress)
+        {
+            _logger.LogError("Error while creating user {0}: {1}", emailAddress, ex.Message);
+            if (ex.InnerException != null)
+            {
+                _logger.LogError("Inner exception: {0}", ex.InnerException.Message);
+            }
+            if (ex.InnerException?.InnerException != null)
+            {
+                _logger.LogError(
+                    "Inner inner exception: {0}",
+                    ex.InnerException.InnerException.Message
+                );
+            }
+            TempData["CantCreate"] = true;
+        }
+
+        [Authorize(
+            Roles = Configurations.Constants.userRoles.SiteAdmin
+                + ","
+                + Configurations.Constants.userRoles.SchoolAdmin
+        )]
+        public async Task<IActionResult> Details(int? id)
+        {
+            (UserRole? usrRole, int? schId) = await _userService.GetUserRoleAndSchoolId();
+
+            if (id == null)
+                return NotFound();
+            if (usrRole is UserRole.None or null)
+                return RedirectToAction("SignIn", "Home");
+
+            IQueryable<Student> students = _dbContext
+                .Students.Include(s => s.School)
+                .Include(s => s.ContactInfo)
+                .Include(s => s.Payments)
+                .Include(s => s.Grades)
+                .Where(s => s.Id == id);
+
+            if (usrRole == UserRole.SchoolAdmin)
+                students = students.Where(s => s.School != null && s.School.Id == schId);
+
+            Student? student = await students.FirstOrDefaultAsync();
+
+            return student == null ? NotFound() : View(student.ToView());
+        }
+
+        [Authorize(
+            Roles = Configurations.Constants.userRoles.SiteAdmin
+                + ","
+                + Configurations.Constants.userRoles.SchoolAdmin
+        )]
         public IActionResult Delete(int? id)
         {
             if (id == null)
@@ -300,7 +386,25 @@ namespace OgrenciAidatSistemi.Controllers
                 return NotFound();
             }
 
-            var student = _dbContext.Students.Where(e => e.Id == id).FirstOrDefault();
+            var (usrRole, schId) = _userService.GetUserRoleAndSchoolId().Result;
+            var studentQuerable = _dbContext.Students.Where(e => e.Id == id);
+
+            switch (usrRole)
+            {
+                case UserRole.SchoolAdmin:
+                    studentQuerable = studentQuerable.Where(s =>
+                        s.School != null && s.School.Id == schId
+                    );
+                    break;
+                case UserRole.None:
+                    return RedirectToAction("SignIn");
+                case UserRole.Student:
+                    return RedirectToAction("Index");
+                case UserRole.SiteAdmin:
+                    break;
+            }
+
+            var student = studentQuerable.FirstOrDefault();
 
             if (student == null)
             {
@@ -325,13 +429,34 @@ namespace OgrenciAidatSistemi.Controllers
         [
             HttpPost,
             ValidateAntiForgeryToken,
-            Authorize(Roles = Configurations.Constants.userRoles.SiteAdmin)
+            Authorize(
+                Roles = Configurations.Constants.userRoles.SiteAdmin
+                    + ","
+                    + Configurations.Constants.userRoles.SchoolAdmin
+            )
         ]
         public async Task<IActionResult> DeleteConfirmed(int? id)
         {
             if (id == null)
                 return NotFound();
-            bool isUserDeleted = await _userService.DeleteUser((int)id);
+            var (usrRole, schId) = await _userService.GetUserRoleAndSchoolId();
+            var studentQuerable = _dbContext.Students.Where(e => e.Id == id);
+            switch (usrRole)
+            {
+                case UserRole.SchoolAdmin:
+                    studentQuerable = studentQuerable.Where(s =>
+                        s.School != null && s.School.Id == schId
+                    );
+                    break;
+                case UserRole.None:
+                    return RedirectToAction("SignIn");
+                case UserRole.Student:
+                    return RedirectToAction("Index");
+            }
+            var student = studentQuerable.FirstOrDefault();
+            if (student == null)
+                return NotFound();
+            bool isUserDeleted = await _userService.DeleteUser(student.Id);
             if (!isUserDeleted)
                 ViewData["Message"] = "Error while deleting user";
             return RedirectToAction("List");

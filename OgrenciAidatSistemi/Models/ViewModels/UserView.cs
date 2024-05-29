@@ -50,9 +50,8 @@ namespace OgrenciAidatSistemi.Models.ViewModels
 
         public UserViewValidationResult ValidateFieldsCreate(AppDbContext dbctx)
         {
-            var baseFieldsValidation = ValidateFieldsSignIn();
-            if (baseFieldsValidation != UserViewValidationResult.FieldsAreValid)
-                return baseFieldsValidation;
+            if (!CheckPasswordsMatch())
+                return UserViewValidationResult.PasswordsNotMatch;
             if (string.IsNullOrEmpty(Password))
                 return UserViewValidationResult.PasswordEmpty;
             if (!CheckPasswordsMatch())

@@ -1,5 +1,11 @@
 @{
-
+    if(ViewBag.IsDebug == null)
+    {
+        ViewBag.IsDebug = false;
+    }
+    @if(ViewBag.UserRole == null){
+        ViewBag.UserRole = UserRole.None;
+    }
     var stopWatch = System.Diagnostics.Stopwatch.StartNew();
 }
 <!DOCTYPE html>

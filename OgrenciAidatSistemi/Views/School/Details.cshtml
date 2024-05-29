@@ -1,11 +1,12 @@
 @model SchoolView
-
+@{
+    var showCount = ViewBag.showCount ?? 5;
+    ViewBag.showCount = showCount;
+}
 <div class="container mt-5">
-    <h2 class="mb-4">School Details</h2>
-
     <div class="card">
         <div class="card-body">
-            <h4 class="card-title">School</h4>
+            <h4 class="card-title">School Details</h4>
             <hr />
             <dl class="row">
                 <dt class="col-sm-2 text-nowrap">
@@ -21,7 +22,6 @@
                 <dd class="col-sm-10">
                     @Html.DisplayFor(model => model.Name)
                 </dd>
-
                 <dt class="col-sm-2 text-nowrap">
                     @Html.DisplayNameFor(model => model.CreatedAt)
                 </dt>
@@ -38,13 +38,16 @@
 
                 <div class="row">
                     <div class="col-md-6">
-                        <div class="mt-3">
+                        @if (Model.Students == null || Model.Students.Count == 0){
+                            <div class="alert alert-info" role="alert">
+                                No students found.
+                            </div>
+                        }else{
                             <partial name="_StudentListPartial" model="Model.Students" />
-                        </div>
+                        }
                     </div>
 
                     <div class="col-md-6 border-start">
-                        <h3 class="mt-5">School Admins</h3>
                         @if (Model.SchoolAdmins == null || Model.SchoolAdmins.Count == 0)
                         {
                             <div class="alert alert-info" role="alert">

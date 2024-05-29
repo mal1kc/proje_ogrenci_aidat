@@ -93,19 +93,19 @@ namespace OgrenciAidatSistemi.Models
             Role = UserRole.SchoolAdmin;
         }
 
-        public SchoolAdminView ToView(bool ignoreBidirectNav = false)
+        public override SchoolAdminView ToView(bool ignoreBidirectNav = false)
         {
-            return new SchoolAdminView()
+            return new()
             {
-                Id = this.Id,
-                FirstName = this.FirstName,
-                LastName = this.LastName,
-                School = ignoreBidirectNav ? null : this.School.ToView(ignoreBidirectNav: true),
-                EmailAddress = this.EmailAddress,
-                CreatedAt = this.CreatedAt,
-                UpdatedAt = this.UpdatedAt,
-                ContactInfo =
-                    this.ContactInfo?.ToView() ?? new ContactInfoView { Email = this.EmailAddress }
+                Role = Role,
+                Id = Id,
+                FirstName = FirstName,
+                LastName = LastName,
+                School = ignoreBidirectNav ? null : School?.ToView(ignoreBidirectNav: true),
+                EmailAddress = EmailAddress,
+                CreatedAt = CreatedAt,
+                UpdatedAt = UpdatedAt,
+                ContactInfo = ContactInfo?.ToView() ?? new ContactInfoView { Email = EmailAddress }
             };
         }
     }

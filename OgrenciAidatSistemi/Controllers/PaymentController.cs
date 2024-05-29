@@ -11,18 +11,13 @@ using OgrenciAidatSistemi.Services;
 
 namespace OgrenciAidatSistemi.Controllers
 {
-    // TODO: change authorization roles for actions
-    // debug : for only edit,delete action
-    // must be SiteAdmin or SchoolAdmin (for its school) => list, create, details
-    // or Student (for its own Payments) => details, list , create
-
     public class PaymentController(
         ILogger<PaymentController> logger,
         AppDbContext dbContext,
         UserService userService,
         PaymentService paymentService,
         FileService fileService
-    ) : Controller
+    ) : BaseModelController(logger)
     {
         private readonly ILogger<PaymentController> _logger = logger;
         private readonly AppDbContext _dbContext = dbContext;
@@ -33,7 +28,6 @@ namespace OgrenciAidatSistemi.Controllers
         private readonly FileService _fileService = fileService;
 
         [Authorize]
-        [DebugOnly]
         public IActionResult List(
             string? searchString = null,
             string? searchField = null,
@@ -42,45 +36,67 @@ namespace OgrenciAidatSistemi.Controllers
             int pageSize = 20
         )
         {
-#if DEBUG
-            ViewBag.IsDebug = true;
-#endif
-            IQueryable<Payment>? payments = null;
-
             var (role, schoolId) = _userService.GetUserRoleAndSchoolId().Result;
 
             ViewBag.UserRole = role;
+            if (role == null || role == UserRole.None)
+            {
+                return RedirectToAction("SignIn", "Home");
+            }
+            ViewBag.UserRole = role;
+            IQueryable<Payment> payments = _dbContext
+                .Payments.Include(p => p.Student)
+                .Include(p => p.School);
             switch (role)
             {
-                case UserRole.SiteAdmin:
-                    payments = _dbContext.Payments.Include(p => p.Student).Include(p => p.School);
-                    ViewBag.UserRole = UserRole.SiteAdmin;
-                    break;
                 case UserRole.SchoolAdmin:
-                    if (schoolId.HasValue)
+                    if (schoolId != null)
                     {
-                        payments = _dbContext
-                            .Payments.Include(p => p.Student)
-                            .Where(p => p.School != null && p.School.Id == schoolId.Value);
+                        payments = payments
+                            .Where(p =>
+                                (p.School != null && p.School.Id == schoolId.Value)
+                                || (
+                                    p.Student != null
+                                    && p.Student.School != null
+                                    && p.Student.School.Id == schoolId.Value
+                                )
+                            )
+                            .AsQueryable();
                     }
-                    ViewBag.UserRole = UserRole.SchoolAdmin;
+                    else
+                    {
+                        ViewData["Error"] = "School Id is not valid of the current user";
+                        return RedirectToAction("SignIn", "Home");
+                    }
                     break;
                 case UserRole.Student:
-                    payments = _dbContext
-                        .Payments.Include(p => p.Student)
+                    payments = payments
                         .Where(p =>
                             p.Student != null && p.Student.Id == _userService.GetCurrentUserID()
-                        );
-                    ViewBag.UserRole = UserRole.Student;
+                        )
+                        .AsQueryable();
+                    break;
+                case UserRole.SiteAdmin:
                     break;
                 default:
-                    return Unauthorized();
+                    return RedirectToAction("SignIn", "Home");
             }
 
             var modelList = new QueryableModelHelper<Payment>(payments, Payment.SearchConfig);
-
-            return View(
-                modelList.List(ViewData, searchString, searchField, sortOrder, pageIndex, pageSize)
+            searchField ??= "";
+            searchString ??= "";
+            sortOrder ??= "";
+            return TryListOrFail(
+                () =>
+                    modelList.List(
+                        ViewData,
+                        searchString.ToSanitizedLowercase(),
+                        searchField.ToSanitizedLowercase(),
+                        sortOrder.ToSanitizedLowercase(),
+                        pageIndex,
+                        pageSize
+                    ),
+                "payments"
             );
         }
 
@@ -89,17 +105,6 @@ namespace OgrenciAidatSistemi.Controllers
         {
             ViewBag.Payments = _dbContext.Payments;
             return View();
-        }
-
-        // POST: Payment/Create
-
-        [HttpPost]
-        [Authorize(Roles = Configurations.Constants.userRoles.SiteAdmin)]
-        [ValidateAntiForgeryToken]
-        public IActionResult Create(Payment model)
-        {
-            // TODO:: implement Paymentinfo create action
-            throw new NotImplementedException("Create action not implemented");
         }
 
         // GET: Payment/Delete/5
@@ -158,29 +163,35 @@ namespace OgrenciAidatSistemi.Controllers
         [Authorize]
         public IActionResult Details(int? id)
         {
+            if (id == null)
+                return NotFound();
             var (role, schoolId) = _userService.GetUserRoleAndSchoolId().Result;
+            IQueryable<Payment> payments = _dbContext.Payments;
             Payment? payment = null;
             ViewBag.UserRole = role;
             switch (role)
             {
                 case UserRole.SiteAdmin:
-                    payment = _dbContext
-                        .Payments.Include(p => p.Student)
-                        .FirstOrDefault(p => p.Id == id);
+                    payment = payments.Include(p => p.Student).FirstOrDefault(p => p.Id == id);
                     break;
                 case UserRole.SchoolAdmin:
                     if (schoolId.HasValue)
                     {
-                        payment = _dbContext
-                            .Payments.Include(p => p.Student)
+                        payment = payments
+                            .Include(p => p.Student)
                             .FirstOrDefault(p =>
-                                p.Id == id && p.School != null && p.School.Id == schoolId.Value
+                                (p.Id == id && p.School != null && p.School.Id == schoolId)
+                                || (
+                                    p.Student != null
+                                    && p.Student.School != null
+                                    && p.Student.School.Id == schoolId
+                                )
                             );
                     }
                     break;
                 case UserRole.Student:
-                    payment = _dbContext
-                        .Payments.Include(p => p.Student)
+                    payment = payments
+                        .Include(p => p.Student)
                         .FirstOrDefault(p =>
                             p.Id == id
                             && p.Student != null
@@ -190,11 +201,11 @@ namespace OgrenciAidatSistemi.Controllers
                 default:
                     return Unauthorized();
             }
-            if (id == null)
-                return NotFound();
-
             if (payment == null)
-                return NotFound();
+            {
+                TempData["Error"] = "Payment not found";
+                return RedirectToAction("List");
+            }
 
             return View(payment.ToView());
         }
@@ -250,15 +261,21 @@ namespace OgrenciAidatSistemi.Controllers
                     paymentPeriods,
                     PaymentPeriod.SearchConfig
                 );
-                return View(
-                    modelList.List(
-                        ViewData,
-                        searchString,
-                        searchField,
-                        sortOrder,
-                        pageIndex,
-                        pageSize
-                    )
+                searchField ??= "";
+                searchString ??= "";
+                sortOrder ??= "";
+
+                return TryListOrFail(
+                    () =>
+                        modelList.List(
+                            ViewData,
+                            searchString.ToSanitizedLowercase(),
+                            searchField.ToSanitizedLowercase(),
+                            sortOrder.ToSanitizedLowercase(),
+                            pageIndex,
+                            pageSize
+                        ),
+                    "payment periods"
                 );
             }
             else
@@ -268,24 +285,49 @@ namespace OgrenciAidatSistemi.Controllers
         }
 
         [HttpGet]
-        [Authorize(Roles = Configurations.Constants.userRoles.SiteAdmin)]
+        [Authorize]
         public IActionResult PeriodDetails(int? id)
         {
-            // TODO: add correct roles
             if (id == null)
                 return NotFound();
 
-            if (_dbContext.PaymentPeriods == null)
-            {
-                _logger.LogError("PaymentPeriods table is null");
-                return NotFound();
-            }
+            var (role, schoolId) = _userService.GetUserRoleAndSchoolId().Result;
 
-            var paymentPeriod = _dbContext
+            var paymentPeriods = _dbContext
                 .PaymentPeriods.Include(pp => pp.Student)
                 .Include(pp => pp.Payments)
-                .Include(pp => pp.WorkYear)
-                .FirstOrDefault(pp => pp.Id == id);
+                .Include(pp => pp.WorkYear);
+            PaymentPeriod? paymentPeriod = null;
+            switch (role)
+            {
+                case UserRole.SiteAdmin:
+                    paymentPeriod = paymentPeriods.FirstOrDefault(p => p.Id == id);
+                    break;
+                case UserRole.SchoolAdmin:
+                    if (schoolId.HasValue)
+                    {
+                        paymentPeriod = paymentPeriods
+                            .Where(p =>
+                                p.Id == id
+                                && p.Student != null
+                                && p.Student.School != null
+                                && p.Student.School.Id == schoolId.Value
+                            )
+                            .FirstOrDefault();
+                    }
+                    break;
+                case UserRole.Student:
+                    paymentPeriod = paymentPeriods
+                        .Where(p =>
+                            p.Id == id
+                            && p.Student != null
+                            && p.Student.Id == _userService.GetCurrentUserID()
+                        )
+                        .FirstOrDefault();
+                    break;
+                default:
+                    return Unauthorized();
+            }
 
             if (paymentPeriod == null)
                 return NotFound();
@@ -308,6 +350,7 @@ namespace OgrenciAidatSistemi.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         [Authorize(
             Roles = Configurations.Constants.userRoles.SiteAdmin
                 + ","
@@ -340,54 +383,33 @@ namespace OgrenciAidatSistemi.Controllers
                 + ","
                 + Configurations.Constants.userRoles.SchoolAdmin
         )]
-        public IActionResult PeriodCreate()
+        public async Task<IActionResult> PeriodCreate()
         {
-            ViewBag.IsSiteAdmin = false;
-            IQueryable<Student>? students = null;
-            IQueryable<WorkYear>? workYears = null;
+            var (role, schoolId) = await _userService.GetUserRoleAndSchoolId();
 
-            #region get user role and groupSid claim to determine the user role
-
-            var (role, schoolId) = _userService.GetUserRoleAndSchoolId().Result;
+            if (schoolId == 0 || schoolId == -1 || schoolId == null)
+            {
+                TempData["Error"] = "School is not valid";
+                return RedirectToAction("Index", "Home");
+            }
 
             ViewBag.IsSiteAdmin = role == UserRole.SiteAdmin;
 
-            switch (role)
-            {
-                case UserRole.SiteAdmin:
-                    students = _dbContext.Students;
-                    workYears = _dbContext.WorkYears;
-                    break;
-                case UserRole.SchoolAdmin:
-                    try
-                    {
-                        if (schoolId == 0 || schoolId == -1 || schoolId == null)
-                        {
-                            throw new FormatException("schoolId is not valid");
-                        }
-                        students = _dbContext.Students.Where(s =>
-                            s.School != null && s.School.Id == schoolId
-                        );
-                        workYears = _dbContext.WorkYears.Where(wy =>
-                            wy.School != null && wy.School.Id == schoolId
-                        );
-                        break;
-                    }
-                    catch (FormatException e)
-                    {
-                        _logger.LogError(e, e.Message ?? "schoolId is not valid");
-                    }
+            IQueryable<Student>? students =
+                role == UserRole.SiteAdmin
+                    ? _dbContext.Students
+                    : _dbContext.Students.Where(s => s.School != null && s.School.Id == schoolId);
 
-                    TempData["Error"] = "School is not valid";
-                    return RedirectToAction("Index", "Home");
-                default:
-                    TempData["Error"] = "User role is not valid";
-                    return RedirectToAction("Index", "Home");
-            }
-            #endregion
+            IQueryable<WorkYear>? workYears =
+                role == UserRole.SiteAdmin
+                    ? _dbContext.WorkYears
+                    : _dbContext.WorkYears.Where(wy =>
+                        wy.School != null && wy.School.Id == schoolId
+                    );
 
             ViewBag.Students = students;
             ViewBag.WorkYears = workYears;
+
             return View();
         }
 
@@ -398,72 +420,75 @@ namespace OgrenciAidatSistemi.Controllers
                 + Configurations.Constants.userRoles.SchoolAdmin
         )]
         [ValidateAntiForgeryToken]
-        public IActionResult PeriodCreate(PaymentPeriodView periodView)
+        public async Task<IActionResult> PeriodCreate(PaymentPeriodView periodView)
         {
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid)
             {
-                var (role, schoolId) = _userService.GetUserRoleAndSchoolId().Result;
-                if (role == null)
-                {
-                    TempData["Error"] = "User role is not defined";
-                    return RedirectToAction("PeriodCreate");
-                }
-
-                var student = _dbContext.Students?.FirstOrDefault(s =>
-                    s.Id == periodView.StudentId
-                );
-                if (student == null)
-                {
-                    TempData["Error"] = "Student is null";
-                    return RedirectToAction("PeriodCreate");
-                }
-
-                // If the user's school ID doesn't match the student's school ID, return an error
-                if (schoolId != null && student.School?.Id != schoolId)
-                {
-                    TempData["Error"] = "User does not have access to this student";
-                    return RedirectToAction("PeriodCreate");
-                }
-
-                var workYear = _dbContext.WorkYears?.FirstOrDefault(wy =>
-                    wy.Id == periodView.WorkYearId
-                );
-                if (workYear == null)
-                {
-                    _logger.LogError("WorkYear is null");
-                    TempData["Error"] = "WorkYear is null";
-                    return RedirectToAction("PeriodCreate");
-                }
-
-                // check if period is already exists at least 30 days
-                if (periodView.StartDate.AddDays(30) > periodView.EndDate)
-                {
-                    TempData["Error"] = "Period is less than 30 days";
-                    return RedirectToAction("PeriodCreate");
-                }
-
-                if (student.School != workYear.School)
-                {
-                    TempData["Error"] = "Student and WorkYear's School is not same";
-                    return RedirectToAction("PeriodCreate");
-                }
-
-                var model = new PaymentPeriod
-                {
-                    Student = student,
-                    WorkYear = workYear,
-                    StartDate = periodView.StartDate,
-                    EndDate = periodView.EndDate,
-                    PerPaymentAmount = periodView.PerPaymentAmount,
-                    Payments = new HashSet<Payment>()
-                };
-
-                _dbContext.PaymentPeriods?.Add(model);
-                _dbContext.SaveChanges();
-                return RedirectToAction(nameof(PeriodList));
+                return RedirectToAction(nameof(PeriodList) + "?sortOrder=Id");
             }
-            // redirect to list with sort
-            return RedirectToAction(nameof(PeriodList) + "?sortOrder=Id");
+
+            var (role, schoolId) = await _userService.GetUserRoleAndSchoolId();
+
+            if (role == null)
+            {
+                TempData["Error"] = "User role is not defined";
+                return RedirectToAction("PeriodCreate");
+            }
+
+            var student = _dbContext
+                .Students?.Include(s => s.School)
+                .FirstOrDefault(s => s.Id == periodView.StudentId);
+            var workYear = _dbContext
+                .WorkYears?.Include(wy => wy.School)
+                .FirstOrDefault(wy => wy.Id == periodView.WorkYearId);
+
+            if (student == null || workYear == null)
+            {
+                TempData["Error"] = student == null ? "Student is null" : "WorkYear is null";
+                return RedirectToAction("PeriodCreate");
+            }
+
+            if (schoolId != null && student.School?.Id != schoolId)
+            {
+                TempData["Error"] = "User does not have access to this student";
+                return RedirectToAction("PeriodCreate");
+            }
+            bool isValid = periodView.Occurrence switch
+            {
+                Occurrence.Monthly => periodView.StartDate.AddMonths(1) >= periodView.EndDate,
+                Occurrence.Quarterly => periodView.StartDate.AddMonths(3) >= periodView.EndDate,
+                Occurrence.Yearly => periodView.StartDate.AddYears(1) >= periodView.EndDate,
+                Occurrence.OneTime => periodView.StartDate == periodView.EndDate,
+                Occurrence.Daily => periodView.StartDate == periodView.EndDate,
+                Occurrence.Weekly => periodView.StartDate.AddDays(7) >= periodView.EndDate,
+                _ => false
+            };
+
+            if (!isValid)
+            {
+                TempData["Error"] = "Invalid Occurrence";
+                return RedirectToAction("PeriodCreate");
+            }
+
+            if (student.School != workYear.School)
+            {
+                TempData["Error"] = "Student and WorkYear's School is not same";
+                return RedirectToAction("PeriodCreate");
+            }
+
+            var model = new PaymentPeriod
+            {
+                Student = student,
+                WorkYear = workYear,
+                StartDate = periodView.StartDate,
+                EndDate = periodView.EndDate,
+                PerPaymentAmount = periodView.PerPaymentAmount,
+            };
+
+            _dbContext.PaymentPeriods?.Add(model);
+            await _dbContext.SaveChangesAsync();
+
+            return RedirectToAction(nameof(PeriodList));
         }
 
         [Authorize(

@@ -8,7 +8,9 @@ namespace OgrenciAidatSistemi.Models
         Monthly,
         Yearly,
         Weekly,
-        Daily
+        Daily,
+        Quarterly,
+        OneTime
     }
 
     public class PaymentPeriod : BaseDbModel, ISearchableModel<PaymentPeriod>

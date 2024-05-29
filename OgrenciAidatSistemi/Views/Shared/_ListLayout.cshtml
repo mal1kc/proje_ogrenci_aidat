@@ -6,11 +6,14 @@
     ViewBag.AspAction ??= "Index";
     ViewBag.AspController ??= "Home";
 
-
     @* if (ViewBag.queryDict == null)
     {
         ViewBag.queryDict = ViewHelpers.GenListQuery(ViewData);
     } *@
+
+    int currentPageIndex = (int)(ViewData["CurrentPageIndex"] ?? 1);
+    int totalPages = (int)(ViewData["TotalPages"] ?? 1);
+    int totalItems = (int)(ViewData["TotalItems"] ?? 0);
 
     var stopwatch = System.Diagnostics.Stopwatch.StartNew();
 }
@@ -52,20 +55,27 @@
     </script>
 }
 
+@if(totalPages == 0 && totalItems == 0)
+{
+    <div class="alert alert-warning" role="alert">
+        No data found.
+    </div>
+    IgnoreSection("Listings");
+}
+else{
 
 <div class="overflow-auto">
     <table class="table">
         @await RenderSectionAsync("Listings", required: true)
     </table>
 </div>
-
+}
 
 <nav aria-label="Page navigation" class="pagination-margin">
     <ul class="pagination justify-content-center">
         @if (ViewData["CurrentPageIndex"] != null)
         {
-            int currentPageIndex = (int)(ViewData["CurrentPageIndex"] ?? 1);
-            int totalPages = (int)(ViewData["TotalPages"] ?? 1);
+
 
             <li class="page-item @(currentPageIndex <= 1 ? "disabled" : "")">
                 <list-page-link-item asp-action="@ViewBag.AspAction"

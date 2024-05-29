@@ -1,78 +1,69 @@
 @model WorkYearView
 @{
-    ViewBag.Title = "Yeni Dönem Ekle";
+    ViewBag.Title = "Create WorkYear";
 
     School? defaultSchool = null;
-    @* (ViewBag.schools as IQueryable<School>)*@
-    // if difrrent type redirect to error page
-    if (ViewBag.Schools is IQueryable<School>)
+    if (!(ViewBag.Schools is IQueryable<School> schools))
     {
-
         TempData["Error"] = "Error: Schools cannot be retrieved";
     }
     else
     {
-        if (ViewBag.Schools.Count() == 1)
+        var schoolList = schools.ToList();
+        if (schoolList.Count == 1)
         {
-            defaultSchool = ViewBag.Schools.First();
-        }
-        else
-        {
-            defaultSchool = null;
+            defaultSchool = schoolList.First();
         }
     }
 }
 
-<h1 class="display-4"> BROKEN NEEDS TO BE FIXED</h1>
-@* 
-TODO: needs to be fixed 
-*@
 
-<h2>Yeni Dönem Ekle</h2>
+@if (TempData["Error"] == null)
+{
+    <h1 class="display-4">@ViewBag.Title</h1>
 
-<partial name="_ValidationScriptsPartial" />
+    <partial name="_ValidationScriptsPartial" />
 
-<form asp-action="Create" method="post" class="needs-validation">
-    @Html.AntiForgeryToken()
-    <div class="mb-3">
-        <label for="StartDate" class="form-label">Başlangıç Tarihi</label>
-        <input asp-for="StartDate" type="date" class="form-control" id="StartDate" required>
+    <form asp-action="Create" method="post" class="needs-validation">
+        @Html.AntiForgeryToken()
+        <div class="mb-3">
+            <label for="StartDate" class="form-label">Başlangıç Tarihi</label>
+            <input asp-for="StartDate" type="date" class="form-control" id="StartDate" required>
 
-        <div class="invalid-feedback">
-            @Html.ValidationMessageFor(model => model.StartDate)
+            <div class="invalid-feedback">
+                @Html.ValidationMessageFor(model => model.StartDate)
+            </div>
+        </div>
+        <div class="mb-3">
+            <label for="EndDate" class="form-label">Bitiş Tarihi</label>
+            <input asp-for="EndDate" type="date" class="form-control" id="EndDate" required>
+
+            <div class="invalid-feedback">
+                @Html.ValidationMessageFor(model => model.EndDate)
+            </div>
         </div>
 
-    </div>
-    <div class="mb-3">
-        <label for="EndDate" class="form-label">Bitiş Tarihi</label>
-        <input asp-for="EndDate" type="date" class="form-control" id="EndDate" required>
+        @if (defaultSchool != null)
+        {
+            <input type="hidden" asp-for="SchoolId" type="number" id="SchoolId" value="@defaultSchool.Id" required/>
+        }
+        else if (ViewBag.Schools.Count() > 1)
+        {
+            <div class="mb-3">
+                <label for="SchoolId" class="form-label">School</label>
+                <select asp-for="SchoolId" class="form-control" id="SchoolId" name="SchoolId" required>
+                    <option value="">Select School</option>
+                    @foreach (var School in ViewBag.Schools)
+                    {
+                        <option value="@School.Id">@School.Name</option>
+                    }
+                </select>
+                <div class="invalid-feedback">
+                    @Html.ValidationMessageFor(model => model.School)
+                </div>
+            </div>
+        }
 
-        <div class="invalid-feedback">
-            @Html.ValidationMessageFor(model => model.EndDate)
-        </div>
-    </div>
-
-    @if (defaultSchool != null)
-    {
-        <input type="hidden" asp-for="School" value="@defaultSchool.Id" />
-    }
-    else
-    {
-        <label for="SchoolId" class="form-label">School</label>
-        <select asp-for="School" class="form-control" id="SchoolId" name="SchoolId" required>
-            <option value="">Select School</option>
-            @foreach (var School in ViewBag.Schools)
-            {
-                <option value="@School.Id">@School.Name</option>
-            }
-        </select>
-        <div class="invalid-feedback">
-            @Html.ValidationMessageFor(model => model.School)
-        </div>
-    }
-
-
-
-    <button type="submit" class="btn btn-primary">Kaydet</button>
-
-</form>
+        <button type="submit" class="btn btn-primary">Create</button>
+    </form>
+}

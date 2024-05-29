@@ -6,7 +6,11 @@
     ViewBag.AspController = "WorkYear";
 }
 
-<h2>@ViewData["Title"] <a asp-action="Create" class="btn btn-sm btn-primary float-end">Create New</a></h2>
+@section CreateNewWithTitle
+{
+    <h2>@ViewData["Title"] <a asp-action="Create" class="btn btn-sm btn-primary float-end">Create New</a></h2>
+}
+
 
 @section SearchFormOptions {
     @* TODO make this options dynamicly *@
@@ -68,7 +72,7 @@
                 <td>
                     @if (item.School != null)
                     {
-                        <partial name="_SchoolViewPartial" model="item.School.ToView()" />
+                        <partial name="_SchoolDetailPartial" model="item.School.ToView()" />
                     }
                     else
                     {

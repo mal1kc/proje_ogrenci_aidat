@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using OgrenciAidatSistemi.Models;
 using OgrenciAidatSistemi.Services;
@@ -47,6 +48,10 @@ namespace OgrenciAidatSistemi.Controllers
 
         public IActionResult Login()
         {
+            if (User.Identity != null && User.Identity.IsAuthenticated)
+            {
+                return RedirectToAction("Index");
+            }
             return View();
         }
 
@@ -61,6 +66,11 @@ namespace OgrenciAidatSistemi.Controllers
         }
 
         public IActionResult About()
+        {
+            return View();
+        }
+
+        public IActionResult AccessDenied()
         {
             return View();
         }

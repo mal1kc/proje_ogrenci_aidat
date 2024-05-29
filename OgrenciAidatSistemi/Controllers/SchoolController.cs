@@ -9,25 +9,17 @@ using OgrenciAidatSistemi.Services;
 
 namespace OgrenciAidatSistemi.Controllers
 {
-    public class SchoolController : Controller
+    public class SchoolController(
+        ILogger<SchoolController> logger,
+        AppDbContext dbContext,
+        UserService userService
+    ) : BaseModelController(logger)
     {
-        private readonly ILogger<SchoolController> _logger;
+        private readonly ILogger<SchoolController> _logger = logger;
 
-        private readonly AppDbContext _dbContext;
+        private readonly AppDbContext _dbContext = dbContext;
 
-        private readonly UserService _userService;
-
-        public SchoolController(
-            ILogger<SchoolController> logger,
-            AppDbContext dbContext,
-            UserService userService
-        )
-        {
-            _logger = logger;
-            _dbContext = dbContext;
-
-            _userService = userService;
-        }
+        private readonly UserService _userService = userService;
 
         [Authorize(Roles = Configurations.Constants.userRoles.SchoolAdmin)]
         public IActionResult Index()
@@ -48,9 +40,21 @@ namespace OgrenciAidatSistemi.Controllers
                 _dbContext.Schools.AsQueryable(),
                 School.SearchConfig
             );
+            searchField ??= "";
+            searchString ??= "";
+            sortOrder ??= "";
 
-            return View(
-                modelList.List(ViewData, searchString, searchField, sortOrder, pageIndex, pageSize)
+            return TryListOrFail(
+                () =>
+                    modelList.List(
+                        ViewData,
+                        searchString.ToSanitizedLowercase(),
+                        searchField.ToSanitizedLowercase(),
+                        sortOrder.ToSanitizedLowercase(),
+                        pageIndex,
+                        pageSize
+                    ),
+                "schools"
             );
         }
 

@@ -3,6 +3,7 @@ using System.Security.Cryptography;
 using System.Text;
 using OgrenciAidatSistemi.Configurations;
 using OgrenciAidatSistemi.Models.Interfaces;
+using OgrenciAidatSistemi.Models.ViewModels;
 
 namespace OgrenciAidatSistemi.Models
 {
@@ -78,5 +79,7 @@ namespace OgrenciAidatSistemi.Models
         public UserRole Role { get; protected set; }
         public string FirstName { get; set; }
         public string? LastName { get; set; }
+
+        public abstract UserView ToView(bool ignoreBidirectNav = false);
     }
 }

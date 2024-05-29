@@ -85,8 +85,6 @@ namespace OgrenciAidatSistemi.Services
 
         public async Task<bool> MakePayment(UnPaidPayment payment, PaidPayment newPayment)
         {
-            // if new payment is not valid, return false
-            // TODO: make more checks for new payment
             if (newPayment.Amount <= 0)
             {
                 return false;

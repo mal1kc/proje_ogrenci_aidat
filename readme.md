@@ -14,54 +14,53 @@
 ## todo
 
 - [X] studentId generator
-- [x] add Message tempData for all views
+- [X] add Message tempData for all views
 - [ ] implement dashboards for all roles
     - [ ] site admin dashboard
-    - [ ] school admin dashboard
+    - [X] school admin dashboard
     - [X] student dashboard
 - [ ] add payment verification panel for sch admin (implement)
 - [X] add payment panel for student (improve usability)
-- [ ] add workYear management panel for sch admin (improve usability)
-- [ ] add paymentperiod management panel for sch admin ( improve usability)
+- [X] add workYear management panel for sch admin (improve usability)
+- [X] add paymentperiod management panel for sch admin ( improve usability)
 - [ ] add all models to delete , edit , create panel for site admin (some of them must be debug only) +++
-
     - [ ] payment
         - [ ] edit (makePayment , verify payment)
-        - [x] detail
-        - [x] delete (only site admin (debug only))
-        - [x] list
+        - [X] detail
+        - [X] delete (only site admin (debug only))
+        - [X] list
     - [ ] paymentperiod (only school admin, site admin)
         - [ ] edit  
-        - [x] create
+        - [X] create
         - [X] delete
         - [X] detail
-        - [x] list
+        - [X] list
     - [ ] workYear  (only school admin, site admin)
         - [ ] edit  
-        - [ ] create (needs re-look)
+        - [X] create
         - [X] delete
         - [X] detail
-        - [x] list  
+        - [X] list  
     - [ ] student  (only school admin, site admin)
         - [ ] myProfile
         - [ ] edit
         - [X] create
         - [X] delete
-        - [x] detail
-        - [x] list 
+        - [X] detail
+        - [X] list 
     - [ ] school (only school admin, site admin)
         - [ ] edit
-        - [x] create   (only site admin)
-        - [x] delete (only site admin)
-        - [x] detail
-        - [x] list (only site admin)
+        - [X] create   (only site admin)
+        - [X] delete (only site admin)
+        - [X] detail
+        - [X] list (only site admin)
     - [ ] schoolAdmin (only school admin, site admin)
         - [ ] myProfile
         - [ ] edit
-        - [x] create 
-        - [x] delete
+        - [X] create 
+        - [X] delete
         - [X] detail
-        - [x] list
+        - [X] list
     - [ ] contactInfo (all , but student can only see their own)
         - [ ] edit(integrated with student & school admin edit)
         - [X] create(integrated with student & school admin create)
@@ -79,11 +78,11 @@
 - [X] crete paymentPeriod service for auto create payments for students and save to db
 - [X] try to add school id as claim for school admin and student , and for site admin it should be 0 or null
 - [X] rewrite ModelQueryableHelper to use predefined search methods and sort methods
-- [x] implement exportService for exporting data to excel or similar formats
-- [x] change errorController pages (404, 500, 403, 401) 
+- [X] implement exportService for exporting data to excel or similar formats
+- [X] change errorController pages (404, 500, 403, 401) 
     - [ ] add error handling for all controllers and services
 
-- [x] improve look by adding dark/light color-mode
+- [X] improve look by adding dark/light color-mode
 
 - [X] remove _dependentSeeder , seeder not improved unless they break
 
@@ -93,7 +92,7 @@
 
 - [ ] ordered pagination not seems to work as expected (fix)
 
-- [ ] in listings fix role based column visibility (not working as expected)
+- [X] in listings fix role based column visibility (don't know how but it's gone now)
 
 ## todo , maybe
 

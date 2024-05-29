@@ -13,7 +13,7 @@ namespace OgrenciAidatSistemi.Controllers
         ILogger<WorkYearController> logger,
         AppDbContext dbContext,
         UserService userService
-    ) : Controller
+    ) : BaseModelController(logger)
     {
         private readonly ILogger<WorkYearController> _logger = logger;
 
@@ -32,10 +32,12 @@ namespace OgrenciAidatSistemi.Controllers
         )
         {
             ViewBag.IsSiteAdmin = false;
-            #region get user role and groupSid from claims to get user data
-
             var (userRole, schId) = _userService.GetUserRoleAndSchoolId().Result;
 
+            var workYears = _dbContext
+                .WorkYears.Include(wy => wy.PaymentPeriods)
+                .Include(wy => wy.School)
+                .AsQueryable();
             switch (userRole)
             {
                 case UserRole.SiteAdmin:
@@ -46,41 +48,31 @@ namespace OgrenciAidatSistemi.Controllers
                         _logger.LogError("School id is null");
                         return RedirectToAction("Index", "Home");
                     }
-
-                    var modelList2 = new QueryableModelHelper<WorkYear>(
-                        _dbContext
-                            .WorkYears.Where(wy => wy.School != null && wy.School.Id == schId)
-                            .Include(wy => wy.School)
-                            .Include(wy => wy.PaymentPeriods),
-                        WorkYear.SearchConfig
-                    );
-
-                    return View(
-                        modelList2.List(
-                            ViewData,
-                            searchString,
-                            searchField,
-                            sortOrder,
-                            pageIndex,
-                            pageSize
-                        )
-                    );
+                    workYears = workYears
+                        .Where(wy => wy.School != null && wy.School.Id == schId)
+                        .AsQueryable();
+                    break;
                 default:
                     _logger.LogError("User role is not valid");
                     return RedirectToAction("Index", "Home");
             }
-            #endregion
 
+            var modelList = new QueryableModelHelper<WorkYear>(workYears, WorkYear.SearchConfig);
+            searchField ??= "";
+            searchString ??= "";
+            sortOrder ??= "";
 
-            var modelList = new QueryableModelHelper<WorkYear>(
-                _dbContext
-                    .WorkYears.Include(wy => wy.PaymentPeriods)
-                    .Include(wy => wy.School)
-                    .AsQueryable(),
-                WorkYear.SearchConfig
-            );
-            return View(
-                modelList.List(ViewData, searchString, searchField, sortOrder, pageIndex, pageSize)
+            return TryListOrFail(
+                () =>
+                    modelList.List(
+                        ViewData,
+                        searchString.ToSanitizedLowercase(),
+                        searchField.ToSanitizedLowercase(),
+                        sortOrder.ToSanitizedLowercase(),
+                        pageIndex,
+                        pageSize
+                    ),
+                "work years"
             );
         }
 
@@ -185,6 +177,7 @@ namespace OgrenciAidatSistemi.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         [Authorize(Roles = Constants.userRoles.SiteAdmin + "," + Constants.userRoles.SchoolAdmin)]
         public IActionResult DeleteConfirmed(int? id)
         {
@@ -268,54 +261,66 @@ namespace OgrenciAidatSistemi.Controllers
                 TempData["Error"] = "Schools table is null";
                 return RedirectToAction("List");
             }
-            IQueryable<School>? schools = null;
-
-            #region get user role and schoolId from claims to get user data
+            IQueryable<School>? schools = _dbContext.Schools;
 
             var (userRole, usrId) = _userService.GetUserRoleAndSchoolId().Result;
             switch (userRole)
             {
                 case UserRole.SiteAdmin:
-                    schools = _dbContext.Schools.AsQueryable();
                     break;
                 case UserRole.SchoolAdmin:
-                    schools = _dbContext.Schools.Where(s => s.Id == usrId).AsQueryable();
+                    schools = schools.Where(s => s.Id == usrId).AsQueryable();
                     break;
                 default:
                     _logger.LogError("User role is not valid");
                     return RedirectToAction("Index", "Home");
             }
-            #endregion
             ViewBag.Schools = schools;
             return View();
         }
 
         [HttpPost]
         [Authorize(Roles = Constants.userRoles.SiteAdmin + "," + Constants.userRoles.SchoolAdmin)]
-        public IActionResult Create(WorkYearView workYear)
+        public async Task<IActionResult> Create(WorkYearView workYear)
         {
-            if (!ModelState.IsValid)
+            var (userRole, schID) = await _userService.GetUserRoleAndSchoolId();
+            var schools = _dbContext.Schools.AsQueryable();
+            if (userRole == UserRole.SchoolAdmin)
             {
-                TempData["Error"] = "WorkYear is not valid";
-                return RedirectToAction("Create");
+                schools = schools.Where(s => s.Id == schID && schID != null);
+            }
+            ViewBag.Schools = schools;
+
+            if (workYear.StartDate > workYear.EndDate)
+            {
+                ModelState.AddModelError("StartDate", "Start date cannot be greater than end date");
+                return View(workYear);
+            }
+            var fifteendaysAgo = DateOnly.FromDateTime(DateTime.UtcNow - TimeSpan.FromDays(15));
+            if (workYear.StartDate < fifteendaysAgo)
+            {
+                ModelState.AddModelError("StartDate", "Start date cannot be less than 15 days ago");
+                return View(workYear);
             }
 
-            // TODO: use schooladminservice to check if is signed schadmin's school and workyear's school is same
-
-
-
+            if (workYear.SchoolId <= 0 || workYear.SchoolId == null)
+            {
+                ModelState.AddModelError("SchoolId", "School is required");
+                return View(workYear);
+            }
 
             School? school = null;
 
-            var (userRole, schID) = _userService.GetUserRoleAndSchoolId().Result;
             switch (userRole)
             {
                 case UserRole.SiteAdmin:
-                    school = _dbContext.Schools.FirstOrDefault(s => s.Id == workYear.SchoolId);
+                    school = await _dbContext.Schools.FirstOrDefaultAsync(s =>
+                        s.Id == workYear.SchoolId
+                    );
                     if (school == null)
                     {
-                        TempData["Error"] = "School does not exist";
-                        return RedirectToAction("Create");
+                        ViewBag.Schools = await _dbContext.Schools.ToListAsync();
+                        return View(workYear);
                     }
                     break;
                 case UserRole.SchoolAdmin:
@@ -324,23 +329,22 @@ namespace OgrenciAidatSistemi.Controllers
                         _logger.LogError("School id is null");
                         return RedirectToAction("Index", "Home");
                     }
-                    school = _dbContext.Schools.FirstOrDefault(s => s.Id == schID);
+                    school = await _dbContext.Schools.FirstOrDefaultAsync(s => s.Id == schID);
                     if (school == null)
                     {
-                        _userService.SignOutUser().RunSynchronously();
+                        await _userService.SignOutUser();
                         TempData["Error"] = "School does not exist";
                         return RedirectToAction("Index", "Home");
+                    }
+                    if (workYear.SchoolId != schID)
+                    {
+                        ViewBag.Schools = await _dbContext.Schools.ToListAsync();
+                        return View(workYear);
                     }
                     break;
                 default:
                     _logger.LogError("User role is not valid");
                     return RedirectToAction("Index", "Home");
-            }
-
-            if (school == null || (workYear.School != null && workYear.School.Id != school.Id))
-            {
-                TempData["Error"] = "You are not authorized to create WorkYear for this school";
-                return RedirectToAction("Create");
             }
 
             var workYearModel = new WorkYear
@@ -351,8 +355,9 @@ namespace OgrenciAidatSistemi.Controllers
             };
 
             _dbContext.WorkYears.Add(workYearModel);
+            await _dbContext.SaveChangesAsync();
 
-            return View(workYear);
+            return RedirectToAction("List");
         }
     }
 }

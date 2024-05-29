@@ -15,7 +15,7 @@ namespace OgrenciAidatSistemi.Controllers
         AppDbContext appDbContext,
         UserService userService,
         ExportService exportService
-    ) : Controller
+    ) : BaseModelController(logger)
     {
         private readonly ILogger<SiteAdminController> _logger = logger;
         private readonly AppDbContext _appDbContext = appDbContext;
@@ -106,16 +106,21 @@ namespace OgrenciAidatSistemi.Controllers
                 _appDbContext.SiteAdmins.AsQueryable(),
                 SiteAdmin.SearchConfig
             );
+            searchField ??= "";
+            searchString ??= "";
+            sortOrder ??= "";
 
-            return View(
-                modelHelper.List(
-                    ViewData,
-                    searchString,
-                    searchField,
-                    sortOrder,
-                    pageIndex,
-                    pageSize
-                )
+            return TryListOrFail(
+                () =>
+                    modelHelper.List(
+                        ViewData,
+                        searchString.ToSanitizedLowercase(),
+                        searchField.ToSanitizedLowercase(),
+                        sortOrder.ToSanitizedLowercase(),
+                        pageIndex,
+                        pageSize
+                    ),
+                "site admins"
             );
         }
 
@@ -231,8 +236,6 @@ namespace OgrenciAidatSistemi.Controllers
             return Task.FromResult<IActionResult>(View(siteAdmin.ToView()));
         }
 
-        // TODO: change action name  to Delete
-
         // POST: /SiteAdmin/DeleteConfirmed/5
         // Delete a SiteAdmin
         //
@@ -287,9 +290,6 @@ namespace OgrenciAidatSistemi.Controllers
                 return NotFound();
             return View(siteAdmin.ToView());
         }
-
-        // TODO: add some query parameters to filter the results by specific fields
-        // maybe date range , maybe school name etc
 
         [Authorize(Roles = Configurations.Constants.userRoles.SiteAdmin)]
         [HttpGet]

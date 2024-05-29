@@ -128,8 +128,10 @@ body {
   color: var(--bs-primary-text-emphasis);
 }
 
-.pagination-margin {
-    margin-bottom: 5rem; /* Adjust this value as needed */
+.pagination-margin ul {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center; /* Optional: to center the items */
 }
 
 th {

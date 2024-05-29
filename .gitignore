@@ -11,3 +11,5 @@ app*.db
 app*.db*
 ./*/wwwroot/uploads/*
 node_modules/
+
+*.semgrep_output
