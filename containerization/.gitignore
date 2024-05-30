@@ -1,0 +1,4 @@
+*.env
+*.log
+*_temp.json
+exports/*

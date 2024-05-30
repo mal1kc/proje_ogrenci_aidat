@@ -16,7 +16,7 @@ namespace OgrenciAidatSistemi.Data
         protected readonly TContext _context;
         protected readonly IConfiguration _configuration;
 
-        protected static ILogger _logger;
+        protected static ILogger? _logger;
 
         protected int _maxSeedCount = 10;
 

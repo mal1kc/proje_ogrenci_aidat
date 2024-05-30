@@ -1,6 +1,7 @@
 using Coravel;
 using Coravel.Scheduling.Schedule.Interfaces;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.EntityFrameworkCore;
 using NReco.Logging.File;
 using OgrenciAidatSistemi.Configurations;
 using OgrenciAidatSistemi.Data;
@@ -37,7 +38,16 @@ internal class Program
                     };
                 });
             _ = services.AddHttpContextAccessor();
-            _ = services.AddDbContext<AppDbContext>();
+            _ = services.AddDbContext<AppDbContext>(
+                // #if DEBUG
+                // #else
+                options =>
+                options.UseSqlServer(
+                    configuration.GetConnectionString("DefaultConnection"),
+                    options => options.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery)
+                )
+            // #endif
+            );
             _ = services.AddSession(options =>
             {
                 options.IdleTimeout = TimeSpan.FromDays(27);
@@ -70,6 +80,11 @@ internal class Program
         async Task ConfigureAppAsync(WebApplication app)
         {
             IConfiguration configuration = app.Configuration;
+
+            // write connection string to console
+            Console.WriteLine(
+                "Connection String: " + configuration.GetConnectionString("DefaultConnection")
+            );
 
             AppDbContext? ctx = app
                 .Services.CreateScope()

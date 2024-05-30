@@ -89,11 +89,9 @@ namespace OgrenciAidatSistemi.Data
             modelBuilder.Entity<Payment>().HasOne(p => p.Student);
             modelBuilder.Entity<Payment>().HasOne(p => p.PaymentPeriod).WithMany(pp => pp.Payments);
             modelBuilder.Entity<Payment>().HasOne(p => p.Receipt);
-            modelBuilder
-                .Entity<Payment>()
-                .HasOne(p => p.Student)
-                .WithMany(s => s.Payments)
-                .OnDelete(DeleteBehavior.SetNull);
+            modelBuilder.Entity<Payment>().HasOne(p => p.Student).WithMany(s => s.Payments)
+            // .OnDelete(DeleteBehavior.SetNull);
+            ;
             modelBuilder
                 .Entity<WorkYear>()
                 .HasMany(wy => wy.PaymentPeriods)
@@ -101,63 +99,56 @@ namespace OgrenciAidatSistemi.Data
             modelBuilder.Entity<WorkYear>().HasOne(wy => wy.School).WithMany(s => s.WorkYears);
             modelBuilder.Entity<PaymentPeriod>().HasOne(pp => pp.WorkYear);
 
-            modelBuilder
-                .Entity<School>()
-                .HasMany(s => s.Students)
-                .WithOne(s => s.School)
-                .OnDelete(DeleteBehavior.Cascade);
-            modelBuilder
-                .Entity<School>()
-                .HasMany(s => s.SchoolAdmins)
-                .WithOne(sa => sa.School)
-                .OnDelete(DeleteBehavior.Cascade);
-            modelBuilder
-                .Entity<School>()
-                .HasMany(s => s.WorkYears)
-                .WithOne(wy => wy.School)
-                .OnDelete(DeleteBehavior.Cascade);
-            modelBuilder
-                .Entity<School>()
-                .HasMany(s => s.Grades)
-                .WithOne(g => g.School)
-                .OnDelete(DeleteBehavior.Cascade);
-
+            modelBuilder.Entity<School>().HasMany(s => s.Students).WithOne(s => s.School)
+            // .OnDelete(DeleteBehavior.Cascade)
+            ;
+            modelBuilder.Entity<School>().HasMany(s => s.SchoolAdmins).WithOne(sa => sa.School)
+            // .OnDelete(DeleteBehavior.Cascade)
+            ;
+            modelBuilder.Entity<School>().HasMany(s => s.WorkYears).WithOne(wy => wy.School)
+            // .OnDelete(DeleteBehavior.Cascade)
+            ;
+            modelBuilder.Entity<School>().HasMany(s => s.Grades).WithOne(g => g.School)
+            // .OnDelete(DeleteBehavior.Cascade)
+            ;
             // Delete behaviors for other relationships
             modelBuilder
                 .Entity<WorkYear>()
                 .HasMany(wy => wy.PaymentPeriods)
                 .WithOne(pp => pp.WorkYear)
-                .OnDelete(DeleteBehavior.SetNull);
-            modelBuilder
-                .Entity<Student>()
-                .HasMany(s => s.Payments)
-                .WithOne(p => p.Student)
-                .OnDelete(DeleteBehavior.SetNull);
-            modelBuilder
-                .Entity<Student>()
-                .HasMany(s => s.PaymentPeriods)
-                .WithOne(pp => pp.Student)
-                .OnDelete(DeleteBehavior.SetNull);
-            modelBuilder
-                .Entity<Payment>()
-                .HasOne(p => p.PaymentPeriod)
-                .WithMany(pp => pp.Payments)
-                .OnDelete(DeleteBehavior.SetNull);
+            // .OnDelete(DeleteBehavior.SetNull)
+            ;
+            modelBuilder.Entity<Student>().HasMany(s => s.Payments).WithOne(p => p.Student)
+            // .OnDelete(DeleteBehavior.SetNull)
+            ;
+            modelBuilder.Entity<Student>().HasMany(s => s.PaymentPeriods).WithOne(pp => pp.Student)
+            // .OnDelete(DeleteBehavior.SetNull)
+            ;
+            modelBuilder.Entity<Payment>().HasOne(p => p.PaymentPeriod).WithMany(pp => pp.Payments)
+            // .OnDelete(DeleteBehavior.SetNull)
+            ;
             modelBuilder
                 .Entity<PaymentPeriod>()
                 .HasOne(pp => pp.WorkYear)
                 .WithMany(wy => wy.PaymentPeriods)
-                .OnDelete(DeleteBehavior.SetNull);
+            // .OnDelete(DeleteBehavior.SetNull)
+            ;
+            modelBuilder.Entity<Payment>().HasOne(p => p.Receipt).WithOne(r => r.Payment)
+            // .OnDelete(DeleteBehavior.SetNull)
+            ;
+            modelBuilder.Entity<Receipt>().HasOne(r => r.Payment).WithOne(p => p.Receipt)
+            // .OnDelete(DeleteBehavior.SetNull)
+            ;
+            // for mssql
+            modelBuilder.Entity<Payment>().Property(p => p.Amount).HasColumnType("decimal(18,2)");
             modelBuilder
-                .Entity<Payment>()
-                .HasOne(p => p.Receipt)
-                .WithOne(r => r.Payment)
-                .OnDelete(DeleteBehavior.SetNull);
+                .Entity<PaymentPeriod>()
+                .Property(pp => pp.TotalAmount)
+                .HasColumnType("decimal(18,2)");
             modelBuilder
-                .Entity<Receipt>()
-                .HasOne(r => r.Payment)
-                .WithOne(p => p.Receipt)
-                .OnDelete(DeleteBehavior.SetNull);
+                .Entity<PaymentPeriod>()
+                .Property(pp => pp.PerPaymentAmount)
+                .HasColumnType("decimal(18,2)");
 
             // Default values and update behaviors for timestamps
 

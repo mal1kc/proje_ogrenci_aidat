@@ -126,20 +126,20 @@
                     <td>
                     <div class="d-flex d-md-inline-block justify-content-center">
                         <a asp-action="Edit" asp-route-id="@item.Id"
-                        class="btn btn-sm btn-primary " 
+                        class="btn btn-sm btn-primary "
                           title="Edit">
-                            &#9998;                       
+                            &#9998;
                             </a>
                         <a asp-action="Details" asp-route-id="@item.Id"
-                        class="btn btn-sm btn-info " 
+                        class="btn btn-sm btn-info "
                          title="Details">
                             &#8505;
                         </a>
 
                         @if (ViewBag.IsDebug == true)
                         {
-                            <a asp-action="Delete" asp-route-id="@item.Id" 
-                            class="btn btn-sm btn-danger " 
+                            <a asp-action="Delete" asp-route-id="@item.Id"
+                            class="btn btn-sm btn-danger "
                              title="Delete">
                                 &#10006;
                             </a>

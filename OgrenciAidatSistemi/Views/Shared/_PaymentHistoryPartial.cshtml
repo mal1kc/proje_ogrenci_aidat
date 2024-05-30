@@ -57,11 +57,11 @@
 
                                 @if(isMakePaymentShow)
                                 {
-                                    <td> 
-                                        
+                                    <td>
+
                                             @if (payment.Status == PaymentStatus.Unpaid)
                                             {
-                                        @* &#x1F6D2; is a Unicode shopping trolley *@ 
+                                        @* &#x1F6D2; is a Unicode shopping trolley *@
                                             <a asp-controller="Payment"
                                                 asp-action="MakePayment" asp-route-id="@payment.Id"
                                                 class="btn btn-primary float-start"> &#x1F6D2; </a>
