@@ -6,7 +6,21 @@ public static class StringExtensions
             return str;
 
         // Define the characters to remove
-        string[] charsToRemove = [";", "'", "\"", "=", "--", "/*", "*/", "xp_", "sp_"];
+        string[] charsToRemove =
+        [
+            ";",
+            "'",
+            "\"",
+            "=",
+            "--",
+            "/*",
+            "*/",
+            "xp_",
+            "exec",
+            "sp_",
+            "xp_cmdshell",
+            "\\"
+        ];
 
         // Remove the characters
         foreach (string c in charsToRemove)

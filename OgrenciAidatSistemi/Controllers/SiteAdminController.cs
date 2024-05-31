@@ -1,6 +1,7 @@
 using System.Data;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using OgrenciAidatSistemi.Data;
 using OgrenciAidatSistemi.Helpers;
 using OgrenciAidatSistemi.Helpers.Controller;
@@ -24,11 +25,55 @@ namespace OgrenciAidatSistemi.Controllers
 
         private readonly ExportService _exportService = exportService;
 
-        // AKA : Admin Dashboard
         [Authorize(Roles = Configurations.Constants.userRoles.SiteAdmin)]
         public IActionResult Index()
         {
-            return View();
+            var current_user_id = _userService.GetCurrentUserID();
+            if (current_user_id == null)
+            {
+                return RedirectToAction("SignOut", "SiteAdmin");
+            }
+            var latestSiteAdmins = _appDbContext
+                .SiteAdmins.OrderByDescending(x => x.CreatedAt)
+                .Take(5)
+                .ToList();
+            var latestStudents = _appDbContext
+                .Students.Include(x => x.School)
+                .OrderByDescending(x => x.CreatedAt)
+                .Take(5)
+                .ToList();
+            var latestPayments = _appDbContext
+                .Payments.Include(x => x.School)
+                .Include(x => x.Student)
+                .Include(x => x.PaymentPeriod)
+                .OrderByDescending(x => x.CreatedAt)
+                .Take(5)
+                .ToList();
+            var latestPaymentsPeriods = _appDbContext
+                .PaymentPeriods.Include(x => x.Payments)
+                .OrderByDescending(x => x.CreatedAt)
+                .Take(5)
+                .ToList();
+            var latestReceipts = _appDbContext
+                .Receipts.Include(x => x.Payment)
+                .Include(x => x.CreatedBy)
+                .OrderByDescending(x => x.CreatedAt)
+                .Take(5)
+                .ToList();
+
+            ViewBag.LatestSiteAdmins = latestSiteAdmins.Select(x => x.ToView());
+            ViewBag.LatestStudents = latestStudents.Select(x => x.ToView());
+            ViewBag.LatestPayments = latestPayments.Select(x => x.ToView());
+            ViewBag.LatestPaymentsPeriods = latestPaymentsPeriods.Select(x => x.ToView());
+            ViewBag.LatestReceipts = latestReceipts.Select(x => x.ToView());
+
+            var current_site_admin = _appDbContext.SiteAdmins.Find(current_user_id);
+            if (current_site_admin == null)
+            {
+                return RedirectToAction("SignOut", "SiteAdmin");
+            }
+
+            return View(current_site_admin.ToView());
         }
 
         [HttpGet(Configurations.Constants.AdminAuthenticationLoginPath)]
@@ -98,8 +143,14 @@ namespace OgrenciAidatSistemi.Controllers
             int pageSize = 20
         )
         {
-            // ??= is a null-coalescing assignment operator
-            // it assigns the right-hand value to the left-hand variable only if the left-hand variable is null
+            searchField ??= "";
+            searchString ??= "";
+            sortOrder ??= "";
+
+            if (searchField.Length > 70 || searchString.Length > 70 || sortOrder.Length > 70)
+            {
+                return BadRequest("Search field and search string must be less than 70 characters");
+            }
             _appDbContext.SiteAdmins ??= _appDbContext.Set<SiteAdmin>();
 
             var modelHelper = new QueryableModelHelper<SiteAdmin>(
@@ -114,9 +165,9 @@ namespace OgrenciAidatSistemi.Controllers
                 () =>
                     modelHelper.List(
                         ViewData,
-                        searchString.ToSanitizedLowercase(),
-                        searchField.ToSanitizedLowercase(),
-                        sortOrder.ToSanitizedLowercase(),
+                        searchString.SanitizeString(),
+                        searchField.SanitizeString(),
+                        sortOrder.SanitizeString(),
                         pageIndex,
                         pageSize
                     ),
@@ -171,16 +222,17 @@ namespace OgrenciAidatSistemi.Controllers
                 if (validationResult != UserViewValidationResult.FieldsAreValid)
                     return View(siteAdmin);
 
-                SiteAdmin newSiteAdmin = new SiteAdmin
-                {
-                    Username = siteAdmin.Username,
-                    PasswordHash = SiteAdmin.ComputeHash(siteAdmin.Password),
-                    EmailAddress = siteAdmin.EmailAddress,
-                    FirstName = siteAdmin.FirstName,
-                    LastName = siteAdmin.LastName,
-                    CreatedAt = DateTime.UtcNow,
-                    UpdatedAt = DateTime.UtcNow
-                };
+                SiteAdmin newSiteAdmin =
+                    new()
+                    {
+                        Username = siteAdmin.Username,
+                        PasswordHash = SiteAdmin.ComputeHash(siteAdmin.Password),
+                        EmailAddress = siteAdmin.EmailAddress,
+                        FirstName = siteAdmin.FirstName,
+                        LastName = siteAdmin.LastName,
+                        CreatedAt = DateTime.UtcNow,
+                        UpdatedAt = DateTime.UtcNow
+                    };
                 _appDbContext.SiteAdmins ??= _appDbContext.Set<SiteAdmin>();
 
                 try

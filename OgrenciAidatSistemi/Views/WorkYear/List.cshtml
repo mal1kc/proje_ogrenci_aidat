@@ -1,4 +1,4 @@
-@model IQueryable<WorkYear>
+@model IEnumerable<WorkYear>
 @{
     Layout = "~/Views/Shared/_ListLayout.cshtml";
     ViewData["Title"] = "List of Work Years";
@@ -81,11 +81,11 @@
                         </p>
                     }
                 </td>
-                <td class="dateonly">
+                <td class="dateOnly">
                     @Html.DisplayFor(modelItem => item.StartDate)
                 </td>
 
-                <td class="dateonly">
+                <td class="dateOnly">
                     @Html.DisplayFor(modelItem => item.EndDate)
                 </td>
                 <td class="date">

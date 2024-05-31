@@ -13,8 +13,8 @@ namespace OgrenciAidatSistemi.Models.Interfaces
         Dictionary<string, Func<T, string, bool>> searchMethods
     )
     {
-        public string[] AllowedFieldsForSearch { get; } = [.. searchMethods.Keys];
-        public string[] AllowedFieldsForSort { get; } = [.. sortingMethods.Keys];
+        public string[] AllowedFieldsForSearch { get; } = [.. searchMethods.Keys.Distinct()];
+        public string[] AllowedFieldsForSort { get; } = [.. sortingMethods.Keys.Distinct()];
         public Dictionary<string, Expression<Func<T, object>>> SortingMethods { get; } =
             sortingMethods;
         public Dictionary<string, Func<T, string, bool>> SearchMethods { get; } = searchMethods;

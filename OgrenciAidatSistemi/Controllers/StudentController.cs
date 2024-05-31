@@ -64,6 +64,10 @@ namespace OgrenciAidatSistemi.Controllers
             StudentView studentView = student.ToView();
             ViewBag.UserRole = signed_user.Role;
 
+            ViewBag.IsThereAnyUnpaidPayment = student.Payments.Any(p =>
+                p.PaymentMethod == PaymentMethod.UnPaid
+            );
+
             return View(studentView);
         }
 
@@ -159,6 +163,14 @@ namespace OgrenciAidatSistemi.Controllers
             int pageSize = 20
         )
         {
+            searchField ??= "";
+            searchString ??= "";
+            sortOrder ??= "";
+            if (searchField.Length > 70 || searchString.Length > 70 || sortOrder.Length > 70)
+            {
+                return BadRequest("Search field and search string must be less than 70 characters");
+            }
+
             var (usrRole, schId) = await _userService.GetUserRoleAndSchoolId();
             if (usrRole == UserRole.None)
                 return RedirectToAction("SignIn");
@@ -174,16 +186,13 @@ namespace OgrenciAidatSistemi.Controllers
 
             var modelList = new QueryableModelHelper<Student>(students, Student.SearchConfig);
 
-            searchField ??= "";
-            searchString ??= "";
-            sortOrder ??= "";
             return TryListOrFail(
                 () =>
                     modelList.List(
                         ViewData,
-                        searchString.ToSanitizedLowercase(),
-                        searchField.ToSanitizedLowercase(),
-                        sortOrder.ToSanitizedLowercase(),
+                        searchString.SanitizeString(),
+                        searchField.SanitizeString(),
+                        sortOrder.SanitizeString(),
                         pageIndex,
                         pageSize
                     ),

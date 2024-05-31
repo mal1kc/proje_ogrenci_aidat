@@ -1,12 +1,51 @@
+@model SiteAdminView
 @{
-    @* Layout = "/Views/Shared/SiteAdmin/_adminLayout.cshtml"; *@
-
     ViewData["Title"] = "SiteAdmin Dashboard";
+    var latestSiteAdmins = ViewBag.LatestSiteAdmins;
+    var latestStudents = ViewBag.LatestStudents;
+    var latestPayments = ViewBag.LatestPayments;
+    var latestPaymentsPeriods = ViewBag.LatestPaymentsPeriods;
+    var latestReceipts = ViewBag.LatestReceipts;
+    ViewBag.UserRole = UserRole.SiteAdmin;
 }
 
-
 <div class="text-center">
-    <h1 class="display-4">Welcome to Student Aidat(Payment) System</h1>
+    <h1 class="display-4">Welcome <b> @Model.FirstName! </b></h1>
     <p>Use the navigation bar to get started.</p>
-    <h1 style="color: red;">TODO: IMPLEMENT THIS DASHBOARD</h1>
+    <div class="container mt-5">
+        <div class="row">
+            <div class="col-lg-6 mb-4">
+                @{
+                    TempData["title"] = "Latest Site Admins";
+                }
+                <partial name="_SiteAdminListPartial" model="latestSiteAdmins" title="Latest Site Admins" />
+
+                @{
+                    TempData["title"] = "Latest Payments";
+                }
+                <partial name="_PaymentHistoryPartial" model="latestPayments" title="Latest Payments" />
+            </div>
+
+            <div class="col-lg-6 mb-4">
+                @{
+                    TempData["title"] = "Latest Receipts";
+                }
+                <partial name="_ReceiptListPartial" model="latestReceipts" title="Latest Receipts" />
+
+                @{
+                    TempData["title"] = "Latest Students";
+                }
+                <partial name="_StudentListPartial" model="latestStudents" title="Latest Students" />
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-lg-12 mb-4">
+                @{
+                    TempData["title"] = "Latest Payment Periods";
+                }
+                <partial name="_PaymentPeriodListPartial" model="latestPaymentsPeriods" title="Latest Payment Periods" />
+            </div>
+        </div>
+    </div>
 </div>

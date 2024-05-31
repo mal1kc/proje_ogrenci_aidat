@@ -33,23 +33,24 @@ namespace OgrenciAidatSistemi.Models.Extensions
 
     public static class PaymentMethodSpecificFields
     {
-        public static Dictionary<PaymentMethod, string[]> Fields = new Dictionary<
-            PaymentMethod,
-            string[]
-        >
-        {
+        public static Dictionary<PaymentMethod, string[]> Fields =
+            new()
             {
-                PaymentMethod.Bank,
-                new string[] { "BankName", "AccountNumber", "BranchCode", "IBAN" }
-            },
-            { PaymentMethod.Check, new string[] { "CheckNumber", "BankName", "BranchCode" } },
-            {
-                PaymentMethod.CreditCard,
-                new string[] { "CardNumber", "CardHolderName", "ExpiryDate", "CVC" }
-            },
-            { PaymentMethod.Cash, new string[] { "CashierName", "ReceiptNumber", "ReceiptDate" } },
-            { PaymentMethod.UnPaid, Array.Empty<string>() }
-        };
+                {
+                    PaymentMethod.Bank,
+                    new string[] { "BankName", "AccountNumber", "BranchCode", "IBAN" }
+                },
+                { PaymentMethod.Check, new string[] { "CheckNumber", "BankName", "BranchCode" } },
+                {
+                    PaymentMethod.CreditCard,
+                    new string[] { "CardNumber", "CardHolderName", "ExpiryDate", "CVC" }
+                },
+                {
+                    PaymentMethod.Cash,
+                    new string[] { "CashierName", "ReceiptNumber", "ReceiptDate" }
+                },
+                { PaymentMethod.UnPaid, Array.Empty<string>() }
+            };
 
         public static string[] GetFields(PaymentMethod paymentMethod) => Fields[paymentMethod];
 

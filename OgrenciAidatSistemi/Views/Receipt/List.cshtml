@@ -1,4 +1,4 @@
-@model IQueryable<Receipt>
+@model IEnumerable<Receipt>
 
 @{
     Layout = "~/Views/Shared/_ListLayout.cshtml";
@@ -14,7 +14,7 @@
 
 @section CreateNewWithTitle
 {
-    <h2>@ViewData["Title"]<a asp-action="Create" class="btn btn-sm btn-primary float-end">Create New</a></h2>
+<h2>@ViewData["Title"]@* <a asp-action="Create" class="btn btn-sm btn-primary float-end">Create New</a> *@ </h2>
 }
 
 @section SearchFormOptions{
@@ -77,13 +77,14 @@
                 {
                     <td>
                         <a asp-action="Details"
-                            asp-route-id="@item.Payment?.Student?.StudentId">@item.Payment?.Student?.StudentId ?? "Unknown"</a>
+                            asp-controller="Student"
+                            asp-route-id="@item.Payment?.Student?.Id">@(item.Payment?.Student?.StudentId ?? "Unknown")</a>
                     </td>
                 }
                 @if (showCreatedByColumn)
                 {
                     <td>
-                        @item.CreatedBy
+                        <partial name="_UserLink" model="item.CreatedBy.ToView()" />
                     </td>
                 }
                 <td class="date">
@@ -110,10 +111,13 @@
                         &#128269;
                     </a>
 
-                    <a asp-action="Delete" asp-route-id="@item.Id"
-                        class="btn btn-sm btn-danger " title="Delete">
-                        &#10006;
-                    </a>
+                    @if (showEditColumn)
+                    {
+                        <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-sm btn-danger"
+                            title="Delete" onclick="return confirm('Are you sure you want to delete this item?');">
+                            &#10006;
+                        </a>
+                    }
 
                     </div>
                 </td>

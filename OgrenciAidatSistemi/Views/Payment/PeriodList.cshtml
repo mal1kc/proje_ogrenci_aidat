@@ -1,14 +1,16 @@
-@model IQueryable<PaymentPeriod>?
+@model IEnumerable<PaymentPeriod>?
 @{
     Layout = "~/Views/Shared/_ListLayout.cshtml";
     ViewData["Title"] = "PaymentPeriods";
     ViewBag.AspAction = "PeriodList";
     ViewBag.AspController = "Payment";
+    var usrRole = ViewBag.UserRole;
+    var isShowDeleteButton = usrRole == UserRole.SiteAdmin || usrRole == UserRole.SchoolAdmin;
 }
 
 @section CreateNewWithTitle
 {
-    <h2>@ViewData["Title"]<a asp-action="PeriodCreate" class="btn btn-sm btn-primary float-end">Create New</a></h2>
+    <h2>@ViewData["Title"] @if(isShowDeleteButton){ <a asp-action="PeriodCreate" class="btn btn-sm btn-primary float-end">Create New</a>}</h2>
 }
 
 @section SearchFormOptions{
@@ -59,27 +61,32 @@
                 <td>
                     <partial name="_StudentViewPartial" model="item.Student?.ToView(true)" />
                 </td>
-                <td class="date">@Html.DisplayFor(modelItem => item.StartDate)</td>
-                <td class="date">@Html.DisplayFor(modelItem => item.EndDate)</td>
+                <td class="dateOnly">@Html.DisplayFor(modelItem => item.StartDate)</td>
+                <td class="dateOnly">@Html.DisplayFor(modelItem => item.EndDate)</td>
                 <td>@Html.DisplayFor(modelItem => item.PerPaymentAmount)</td>
                 <td>@Html.DisplayFor(modelItem => item.TotalAmount)</td>
                 <td>@Html.DisplayFor(modelItem => item.Occurrence)</td>
               <td>
                     <div class="btn-group">
+@if(isShowDeleteButton)
+                    {
                     <a asp-action="PeriodEdit" asp-route-id="@item.Id"
                         class="btn btn-sm btn-primary"
                           title="Edit">
                             &#9998;
-                    </a>
+                    </a>}
                     <a asp-action="PeriodDetails" asp-route-id="@item.Id"
                         class="btn btn-sm btn-info" title="Details">
                         &#128269;
                     </a>
+                    @if(isShowDeleteButton)
+                    {
                     <a asp-action="PeriodDelete" asp-route-id="@item.Id"
                     class="btn btn-sm btn-danger"
                         title="Delete">
                         &#10006;
                     </a>
+                    }
                     </div>
                 </td>
 

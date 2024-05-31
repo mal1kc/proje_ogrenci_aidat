@@ -2,12 +2,19 @@
 
 @{
     ViewData["Title"] = "Home Page";
+    var IsThereAnyUnpaidPayment =  (bool)ViewBag.IsThereAnyUnpaidPayment;
 }
 
 <div class="container mt-5">
     <h1 class="mb-4">Welcome, @Model.FirstName!</h1>
 
     <div class="row">
+        if (IsThereAnyUnpaidPayment)
+        {
+            <div class="alert alert-danger" role="alert">
+                You have unpaid payments. Please pay your debts.
+            </div>
+        }
         <div class="col-lg-3 mb-4">
                 <partial name="_GradesPartial" model="Model.Grades" />
         </div>

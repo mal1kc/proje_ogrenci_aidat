@@ -46,6 +46,7 @@ namespace OgrenciAidatSistemi.Models
                 defaultSortMethod: s => s.PaymentDate,
                 sortingMethods: new()
                 {
+                    { "Id", static s => s.Id },
                     { "PaymentDate", static s => s.PaymentDate },
                     { "Amount", static s => (int)s.Amount },
                     { "Status", static s => s.Status },
@@ -61,7 +62,7 @@ namespace OgrenciAidatSistemi.Models
                 searchMethods: new()
                 {
                     {
-                        "PaymentID",
+                        "Id",
                         static (s, searchString) =>
                             s
                                 .Id.ToString()

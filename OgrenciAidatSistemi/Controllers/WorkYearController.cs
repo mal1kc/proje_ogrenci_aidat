@@ -31,6 +31,14 @@ namespace OgrenciAidatSistemi.Controllers
             int pageSize = 20
         )
         {
+            searchField ??= "";
+            searchString ??= "";
+            sortOrder ??= "";
+            if (searchField.Length > 70 || searchString.Length > 70 || sortOrder.Length > 70)
+            {
+                return BadRequest("Search field and search string must be less than 70 characters");
+            }
+
             ViewBag.IsSiteAdmin = false;
             var (userRole, schId) = _userService.GetUserRoleAndSchoolId().Result;
 
@@ -58,17 +66,14 @@ namespace OgrenciAidatSistemi.Controllers
             }
 
             var modelList = new QueryableModelHelper<WorkYear>(workYears, WorkYear.SearchConfig);
-            searchField ??= "";
-            searchString ??= "";
-            sortOrder ??= "";
 
             return TryListOrFail(
                 () =>
                     modelList.List(
                         ViewData,
-                        searchString.ToSanitizedLowercase(),
-                        searchField.ToSanitizedLowercase(),
-                        sortOrder.ToSanitizedLowercase(),
+                        searchString.SanitizeString(),
+                        searchField.SanitizeString(),
+                        sortOrder.SanitizeString(),
                         pageIndex,
                         pageSize
                     ),
@@ -275,7 +280,7 @@ namespace OgrenciAidatSistemi.Controllers
                     _logger.LogError("User role is not valid");
                     return RedirectToAction("Index", "Home");
             }
-            ViewBag.Schools = schools;
+            ViewBag.Schools = schools.AsQueryable();
             return View();
         }
 

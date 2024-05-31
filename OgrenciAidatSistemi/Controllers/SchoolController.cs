@@ -36,21 +36,25 @@ namespace OgrenciAidatSistemi.Controllers
             int pageSize = 20
         )
         {
-            var modelList = new QueryableModelHelper<School>(
-                _dbContext.Schools.AsQueryable(),
-                School.SearchConfig
-            );
             searchField ??= "";
             searchString ??= "";
             sortOrder ??= "";
 
+            if (searchField.Length > 70 || searchString.Length > 70 || sortOrder.Length > 70)
+            {
+                return BadRequest("Search field and search string must be less than 70 characters");
+            }
+            var modelList = new QueryableModelHelper<School>(
+                _dbContext.Schools.AsQueryable(),
+                School.SearchConfig
+            );
             return TryListOrFail(
                 () =>
                     modelList.List(
                         ViewData,
-                        searchString.ToSanitizedLowercase(),
-                        searchField.ToSanitizedLowercase(),
-                        sortOrder.ToSanitizedLowercase(),
+                        searchString.SanitizeString(),
+                        searchField.SanitizeString(),
+                        sortOrder.SanitizeString(),
                         pageIndex,
                         pageSize
                     ),

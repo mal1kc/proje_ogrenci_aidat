@@ -3,7 +3,7 @@ $normalColor = 'Green'
 $errorColor = 'Red'
 # $warningColor = 'Yellow'
 $cr_dir_path = Split-Path -Parent $MyInvocation.MyCommand.Definition
-$startDelay = 9
+$startDelay = 2
 $appName = "OgrenciAidatSistemi".ToLower()
 $appContainerName = "oai_container"
 $dbContainerName = "mssql_container"
@@ -22,8 +22,15 @@ $tempSettingsPath = "$cr_dir_path/appsettings_temp.json"
 $logFilePath = "$cr_dir_path/run_with_mssql_container.log"
 $dockerFile = "$cr_dir_path/Dockerfile"
 $appSrcPath = "$cr_dir_path/../OgrenciAidatSistemi"
-$dbPassword = Get-Content "$cr_dir_path/.env" | Select-String "DB_PASSWORD" | ForEach-Object { $_ -replace "DB_PASSWORD=", "" }
 $dependencies = @("jq", "podman")
+
+try{
+    $dbPassword = Get-Content "$cr_dir_path/.env" | Select-String "DB_PASSWORD" | ForEach-Object { $_ -replace "DB_PASSWORD=", "" }
+    Write-Host "DB_PASSWORD is set in .env file.Password: $dbPassword" -ForegroundColor $normalColor
+} catch {
+    Write-Host "Error while reading .env file. Exiting." -ForegroundColor $errorColor
+    exit 1
+}
 
 function CheckDependencies {
     foreach ($dep in $dependencies) {
@@ -45,8 +52,14 @@ function CheckFiles {
     }
 
     if ($dbPassword -eq "") {
-        Write-Host "DB_PASSWORD is not set in .env file. Exiting." -ForegroundColor $errorColor
-        exit 1
+        if (!(Test-Path "$cr_dir_path/.env")) {
+            Write-Host ".env file does not exist. Exiting." -ForegroundColor $errorColor
+            exit 1
+        }
+        if ($dbPassword -eq "") {
+            Write-Host "DB_PASSWORD is not set in .env file. Exiting." -ForegroundColor $errorColor
+            exit 1
+        }
     }
 
     if (!(Test-Path $dockerFile)) {
@@ -62,21 +75,39 @@ function CheckFiles {
     if (!(Test-Path $tempSettingsPath)) {
         Write-Host "Temporary appsettings.json does not exist. Creating it." -ForegroundColor $normalColor
         Copy-Item -Path $appSettingsPath -Destination $tempSettingsPath
-        $json = Get-Content $appSettingsPath -Raw | jq '.ConnectionStrings.DefaultConnection |= sub("<thisIsPassword>"; "' + $dbPassword + '")'
+        # json=$(jq '.ConnectionStrings.DefaultConnection |= sub("<thisIsPassword>"; "'"$dbPassword"'")' "$appSettingsPath")
+        $json = Get-Content $appSettingsPath -Raw | jq '.ConnectionStrings.DefaultConnection |= sub("<thisIsPassword>"; "dbPassword")'.Replace('dbPassword',$dbPassword)
+        # hacky way to replace password in json file
         Set-Content -Path $tempSettingsPath -Value $json
+    }
+}
+
+function ExecuteCommands {
+    param(
+        [array]$commands
+    )
+
+    foreach ($command in $commands) {
+        Write-Host "Executing: $command" -ForegroundColor $normalColor
+        Invoke-Expression $command
     }
 }
 
 function CleanUp {
     if (!$script:noPreRm) {
         Write-Host "Pre-cleaning." -ForegroundColor $normalColor
+        $commands = @()
+
         if ($script:usePod -and (& $containerTool 'pod' 'exists' $podName)) {
             Write-Host "Pod exists. Removing." -ForegroundColor $normalColor
-            & $containerTool 'pod' 'stop' $podName
-            & $containerTool 'pod' 'rm' $podName '-f'
+            $commands += "$containerTool pod stop $podName"
+            $commands += "$containerTool pod rm $podName -f"
         }
-        RmIfExistsContainer $dbContainerName
-        RmIfExistsContainer $appContainerName
+
+        $commands += "RmIfExistsContainer $dbContainerName"
+        $commands += "RmIfExistsContainer $appContainerName"
+
+        ExecuteCommands $commands
         Write-Host "Pre-cleaning completed." -ForegroundColor $normalColor
     }
 }
@@ -95,11 +126,11 @@ function RunContainers {
     }
 }
 
-
 function RmIfExistsContainer {
     param(
         [string]$contname
     )
+    # not works as expected
     $containerTool = $script:containerTool
     Write-Host "Checking if container exists." -ForegroundColor $normalColor
     Write-Host "exec: $containerTool container exists $contname" -ForegroundColor $normalColor
@@ -107,17 +138,26 @@ function RmIfExistsContainer {
         Write-Host "Container name is not set. Exiting." -ForegroundColor $errorColor
         exit 1
     }
-    if (& $containerTool 'container' 'exists' $contname) {
-        Write-Host "Container exists. Removing." -ForegroundColor $normalColor
-        & $containerTool 'container' 'stop' $contname
-        & $containerTool 'container' 'rm' $contname '-f'
+    if ($(& $containerTool 'ps' '-a' '--filter' "name=$contname" '--format' '{{.ID}}')) {
+    Write-Host "Container exists. Removing." -ForegroundColor $normalColor
+    $commands = @(
+        "$containerTool container stop $contname",
+        "$containerTool container rm $contname -f"
+    )
+    ExecuteCommands $commands
     }
+
+
+    Start-Sleep -Seconds $startDelay # Wait for the container to be removed
 }
 
 function RunAppContainer {
     Write-Host "Building application container." -ForegroundColor $normalColor
     RmIfExistsContainer $appContainerName
-    & $containerTool 'run' '--name' $appContainerName '-p' $appHttpPort '-v' "${tempSettingsPath}:/app/appsettings.json" '-v' "${logFilePath}:/app/app.log" '-d' "${appName}:latest"
+    $commands = @(
+        "$containerTool run --name $appContainerName -p $appHttpPort -v ${tempSettingsPath}:/app/appsettings.json -v ${logFilePath}:/app/app.log -d ${appName}:latest"
+    )
+    ExecuteCommands $commands
     Write-Host "Application container is running on port 8080." -ForegroundColor $normalColor
     if ($useDb) {
         Start-Sleep -Seconds $startDelay
@@ -127,7 +167,10 @@ function RunAppContainer {
 function RunDbContainer {
     Write-Host "Running SQL Server container." -ForegroundColor $normalColor
     RmIfExistsContainer $dbContainerName
-    & $containerTool 'run' '--name' $dbContainerName '-p' "${dbPort}:${dbPort}" '-e' "ACCEPT_EULA=Y" '-e' "SA_PASSWORD=$dbPassword" '-d' "mcr.microsoft.com/mssql/server"
+    $commands = @(
+        "$containerTool run --name $dbContainerName -p ${dbPort}:${dbPort} -e ACCEPT_EULA=Y -e SA_PASSWORD=$dbPassword -d mcr.microsoft.com/mssql/server"
+    )
+    ExecuteCommands $commands
     Write-Host "SQL Server container is running on port 1433." -ForegroundColor $normalColor
 }
 
@@ -136,13 +179,14 @@ function RunAllContainersWithPod {
         Write-Host "Pod already exists and --pre-rm is not set. Exiting." -ForegroundColor $errorColor
         exit 1
     } else {
-        & $containerTool 'pod' 'create' '--name' $podName
-        Write-Host "Pod is created." -ForegroundColor $normalColor
-        Write-Host "Running application and database containers with pod." -ForegroundColor $normalColor
-        RmIfExistsContainer $dbContainerName
-        & $containerTool 'run' '--pod' $podName '--name' $dbContainerName '-p' "${dbPort}:${dbPort}" '-e' "ACCEPT_EULA=Y" '-e' "SA_PASSWORD=$dbPassword" '-d' "mcr.microsoft.com/mssql/server"
-        RmIfExistsContainer $appContainerName
-        & $containerTool 'run' '--pod' $podName '--name' $appContainerName '-p' $appHttpPort '-v' "${tempSettingsPath}:/app/appsettings.json" '-v' "${logFilePath}:/app/app.log" '-d' "${appName}:latest"
+        $commands = @(
+            "$containerTool pod create --name $podName",
+            "RmIfExistsContainer $dbContainerName",
+            "$containerTool run --pod $podName --name $dbContainerName -p ${dbPort}:${dbPort} -e ACCEPT_EULA=Y -e SA_PASSWORD=$dbPassword -d mcr.microsoft.com/mssql/server",
+            "RmIfExistsContainer $appContainerName",
+            "$containerTool run --pod $podName --name $appContainerName -p $appHttpPort -v ${tempSettingsPath}:/app/appsettings.json -v ${logFilePath}:/app/app.log -d ${appName}:latest"
+        )
+        ExecuteCommands $commands
         Write-Host "Pod is running with application and database containers." -ForegroundColor $normalColor
     }
 }
@@ -171,7 +215,7 @@ foreach ($arg in $args) {
             $script:noPreRm = $true
         }
         "--rm" {
-            Write-Output "Rm option detected"
+            Write-Output "Rm option detected not implemented"
             $script:rm = $true
         }
         default {
@@ -186,5 +230,9 @@ Write-Output "Parse result: Cleanup=$cleanup, DB=$useDb, App=$useApp, Pod=$usePo
 
 CheckDependencies
 CheckFiles
-CleanUp
 RunContainers
+
+# if ($rm) {
+#     Write-Host "Removing created containers." -ForegroundColor $normalColor
+#     CleanUp
+# }

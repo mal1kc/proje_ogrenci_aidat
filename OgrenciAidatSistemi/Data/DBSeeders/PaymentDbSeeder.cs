@@ -64,22 +64,23 @@ namespace OgrenciAidatSistemi.Data.DBSeeders
             // student.ContactInfo.Email = student.EmailAddress;
 
             var school = student.School;
-            PaymentPeriod paymentperiod = new PaymentPeriod
-            {
-                Student = student,
-                WorkYear = new WorkYear
+            PaymentPeriod paymentperiod =
+                new()
                 {
-                    StartDate = DateOnly.FromDateTime(DateTime.Today),
-                    EndDate = DateOnly.FromDateTime(DateTime.Today + TimeSpan.FromDays(180)), // 6 months
+                    Student = student,
+                    WorkYear = new WorkYear
+                    {
+                        StartDate = DateOnly.FromDateTime(DateTime.Today),
+                        EndDate = DateOnly.FromDateTime(DateTime.Today + TimeSpan.FromDays(180)), // 6 months
+                        CreatedAt = DateTime.UtcNow,
+                        UpdatedAt = DateTime.UtcNow,
+                    },
                     CreatedAt = DateTime.UtcNow,
                     UpdatedAt = DateTime.UtcNow,
-                },
-                CreatedAt = DateTime.UtcNow,
-                UpdatedAt = DateTime.UtcNow,
-                Occurrence = Occurrence.Monthly,
-                StartDate = DateOnly.FromDateTime(DateTime.Today),
-                EndDate = DateOnly.FromDateTime(DateTime.Today + TimeSpan.FromDays(30)),
-            };
+                    Occurrence = Occurrence.Monthly,
+                    StartDate = DateOnly.FromDateTime(DateTime.Today),
+                    EndDate = DateOnly.FromDateTime(DateTime.Today + TimeSpan.FromDays(30)),
+                };
             Payment payment = paymentStatus switch
             {
                 PaymentStatus.Unpaid

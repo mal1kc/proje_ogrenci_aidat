@@ -1,6 +1,7 @@
 @model WorkYearView
 @{
     ViewBag.Title = "Create WorkYear";
+    int count = 0;
 
     School? defaultSchool = null;
     if (!(ViewBag.Schools is IQueryable<School> schools))
@@ -9,12 +10,15 @@
     }
     else
     {
+
         var schoolList = schools.ToList();
-        if (schoolList.Count == 1)
+        count = schoolList.Count;
+        if (count == 1)
         {
             defaultSchool = schoolList.First();
         }
     }
+
 }
 
 
@@ -47,7 +51,7 @@
         {
             <input type="hidden" asp-for="SchoolId" type="number" id="SchoolId" value="@defaultSchool.Id" required/>
         }
-        else if (ViewBag.Schools.Count() > 1)
+        else if (count > 1)
         {
             <div class="mb-3">
                 <label for="SchoolId" class="form-label">School</label>

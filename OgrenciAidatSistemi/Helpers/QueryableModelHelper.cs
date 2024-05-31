@@ -28,22 +28,28 @@ namespace OgrenciAidatSistemi.Helpers
             if (string.IsNullOrEmpty(searchString) || searchString.Length < 3)
                 return _sourceQueryable;
 
-            return string.IsNullOrEmpty(searchField)
-                ? _sourceQueryable
+            var query = _sourceQueryable.AsQueryable();
+
+            if (string.IsNullOrEmpty(searchField))
+            {
+                query = query
                     .AsParallel()
                     .Where(model =>
                         _searchConfig.SearchMethods.Values.Any(searchMethod =>
                             searchMethod(model, searchString)
                         )
                     )
-                    .AsQueryable()
-                : _sourceQueryable
-                    .AsParallel()
-                    .Where(model =>
-                        _searchConfig.SearchMethods.TryGetValue(searchField, out var searchMethod)
-                        && searchMethod(model, searchString)
-                    )
                     .AsQueryable();
+            }
+            else if (_searchConfig.SearchMethods.TryGetValue(searchField, out var searchMethod))
+            {
+                query = query
+                    .AsParallel()
+                    .Where(model => searchMethod(model, searchString))
+                    .AsQueryable();
+            }
+
+            return query;
         }
 
         public IQueryable<T> Sort(string fieldName, SortOrderEnum sortOrder)
@@ -65,7 +71,7 @@ namespace OgrenciAidatSistemi.Helpers
         public IQueryable<T> Sort(string? sortOrderStr)
         {
             if (string.IsNullOrEmpty(sortOrderStr))
-                return _resultedQueryable;
+                return _resultedQueryable.OrderBy(_searchConfig.DefaultSortMethod);
 
             var sortOrder = SortOrderEnum.ASC;
             var fieldName = sortOrderStr;
@@ -86,15 +92,16 @@ namespace OgrenciAidatSistemi.Helpers
             SortOrderEnum sortType
         )
         {
-            _resultedQueryable ??= _sourceQueryable;
+            _resultedQueryable = _sourceQueryable;
+
             if (!string.IsNullOrEmpty(searchString))
                 _resultedQueryable = Search(searchString, searchField);
+
             if (!string.IsNullOrEmpty(sortField))
                 _resultedQueryable = Sort(sortField, sortType);
             else
-            {
                 _resultedQueryable = _resultedQueryable.OrderBy(_searchConfig.DefaultSortMethod);
-            }
+
             return _resultedQueryable;
         }
 
@@ -111,9 +118,8 @@ namespace OgrenciAidatSistemi.Helpers
             int pageSize = 20
         )
         {
-            pageIndex = pageIndex < 1 ? 1 : pageIndex;
-            pageSize = pageSize < 1 ? 10 : pageSize;
-            pageSize = pageSize > 100 ? 100 : pageSize;
+            pageIndex = Math.Max(1, pageIndex);
+            pageSize = Math.Clamp(pageSize, 10, 100);
 
             // Validate and parse sortOrder
             string? sortField = null;
@@ -135,7 +141,8 @@ namespace OgrenciAidatSistemi.Helpers
             // Generate ViewData for sorting
             foreach (var field in _searchConfig.AllowedFieldsForSort)
             {
-                ViewData[$"{field}SortOrder"] =
+                var sortOrderKey = $"{field}SortOrder";
+                var sortOrderValue =
                     sortOrder == null
                         ? $"{field}_asc"
                         : field == sortField
@@ -144,9 +151,10 @@ namespace OgrenciAidatSistemi.Helpers
                                 : $"{field}_asc"
                             : $"{field}_asc";
 
+                ViewData[sortOrderKey] = sortOrderValue;
                 if (field == sortField)
                 {
-                    ViewData["CurrentSortOrder"] = ViewData[$"{field}SortOrder"];
+                    ViewData["CurrentSortOrder"] = ViewData[sortOrderKey];
                 }
             }
 
@@ -160,10 +168,11 @@ namespace OgrenciAidatSistemi.Helpers
                 sortType == "asc" ? SortOrderEnum.ASC : SortOrderEnum.DESC
             );
 
-            // if order is not specified, sort by default field
-
-            var paginatedModel = _resultedQueryable.Skip((pageIndex - 1) * pageSize).Take(pageSize);
-
+            // Pagination
+            var paginatedModel = _resultedQueryable
+                .Skip((pageIndex - 1) * pageSize)
+                .Take(pageSize)
+                .ToList();
             var countOfModelResult = _resultedQueryable.Count();
 
             ViewData["CurrentPageIndex"] = pageIndex;
@@ -171,7 +180,7 @@ namespace OgrenciAidatSistemi.Helpers
             ViewData["TotalItems"] = countOfModelResult;
             ViewData["PageSize"] = pageSize;
 
-            return paginatedModel;
+            return paginatedModel.AsQueryable();
         }
     }
 }

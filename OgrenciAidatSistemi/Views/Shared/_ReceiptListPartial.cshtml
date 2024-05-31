@@ -1,0 +1,54 @@
+@model IEnumerable<ReceiptView>
+
+@{
+    var partialViewTitle = TempData["title"] as string ?? "Receipts";
+    var CardName = "receiptCard";
+}
+
+<div class="container-fluid py-0 my-0">
+    <div class="card m-0">
+        <div class="card-header" id="headingOne">
+            <h5 class="mb-0">
+                @partialViewTitle <button class="btn btn-link collapsed" type="button" data-bs-toggle="collapse"
+                    data-bs-target="#@CardName" aria-expanded="false" aria-controls="userDetailCard">
+                    <span class="triangle">&#9650;</span> <!-- This is a Unicode up arrow -->
+                </button>
+            </h5>
+        </div>
+        <div id="@CardName" class="collapse" aria-labelledby="headingOne" data-parent="#accordion">
+            <div class="card-body">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Receipt Id</th>
+                            <th>Payment</th>
+                            <th>Created By</th>
+                            <th>Created At</th>
+                            <th>Receipt Payment</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var receipt in Model ?? Enumerable.Empty<ReceiptView>())
+                        {
+                            <tr>
+                                <td>@Html.DisplayFor(modelItem => receipt.Id)</td>
+                                <td>
+                                    <partial name="_PaymentDetailPartial" model="receipt.Payment" />
+                                </td>
+                                <td> <partial name="_UserLink" model="receipt.CreatedBy?.ToView()" /></td>
+                                <td>@Html.DisplayFor(modelItem => receipt.CreatedAt)</td>
+                                <td>
+                                    <a asp-action="Details" asp-controller="Receipt" asp-route-id="@receipt.Id" class="btn btn-primary">Details</a>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+                <p class="mt-5">
+                    <a asp-action="List" asp-controller="Receipt" class="btn btn-primary">Back to List</a>
+                </p>
+            </div>
+        </div>
+    </div>
+</div>

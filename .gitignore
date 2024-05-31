@@ -13,3 +13,4 @@ app*.db*
 node_modules/
 
 *.semgrep_output
+*.Development_temp.json

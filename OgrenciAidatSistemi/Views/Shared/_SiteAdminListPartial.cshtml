@@ -1,0 +1,109 @@
+@model IEnumerable<SiteAdminView>?
+@{
+    const string CardName = "siteAdminCard";
+    const string partialViewTitle = "Site Admins";
+}
+
+<div class="container-fluid py-0 my-0">
+    <div class="card m-0">
+        <div class="card-header" id="headingOne">
+            <h5 class="mb-0">
+                @partialViewTitle <button class="btn btn-link collapsed" type="button" data-bs-toggle="collapse"
+                    data-bs-target="#@CardName" aria-expanded="false" aria-controls="userDetailCard">
+                    <span class="triangle">&#9650;</span> <!-- This is a Unicode up arrow -->
+                </button>
+            </h5>
+        </div>
+        <div id="@CardName" class="collapse" aria-labelledby="headingOne" data-parent="#accordion">
+            <div class="card-body">
+                @if (Model == null)
+                {
+                    <p> cannot get the site admins</p>
+                    return; @* return to stop the execution of the rest of the code *@
+                }
+                else
+                {
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>
+                                    <list-page-link-item class="btn-sort" asp-action="List"
+                                        sort-order="@ViewData["IdSortOrder"]"
+                                        asp-route-searchString="@ViewData["CurrentSearchString"]">Id</list-page-link-item>
+                                </th>
+                                <th>
+                                    <list-page-link-item class="btn-sort" asp-action="List"
+                                        sort-order="@ViewData["UserameSortOrder"]"
+                                        asp-route-searchString="@ViewData["CurrentSearchString"]">Username</list-page-link-item>
+                                </th>
+                                <th>
+                                    <list-page-link-item class="btn-sort" asp-action="List"
+                                        sort-order="@ViewData["EmailAddressSortOrder"]"
+                                        asp-route-searchString="@ViewData["CurrentSearchString"]">Email
+                                        Address</list-page-link-item>
+                                </th>
+                                <th>
+                                    <list-page-link-item class="btn-sort" asp-action="List"
+                                        sort-order="@ViewData["CreatedAtSortOrder"]"
+                                        asp-route-searchString="@ViewData["CurrentSearchString"]">Created
+                                        At</list-page-link-item>
+                                </th>
+                                <th>
+                                    <list-page-link-item class="btn-sort" asp-action="List"
+                                        sort-order="@ViewData["UpdatedAtSortOrder"]"
+                                        asp-route-searchString="@ViewData["CurrentSearchString"]">Updated
+                                        At</list-page-link-item>
+                                </th>
+                                <th></th> <!-- column for buttons edit | details | delete -->
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in Model)
+
+                            {
+                                <tr>
+                                    <td>
+                                        @Html.DisplayFor(modelItem => item.Id)
+                                    </td>
+                                    <td>
+                                        @Html.DisplayFor(modelItem => item.Username)
+                                    </td>
+                                   <td>
+                                        @Html.DisplayFor(modelItem => item.EmailAddress)
+                                    </td>
+                                    <td>
+                                        @Html.DisplayFor(modelItem => item.CreatedAt)
+                                    </td>
+                                    <td>
+                                        @Html.DisplayFor(modelItem => item.UpdatedAt)
+                                    </td>
+                                    <td>
+                                        <div class="btn-group">
+                                            <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-primary "
+                                                title="Edit">
+                                                &#9998;
+                                            </a>
+                                            <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-info "
+                                                title="Details">
+                                                &#128269;
+                                            </a>
+                                            <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-sm btn-danger "
+                                                title="Delete">
+                                                &#10006;
+                                            </a>
+                                        </div>
+                                    </td>
+
+                                </tr>
+                            }
+                        </tbody>
+
+
+
+                    </table>
+                }
+
+            </div>
+        </div>
+    </div>
+</div>

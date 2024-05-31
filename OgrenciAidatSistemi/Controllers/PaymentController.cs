@@ -36,6 +36,14 @@ namespace OgrenciAidatSistemi.Controllers
             int pageSize = 20
         )
         {
+            searchField ??= "";
+            searchString ??= "";
+            sortOrder ??= "";
+
+            if (searchField.Length > 70 || searchString.Length > 70 || sortOrder.Length > 70)
+            {
+                return BadRequest("Search field and search string must be less than 70 characters");
+            }
             var (role, schoolId) = _userService.GetUserRoleAndSchoolId().Result;
 
             ViewBag.UserRole = role;
@@ -83,16 +91,14 @@ namespace OgrenciAidatSistemi.Controllers
             }
 
             var modelList = new QueryableModelHelper<Payment>(payments, Payment.SearchConfig);
-            searchField ??= "";
-            searchString ??= "";
-            sortOrder ??= "";
+
             return TryListOrFail(
                 () =>
                     modelList.List(
                         ViewData,
-                        searchString.ToSanitizedLowercase(),
-                        searchField.ToSanitizedLowercase(),
-                        sortOrder.ToSanitizedLowercase(),
+                        searchString.SanitizeString(),
+                        searchField.SanitizeString(),
+                        sortOrder.SanitizeString(),
                         pageIndex,
                         pageSize
                     ),
@@ -225,6 +231,7 @@ namespace OgrenciAidatSistemi.Controllers
             {
                 return RedirectToAction("Login", "Account");
             }
+            ViewBag.UserRole = role;
 
             IQueryable<PaymentPeriod>? paymentPeriods = null;
             switch (role)
@@ -269,9 +276,9 @@ namespace OgrenciAidatSistemi.Controllers
                     () =>
                         modelList.List(
                             ViewData,
-                            searchString.ToSanitizedLowercase(),
-                            searchField.ToSanitizedLowercase(),
-                            sortOrder.ToSanitizedLowercase(),
+                            searchString.SanitizeString(),
+                            searchField.SanitizeString(),
+                            sortOrder.SanitizeString(),
                             pageIndex,
                             pageSize
                         ),
@@ -387,7 +394,7 @@ namespace OgrenciAidatSistemi.Controllers
         {
             var (role, schoolId) = await _userService.GetUserRoleAndSchoolId();
 
-            if (schoolId == 0 || schoolId == -1 || schoolId == null)
+            if ((schoolId == 0 || schoolId == -1 || schoolId == null) && role != UserRole.SiteAdmin)
             {
                 TempData["Error"] = "School is not valid";
                 return RedirectToAction("Index", "Home");

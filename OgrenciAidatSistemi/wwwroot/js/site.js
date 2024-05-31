@@ -71,8 +71,9 @@ window.onload = function () {
         }
     }
 
-    var dateOnlyElements = document.getElementsByClassName('dateonly');
-    // example dateonly text (UTC by def): 11/24/2024
+
+    var dateOnlyElements = document.getElementsByClassName('dateOnly');
+    // example dateOnly text (UTC by def): 11/24/2024
     for (var i = 0; i < dateOnlyElements.length; i++) {
         var dateElement = dateOnlyElements[i];
         if (!dateElement.textContent || dateElement.textContent === '' || dateElement.textContent === 'Unknown') {

@@ -178,6 +178,14 @@ namespace OgrenciAidatSistemi.Controllers
             int pageSize = 20
         )
         {
+            searchField ??= "";
+            searchString ??= "";
+            sortOrder ??= "";
+
+            if (searchField.Length > 70 || searchString.Length > 70 || sortOrder.Length > 70)
+            {
+                return BadRequest("Search field and search string must be less than 70 characters");
+            }
             var (usrRole, schId) = await _userService.GetUserRoleAndSchoolId();
             if (usrRole == UserRole.Student)
                 return RedirectToAction("Index", "Home");
@@ -191,17 +199,13 @@ namespace OgrenciAidatSistemi.Controllers
                 SchoolAdmin.SearchConfig
             );
 
-            searchField ??= "";
-            searchString ??= "";
-            sortOrder ??= "";
-
             return TryListOrFail(
                 () =>
                     modelList.List(
                         ViewData,
-                        searchString.ToSanitizedLowercase(),
-                        searchField.ToSanitizedLowercase(),
-                        sortOrder.ToSanitizedLowercase(),
+                        searchString.SanitizeString(),
+                        searchField.SanitizeString(),
+                        sortOrder.SanitizeString(),
                         pageIndex,
                         pageSize
                     ),

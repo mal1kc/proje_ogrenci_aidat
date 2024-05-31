@@ -39,14 +39,14 @@ internal class Program
                 });
             _ = services.AddHttpContextAccessor();
             _ = services.AddDbContext<AppDbContext>(
-                // #if DEBUG
-                // #else
+#if DEBUG
+#else
                 options =>
                 options.UseSqlServer(
                     configuration.GetConnectionString("DefaultConnection"),
                     options => options.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery)
                 )
-            // #endif
+#endif
             );
             _ = services.AddSession(options =>
             {
@@ -82,9 +82,12 @@ internal class Program
             IConfiguration configuration = app.Configuration;
 
             // write connection string to console
+#if DEBUG
+#else
             Console.WriteLine(
                 "Connection String: " + configuration.GetConnectionString("DefaultConnection")
             );
+#endif
 
             AppDbContext? ctx = app
                 .Services.CreateScope()

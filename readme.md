@@ -21,44 +21,44 @@
 - [X] add paymentperiod management panel for sch admin ( improve usability)
 - [X] add all models to delete , edit , create panel for site admin (some of them must be debug only) +++
     - [X] payment
-        - [ ] edit (makePayment , verify payment)
+        - [-] edit (makePayment , verify payment)
         - [X] detail
         - [X] delete (only site admin (debug only))
         - [X] list
     - [X] paymentperiod (only school admin, site admin)
-        - [ ] edit
+        - [-] edit
         - [X] create
         - [X] delete
         - [X] detail
         - [X] list
     - [X] workYear  (only school admin, site admin)
-        - [ ] edit
+        - [-] edit
         - [X] create
         - [X] delete
         - [X] detail
         - [X] list
     - [X] student  (only school admin, site admin)
-        - [ ] edit
+        - [-] edit
         - [X] create
         - [X] delete
         - [X] detail
         - [X] list
     - [X] school (only school admin, site admin)
-        - [ ] edit
+        - [-] edit
         - [X] create   (only site admin)
         - [X] delete (only site admin)
         - [X] detail
         - [X] list (only site admin)
     - [X] schoolAdmin (only school admin, site admin)
-        - [ ] edit
+        - [-] edit
         - [X] create
         - [X] delete
         - [X] detail
         - [X] list
     - [X] contactInfo (all , but student can only see their own)
-        - [ ] edit(integrated with student & school admin edit)
+        - [-] edit(integrated with student & school admin edit)
         - [X] create(integrated with student & school admin create)
-        - [ ] delete
+        - [-] delete
         - [X] detail (not necessary because it can be shown with _contactInfo partial views)
         - [X] list (not necessary)
     - [X] receipt (all , but student can only see their own)
@@ -82,12 +82,10 @@
 
 - [X] remove admin layout and use only _layout (not useful)
 
-- [ ] ordered pagination not seems to work as expected (fix)
-    - [ ] string fields search string is converted to lower but target not converted to lower
-
 - [X] in listings fix role based column visibility (don't know how but it's gone now)
 
-- [ ] fix sortings ( broken prob: TryListOrFail method causing)
+- [x] fix sorting ( broken prob: TryListOrFail method causing)
+    - [X] to lowering cause sorting failure (santization)
 
 - [ ] school admin issues
     - [X] dashboard
@@ -95,27 +93,26 @@
 
 - [ ] student
     - [X] dashboard
-        - [ ] add a message to dashboard if has no payment to be make
+        - [x] add a message to dashboard if has a debt to pay
     - [ ] account detail
-    - [ ] delete create button
-        - [ ] on receipt listing
-        - [ ] on paymentPeriod listing
-    -  [ ] delete delete button on all listings all panes avaliable
-    - [ ] fix receipt details
-    - [ ] all of period - end/start date is Invalid Date
-            ```06/29/2024Z -> Invalid Date site.js:69:21```
+    - [X] delete create button
+        - [X] on receipt listing
+        - [X] on paymentPeriod listing
+    -  [X] delete delete button on all listings all panes avaliable
+    - [X] fix receipt details
+    - [X] all of period - end/start date is Invalid Date
 - [ ] site admin issues
-    - [ ] dashboard
-    - [ ] can't access workYear create
+    - [X] dashboard
+    - [X] can't access workYear create
     - [ ] account detail
-    - [ ] can't access paymentPeriod create
+    - [X] can't access paymentPeriod create
     - [ ] maybe add export controllers for data export
-    - [ ] fix delete button on receipts
+    - [X] fix delete button on receipts
 
 - [ ] release
     - [ ] change admin pass
     - [ ] add second admin
-    - [ ] add max lenght checker before sanitize search queries
+    - [X] add max lenght checker before sanitize search queries
 
 ## todo , maybe
 

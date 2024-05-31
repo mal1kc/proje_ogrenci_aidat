@@ -1,0 +1,53 @@
+@model IEnumerable<PaymentPeriodView>
+
+@{
+    var partialViewTitle = TempData["title"] as string ?? "Payment Periods";
+    var CardName = "paymentPeriodCard";
+}
+
+<div class="container-fluid py-0 my-0">
+    <div class="card m-0">
+        <div class="card-header" id="headingOne">
+            <h5 class="mb-0">
+                @partialViewTitle <button class="btn btn-link collapsed" type="button" data-bs-toggle="collapse"
+                    data-bs-target="#@CardName" aria-expanded="false" aria-controls="userDetailCard">
+                    <span class="triangle">&#9650;</span> <!-- This is a Unicode up arrow -->
+                </button>
+            </h5>
+        </div>
+        <div id="@CardName" class="collapse" aria-labelledby="headingOne" data-parent="#accordion">
+            <div class="card-body">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Period Id</th>
+                            <th>Student</th>
+                            <th>Period Start Date</th>
+                            <th>Period End Date</th>
+                            <th>Per Payment Amount</th>
+                            <th>Total Amount</th>
+                            <th>Occurrence</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var payment in Model ?? Enumerable.Empty<PaymentPeriodView>())
+                        {
+                            <tr>
+                                <td>@Html.DisplayFor(modelItem => payment.Id)</td>
+                                <td>@Html.DisplayFor(modelItem => payment.StudentId)</td>
+                                <td>@Html.DisplayFor(modelItem => payment.StartDate)</td>
+                                <td>@Html.DisplayFor(modelItem => payment.EndDate)</td>
+                                <td>@Html.DisplayFor(modelItem => payment.PerPaymentAmount)</td>
+                                <td>@Html.DisplayFor(modelItem => payment.TotalAmount)</td>
+                                <td>@Html.DisplayFor(modelItem => payment.Occurrence)</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+                <p class="mt-5">
+                    <a asp-action="List" asp-controller="PaymentPeriod" class="btn btn-primary">Back to List</a>
+                </p>
+            </div>
+        </div>
+    </div>
+</div>

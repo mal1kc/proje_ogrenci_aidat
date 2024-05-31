@@ -77,11 +77,13 @@ namespace OgrenciAidatSistemi.Controllers
             }
             catch (ArgumentException ex)
             {
+                TempData["Error"] = "File not found";
                 _logger.LogWarning(ex, "File not found");
-                return RedirectToAction("Index", "Error", new { statusCode = 404 });
+                return RedirectToAction("List");
             }
             catch (Exception ex)
             {
+                TempData["Error"] = "An error occurred while downloading the file";
                 _logger.LogError(ex, "Error downloading file");
                 return StatusCode(
                     StatusCodes.Status500InternalServerError,
@@ -100,6 +102,14 @@ namespace OgrenciAidatSistemi.Controllers
             int pageSize = 20
         )
         {
+            searchField ??= "";
+            searchString ??= "";
+            sortOrder ??= "";
+
+            if (searchField.Length > 70 || searchString.Length > 70 || sortOrder.Length > 70)
+            {
+                return BadRequest("Search field and search string must be less than 70 characters");
+            }
             ViewBag.IsSiteAdmin = false;
 
             IQueryable<Receipt>? receipts = null;
@@ -110,6 +120,7 @@ namespace OgrenciAidatSistemi.Controllers
             {
                 return Unauthorized();
             }
+            ViewBag.UserRole = role;
 
             switch (role)
             {
@@ -119,6 +130,7 @@ namespace OgrenciAidatSistemi.Controllers
                         .Receipts.Include(r => r.CreatedBy)
                         .Include(r => r.Payment)
                         .Include(r => r.Payment.Student)
+                        .ThenInclude(p => p.PaymentPeriods)
                         .AsQueryable();
                     break;
                 case UserRole.SchoolAdmin:
@@ -136,6 +148,7 @@ namespace OgrenciAidatSistemi.Controllers
                         .Include(r => r.CreatedBy)
                         .Include(r => r.Payment)
                         .Include(r => r.Payment.Student)
+                        .ThenInclude(p => p.PaymentPeriods)
                         .AsQueryable();
                     break;
                 case UserRole.Student:
@@ -163,15 +176,11 @@ namespace OgrenciAidatSistemi.Controllers
                 // return empty Queryable
                 receipts ??= _dbContext.Receipts.Where(r => false);
                 var modelList = new QueryableModelHelper<Receipt>(receipts, Receipt.SearchConfig);
-                searchField ??= "";
-                searchString ??= "";
-                sortOrder ??= "";
-
                 var result = modelList.List(
                     ViewData,
-                    searchString.ToSanitizedLowercase(),
-                    searchField.ToSanitizedLowercase(),
-                    sortOrder.ToSanitizedLowercase(),
+                    searchString.SanitizeString(),
+                    searchField.SanitizeString(),
+                    sortOrder.SanitizeString(),
                     pageIndex,
                     pageSize
                 );
@@ -208,11 +217,13 @@ namespace OgrenciAidatSistemi.Controllers
 
                 if (role == null)
                 {
+                    TempData["Error"] = "You are not authorized to view this receipt";
                     return Unauthorized();
                 }
 
-                if (role == UserRole.Student && receipt.Payment.School.Id != schoolid)
+                if (role == UserRole.Student && receipt.Payment?.School?.Id != schoolid)
                 {
+                    TempData["Error"] = "You are not authorized to view this receipt";
                     return Unauthorized();
                 }
                 ViewBag.UserRole = role;
