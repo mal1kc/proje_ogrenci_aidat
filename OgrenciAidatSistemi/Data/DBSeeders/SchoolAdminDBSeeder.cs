@@ -98,7 +98,12 @@ namespace OgrenciAidatSistemi.Data
                 FirstName = "rschAdmin" + faker.Name.FirstName(),
                 LastName = "rschAdmin" + faker.Name.LastName(),
                 EmailAddress = email,
+#if DEBUG
                 PasswordHash = SchoolAdmin.ComputeHash("RandomPassword_" + email.Split('@')[0]),
+#else
+                PasswordHash = SchoolAdmin.ComputeHash("RandomPassword_a53iZtMIjCipZoZgM5S"),
+#endif
+
                 School = new School
                 {
                     Name = "School" + faker.Random.Number(1, 100),

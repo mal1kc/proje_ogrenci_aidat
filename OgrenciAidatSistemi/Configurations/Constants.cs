@@ -3,8 +3,8 @@ namespace OgrenciAidatSistemi.Configurations
     public static class Constants
     {
         public const String AppName = "OgrenciAidatSistemi";
-        public const String AppVersion = "0.7.0";
-        public const String PasswdSalt = "asp_19545s";
+        public const String AppVersion = "pre-release 0.9.0";
+        public const String PasswdSalt = "as1235*02xp_19545s";
         public const short MaxUserNameLength = 124;
         public const short MinUserNameLength = 5;
 
@@ -17,10 +17,8 @@ namespace OgrenciAidatSistemi.Configurations
             "583b18eacfb20ee2c32aa859263e77858914d0603587032969389a6ed14a1503";
         public const String CookieName = AppName;
         public const String AuthenticationCookieName = AppName + ".Auth";
-        public const String AuthenticationLoginPath = "/signIn";
         public const String AdminAuthenticationLoginPath =
-            "/0e4ec65beafa9ffb05abf95f2299783ba48721134a35a7abe28aab71e0ad15c04543917869ef1ae7241186cf5bd9b28c4270031a910ca8b2d76de995ef1a73ff";
-
+            "/e065708a77dbb08ca7e9263254223251a015563b42ad3c7092df2797f279d5e9"; // nice song
 #pragma warning disable IDE1006 // Naming Styles
         public static class userRoles
 #pragma warning restore IDE1006 // Naming Styles

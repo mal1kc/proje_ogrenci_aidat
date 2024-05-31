@@ -43,7 +43,11 @@ namespace OgrenciAidatSistemi.Data.DBSeeders
                 },
                 GradLevel = faker.Random.Number(1, 12),
                 IsLeftSchool = faker.Random.Number(2) == 0,
+#if DEBUG
                 PasswordHash = Student.ComputeHash("password"), // dont overthink it
+#else
+                PasswordHash = Student.ComputeHash("oQsgMTEwcDN7Wm7KGma6"),
+#endif
                 EmailAddress = "temp@somemail.com"
             };
 

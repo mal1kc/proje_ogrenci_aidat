@@ -87,30 +87,30 @@
 - [x] fix sorting ( broken prob: TryListOrFail method causing)
     - [X] to lowering cause sorting failure (sanitization)
 
-- [ ] school admin issues
+- [X] school admin issues
     - [X] dashboard
-    - [ ] account detail
+    - [X] account detail
 
-- [ ] student
+- [X] student
     - [X] dashboard
         - [x] add a message to dashboard if has a debt to pay
-    - [ ] account detail
+    - [X] account detail
     - [X] delete create button
         - [X] on receipt listing
         - [X] on paymentPeriod listing
     -  [X] delete delete button on all listings all panes available
     - [X] fix receipt details
     - [X] all of period - end/start date is Invalid Date
-- [ ] site admin issues
+- [X] site admin issues
     - [X] dashboard
     - [X] can't access workYear create
-    - [ ] account detail
+    - [X] account detail
     - [X] can't access paymentPeriod create
     - [X] maybe add export controllers for data export
     - [X] fix delete button on receipts
 
 - [ ] release
-    - [ ] change admin pass
+    - [X] change admin pass
     - [ ] add second admin
     - [X] add max length checker before sanitize search queries
 
@@ -126,3 +126,10 @@
 - [X] ( possible fix at [[./OgrenciAidatSistemi/Services/UserService.cs:220]] ) if a user is deleted, or not exist in db , if it is logged in, its still logged in, fix this
     - in this condition, user related panels but navbar is not shown , logged status is not shown ( not easily detectable)
 - [X] list view links does not carry search parameters or sort parameters to next page (prob easy fix)
+
+<!--
+defa ad:fmYQiGi4wKESK5YeIO89
+def st:oQsgMTEwcDN7Wm7KGma6
+def sch:RandomPassword_a53iZtMIjCipZoZgM5S
+-->
+

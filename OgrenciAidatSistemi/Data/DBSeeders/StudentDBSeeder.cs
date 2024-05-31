@@ -99,7 +99,12 @@ namespace OgrenciAidatSistemi.Data
                 School = school,
                 GradLevel = faker.Random.Number(1, 12),
                 IsLeftSchool = faker.Random.Bool(),
+#if DEBUG
                 PasswordHash = Student.ComputeHash("password"),
+#else
+                // PasswordHash = Student.ComputeHash(faker.Internet.Password()),
+                PasswordHash = Student.ComputeHash("oQsgMTEwcDN7Wm7KGma6"),
+#endif
                 EmailAddress = "temp@random.com",
                 FirstName = faker.Name.FirstName(),
                 LastName = faker.Name.LastName(),
