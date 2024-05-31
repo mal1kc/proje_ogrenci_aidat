@@ -1,6 +1,7 @@
 using System.Data;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using OgrenciAidatSistemi.Data;
 using OgrenciAidatSistemi.Helpers;
@@ -11,6 +12,7 @@ using OgrenciAidatSistemi.Services;
 
 namespace OgrenciAidatSistemi.Controllers
 {
+    [Authorize(Roles = Configurations.Constants.userRoles.SiteAdmin)]
     public class SiteAdminController(
         ILogger<SiteAdminController> logger,
         AppDbContext appDbContext,
@@ -25,7 +27,6 @@ namespace OgrenciAidatSistemi.Controllers
 
         private readonly ExportService _exportService = exportService;
 
-        [Authorize(Roles = Configurations.Constants.userRoles.SiteAdmin)]
         public IActionResult Index()
         {
             var current_user_id = _userService.GetCurrentUserID();
@@ -77,6 +78,7 @@ namespace OgrenciAidatSistemi.Controllers
         }
 
         [HttpGet(Configurations.Constants.AdminAuthenticationLoginPath)]
+        [AllowAnonymous]
         public async Task<IActionResult> SignIn()
         {
             if (await _userService.IsUserSignedIn())
@@ -87,6 +89,7 @@ namespace OgrenciAidatSistemi.Controllers
         }
 
         [HttpPost(Configurations.Constants.AdminAuthenticationLoginPath)]
+        [AllowAnonymous]
         public async Task<IActionResult> SignInPost(SiteAdminView adminView)
         {
             if (adminView.Username == null || adminView.Password == null)
@@ -255,7 +258,6 @@ namespace OgrenciAidatSistemi.Controllers
         // Delete a SiteAdmin
         // This is a confirmation page for deleting a SiteAdmin
 
-        [Authorize(Roles = Configurations.Constants.userRoles.SiteAdmin)]
         [DebugOnly]
         // [DisabledAction]
         public Task<IActionResult> Delete(int? id)
@@ -332,7 +334,6 @@ namespace OgrenciAidatSistemi.Controllers
         // Show details of a SiteAdmin
         // This page is read-only // This page is accessible by siteAdmins only
 
-        [Authorize(Roles = Configurations.Constants.userRoles.SiteAdmin)]
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null || _appDbContext.SiteAdmins == null)
@@ -343,11 +344,12 @@ namespace OgrenciAidatSistemi.Controllers
             return View(siteAdmin.ToView());
         }
 
-        [Authorize(Roles = Configurations.Constants.userRoles.SiteAdmin)]
+        // GET: /SiteAdmin/Export
+
         [HttpGet]
         public IActionResult Export()
         {
-            throw new NotImplementedException();
+            return View();
         }
     }
 }

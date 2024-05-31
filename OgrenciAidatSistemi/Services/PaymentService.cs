@@ -1,5 +1,3 @@
-using System.CodeDom.Compiler;
-using System.Security.Cryptography;
 using System.Text;
 using Microsoft.EntityFrameworkCore;
 using OgrenciAidatSistemi.Data;
@@ -108,6 +106,17 @@ namespace OgrenciAidatSistemi.Services
             {
                 // Save changes to the database
                 await _context.SaveChangesAsync();
+
+                var receipt = await GenerateReceipt(newPayment);
+                if (receipt != null)
+                {
+                    _context.Receipts.Add(receipt);
+                    await _context.SaveChangesAsync();
+                }
+                else
+                {
+                    _logger.LogError("Error while generating receipt");
+                }
                 return true;
             }
             catch (Exception e)
@@ -127,21 +136,25 @@ namespace OgrenciAidatSistemi.Services
             receiptData.AppendLine($"Amount: {payment.Amount}");
             receiptData.AppendLine($"Payment Date: {payment.PaymentDate}");
             receiptData.AppendLine(
-                $"Student: {payment.Student.FirstName} {payment.Student.LastName} ({payment.Student.StudentId})"
+                $"Student: {payment.Student?.FirstName} {payment.Student?.LastName} ({payment.Student?.StudentId})"
             );
-            receiptData.AppendLine($"School: {payment.School.Name}");
+            var school =
+                payment.School != null
+                    ? payment.Student?.School
+                    : null ?? payment.PaymentPeriod?.WorkYear?.School;
+            receiptData.AppendLine($"School: {school?.Name} ({school?.Id})");
 
             receiptData.AppendLine(
-                $"Payment Period: {payment.PaymentPeriod.StartDate} - {payment.PaymentPeriod.EndDate}"
+                $"Payment Period: {payment.PaymentPeriod?.StartDate} - {payment.PaymentPeriod?.EndDate}"
             );
             receiptData.AppendLine(
-                $"Payment Period Per Payment Amount: {payment.PaymentPeriod.PerPaymentAmount}"
+                $"Payment Period Per Payment Amount: {payment.PaymentPeriod?.PerPaymentAmount}"
             );
             receiptData.AppendLine(
-                $"Payment Period Occurrence: {payment.PaymentPeriod.Occurrence}"
+                $"Payment Period Occurrence: {payment.PaymentPeriod?.Occurrence}"
             );
             receiptData.AppendLine(
-                $"Payment Period Work Year: {payment.PaymentPeriod.WorkYear.StartDate} - {payment.PaymentPeriod.WorkYear.EndDate}"
+                $"Payment Period Work Year: {payment.PaymentPeriod?.WorkYear?.StartDate} - {payment?.PaymentPeriod?.WorkYear?.EndDate}"
             );
 
             // Add the receipt data to the receipt object
@@ -156,10 +169,12 @@ namespace OgrenciAidatSistemi.Services
                 var receiptFilePath = await _fileService.WriteFileAsync(
                     fileName,
                     receiptData.ToString(),
+                    "text/plain",
                     payment.Student,
                     "/receipts"
                 );
                 var receipt = Receipt.FromFilePath(receiptFilePath);
+                receipt.FileHash = receipt.ComputeHash();
                 receipt.Payment = payment;
                 return receipt;
             }

@@ -13,7 +13,7 @@ namespace OgrenciAidatSistemi.Services
 
         private long _maxFileSize;
 
-        private string _uploadsFolder;
+        public string _uploadsFolder;
 
         public FileService(
             ILogger<FileService> logger,
@@ -155,6 +155,7 @@ namespace OgrenciAidatSistemi.Services
         public async Task<FilePath> WriteFileAsync(
             string fileName,
             string content,
+            string contentType,
             User createdBy,
             string folderPath = "/generated"
         )
@@ -165,35 +166,51 @@ namespace OgrenciAidatSistemi.Services
             }
             var sanitizedFileName = SanitizeFileName(fileName);
             var filePath = Path.Combine(_uploadsFolder, folderPath, sanitizedFileName);
+            if (
+                !Directory.Exists(Path.GetDirectoryName(filePath))
+                && !string.IsNullOrWhiteSpace(Path.GetDirectoryName(filePath))
+            )
+            {
+                var dirNanme = Path.GetDirectoryName(filePath);
+                if (dirNanme != null)
+                {
+                    Directory.CreateDirectory(dirNanme);
+                }
+            }
             await File.WriteAllTextAsync(filePath, content);
             return new FilePath(
                 path: filePath,
                 name: fileName,
                 extension: Path.GetExtension(fileName),
-                contentType: "text/plain",
+                contentType: contentType,
                 size: content.Length,
-                description: "Generated file"
+                description: "Generated file content from the system created by "
+                    + createdBy?.EmailAddress
             );
         }
 
         public static string SanitizeFileName(string fileName)
         {
+            // Split the file name into name and extension
+            var name = Path.GetFileNameWithoutExtension(fileName);
+            var extension = Path.GetExtension(fileName);
+
             // Remove invalid characters from the file name
-            string invalidChars =
-                new string(Path.GetInvalidFileNameChars()) + new string(Path.GetInvalidPathChars());
-            foreach (char c in invalidChars)
-            {
-                fileName = fileName.Replace(c.ToString(), "");
-            }
+            string invalidChars = System.Text.RegularExpressions.Regex.Escape(
+                new string(Path.GetInvalidFileNameChars())
+            );
+            string invalidRegStr = string.Format(@"([{0}]*\.+$)|([{0}]+)", invalidChars);
+            name = System.Text.RegularExpressions.Regex.Replace(name, invalidRegStr, "_");
 
             // Remove certain patterns from the file name
-            string[] patterns = { "/.", "..", ".", "~", "/", "\\" };
+            string[] patterns = ["..", "~"];
             foreach (string pattern in patterns)
             {
-                fileName = fileName.Replace(pattern, "");
+                name = name.Replace(pattern, "");
             }
 
-            return fileName;
+            // Recombine the sanitized name and the extension
+            return name + extension;
         }
     }
 }

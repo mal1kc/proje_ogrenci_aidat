@@ -1,12 +1,24 @@
+using System.Data;
+using System.IO.Compression;
+using ClosedXML.Excel;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using Moq;
 using OgrenciAidatSistemi.Services;
 using OgrenciAidatSistemi.Tests.Data;
 
 namespace OgrenciAidatSistemi.Tests
 {
-    public class ExportServiceStaticTests
+    public class ExportServiceTests
     {
+        private readonly ExportService _exportService;
+
+        public ExportServiceTests()
+        {
+            var mockLogger = new Mock<ILogger<ExportService>>();
+            _exportService = new ExportService(mockLogger.Object);
+        }
+
         [Fact]
         public void ToDataTable_ShouldConvertItemsToDataTable()
         {
@@ -164,6 +176,112 @@ namespace OgrenciAidatSistemi.Tests
             Assert.Equal(DateTime.MinValue.ToString(), dataTable.Rows[0]["UpdatedAt"]);
 
             Assert.Equal("", dataTable.Rows[0]["UpdatedDate"]);
+        }
+
+        [Fact]
+        public void ExportToExcel_ShouldCreateExcelFileWithData()
+        {
+            // Arrange
+            var dataTable = new DataTable("Test");
+            dataTable.Columns.Add("Id", typeof(int));
+            dataTable.Columns.Add("Name", typeof(string));
+            dataTable.Rows.Add(1, "Item1");
+            dataTable.Rows.Add(2, "Item2");
+
+            // Act
+            var excelStream = _exportService.ExportToExcel(dataTable, "Test");
+
+            // Assert
+            Assert.NotNull(excelStream);
+            Assert.True(excelStream.Length > 0);
+
+            using var workbook = new XLWorkbook(excelStream);
+            var worksheet = workbook.Worksheets.Worksheet("Test");
+            Assert.NotNull(worksheet);
+            Assert.Equal("Item1", worksheet.Cell(2, 2).Value.ToString());
+        }
+
+        [Fact]
+        public void ExportMultipleToExcel_ShouldCreateExcelFileWithMultipleSheets()
+        {
+            // Arrange
+            var dataTable1 = new DataTable("Sheet1");
+            dataTable1.Columns.Add("Id", typeof(int));
+            dataTable1.Columns.Add("Name", typeof(string));
+            dataTable1.Rows.Add(1, "Item1");
+
+            var dataTable2 = new DataTable("Sheet2");
+            dataTable2.Columns.Add("Id", typeof(int));
+            dataTable2.Columns.Add("Name", typeof(string));
+            dataTable2.Rows.Add(2, "Item2");
+
+            var dataTables = new Dictionary<string, DataTable>
+            {
+                { "Sheet1", dataTable1 },
+                { "Sheet2", dataTable2 }
+            };
+
+            // Act
+            var excelStream = _exportService.ExportMultipleToExcel(dataTables);
+
+            // Assert
+            Assert.NotNull(excelStream);
+            Assert.True(excelStream.Length > 0);
+
+            using var workbook = new XLWorkbook(excelStream);
+            var worksheet1 = workbook.Worksheets.Worksheet("Sheet1");
+            var worksheet2 = workbook.Worksheets.Worksheet("Sheet2");
+            Assert.NotNull(worksheet1);
+            Assert.NotNull(worksheet2);
+            Assert.Equal("Item1", worksheet1.Cell(2, 2).Value.ToString());
+            Assert.Equal("Item2", worksheet2.Cell(2, 2).Value.ToString());
+        }
+
+        [Fact]
+        public void CreateZipWithExcelFiles_ShouldCreateZipWithExcelFiles()
+        {
+            // Arrange
+            var dataTable1 = new DataTable("Sheet1");
+            dataTable1.Columns.Add("Id", typeof(int));
+            dataTable1.Columns.Add("Name", typeof(string));
+            dataTable1.Rows.Add(1, "Item1");
+
+            var dataTable2 = new DataTable("Sheet2");
+            dataTable2.Columns.Add("Id", typeof(int));
+            dataTable2.Columns.Add("Name", typeof(string));
+            dataTable2.Rows.Add(2, "Item2");
+
+            var dataTables = new Dictionary<string, DataTable>
+            {
+                { "Sheet1", dataTable1 },
+                { "Sheet2", dataTable2 }
+            };
+
+            // Act
+            MemoryStream zipStream;
+            using (zipStream = _exportService.CreateZipWithExcelFiles(dataTables))
+            {
+                // Assert
+                Assert.NotNull(zipStream);
+                Assert.True(zipStream.Length > 0);
+
+                using var archive = new ZipArchive(zipStream, ZipArchiveMode.Read);
+                Assert.Equal(2, archive.Entries.Count);
+                var entry1 = archive.GetEntry("Sheet1.xlsx");
+                var entry2 = archive.GetEntry("Sheet2.xlsx");
+                Assert.NotNull(entry1);
+                Assert.NotNull(entry2);
+
+                using var entry1Stream = entry1.Open();
+                using var workbook1 = new XLWorkbook(entry1Stream);
+                var worksheet1 = workbook1.Worksheets.Worksheet("Sheet1");
+                Assert.Equal("Item1", worksheet1.Cell(2, 2).Value.ToString());
+
+                using var entry2Stream = entry2.Open();
+                using var workbook2 = new XLWorkbook(entry2Stream);
+                var worksheet2 = workbook2.Worksheets.Worksheet("Sheet2");
+                Assert.Equal("Item2", worksheet2.Cell(2, 2).Value.ToString());
+            }
         }
     }
 }

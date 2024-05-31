@@ -137,7 +137,8 @@ namespace OgrenciAidatSistemi.Tests
         {
             // Arrange
             var fileName = "test.txt";
-            var filePath = Path.Combine(_mockEnvironment.Object.WebRootPath, "uploads", fileName);
+            var filePath = Path.Combine(_fileService._uploadsFolder, fileName);
+
             using (var stream = File.Create(filePath))
             {
                 var writer = new StreamWriter(stream);

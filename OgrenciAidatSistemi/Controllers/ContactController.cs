@@ -1,4 +1,3 @@
-using DocumentFormat.OpenXml.Math;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using OgrenciAidatSistemi.Data;

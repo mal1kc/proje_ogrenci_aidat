@@ -18,14 +18,14 @@
 - [ ] add payment verification panel for sch admin (implement)
 - [X] add payment panel for student (improve usability)
 - [X] add workYear management panel for sch admin (improve usability)
-- [X] add paymentperiod management panel for sch admin ( improve usability)
+- [X] add paymentPeriod management panel for sch admin ( improve usability)
 - [X] add all models to delete , edit , create panel for site admin (some of them must be debug only) +++
     - [X] payment
         - [-] edit (makePayment , verify payment)
         - [X] detail
         - [X] delete (only site admin (debug only))
         - [X] list
-    - [X] paymentperiod (only school admin, site admin)
+    - [X] paymentPeriod (only school admin, site admin)
         - [-] edit
         - [X] create
         - [X] delete
@@ -85,7 +85,7 @@
 - [X] in listings fix role based column visibility (don't know how but it's gone now)
 
 - [x] fix sorting ( broken prob: TryListOrFail method causing)
-    - [X] to lowering cause sorting failure (santization)
+    - [X] to lowering cause sorting failure (sanitization)
 
 - [ ] school admin issues
     - [X] dashboard
@@ -98,7 +98,7 @@
     - [X] delete create button
         - [X] on receipt listing
         - [X] on paymentPeriod listing
-    -  [X] delete delete button on all listings all panes avaliable
+    -  [X] delete delete button on all listings all panes available
     - [X] fix receipt details
     - [X] all of period - end/start date is Invalid Date
 - [ ] site admin issues
@@ -106,13 +106,13 @@
     - [X] can't access workYear create
     - [ ] account detail
     - [X] can't access paymentPeriod create
-    - [ ] maybe add export controllers for data export
+    - [X] maybe add export controllers for data export
     - [X] fix delete button on receipts
 
 - [ ] release
     - [ ] change admin pass
     - [ ] add second admin
-    - [X] add max lenght checker before sanitize search queries
+    - [X] add max length checker before sanitize search queries
 
 ## todo , maybe
 

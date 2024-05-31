@@ -78,11 +78,20 @@
             data-bs-toggle="dropdown" aria-expanded="false">
         </button>
         <ul class="dropdown-menu dropdown-menu-start">
+            
             <li><a class="dropdown-item" href="#">AccountDetail</a></li>
             <li>
                 <hr class="dropdown-divider">
             </li>
             <li><a class="dropdown-item" href="#">Something else here</a></li>
+            @if(
+            @Model.Role == UserRole.SiteAdmin
+            ){
+            <li>
+                <hr class="dropdown-divider">
+                <a class="dropdown-item" asp-controller="SiteAdmin" asp-action="Export">Export to Excel</a>
+            </li>
+            }
             <li>
                 <hr class="dropdown-divider">
             </li>

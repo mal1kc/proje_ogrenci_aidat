@@ -10,7 +10,7 @@ namespace OgrenciAidatSistemi.Models
         public ICollection<Grade>? Grades { get; set; }
         public ICollection<WorkYear>? WorkYears { get; set; }
 
-        public required ISet<Student?>? Students { get; set; }
+        public required ICollection<Student?>? Students { get; set; }
 
         public static ModelSearchConfig<School> SearchConfig =>
             new(

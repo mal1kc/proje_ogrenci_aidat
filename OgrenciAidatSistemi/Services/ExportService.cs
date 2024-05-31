@@ -1,15 +1,14 @@
 using System.Data;
+using System.IO.Compression;
 using System.Reflection;
 using ClosedXML.Excel;
-using OgrenciAidatSistemi.Data;
 using OgrenciAidatSistemi.Helpers;
 
 namespace OgrenciAidatSistemi.Services
 {
-    public class ExportService(AppDbContext context, ILogger<ExportService> logger)
+    public class ExportService(ILogger<ExportService> logger)
     {
-        private readonly AppDbContext _context = context;
-        private readonly ILogger _logger = logger;
+        private readonly ILogger<ExportService> _logger = logger;
 
         public static DataTable ToDataTable<T>(IEnumerable<T> items)
         {
@@ -20,7 +19,6 @@ namespace OgrenciAidatSistemi.Services
             return ToDataTable(items, fields);
         }
 
-        // with specified fields(as column names)
         public static DataTable ToDataTable<T>(IEnumerable<T> items, string[] fields)
         {
             var dataTable = new DataTable(typeof(T).Name);
@@ -42,14 +40,48 @@ namespace OgrenciAidatSistemi.Services
             return dataTable;
         }
 
-        public MemoryStream ExportToExcel(DataTable data)
+        public MemoryStream ExportToExcel(DataTable data, string sheetName = "Export")
         {
             using var workbook = new XLWorkbook();
-            workbook.Worksheets.Add(data, "Export");
+            workbook.Worksheets.Add(data, sheetName);
             var stream = new MemoryStream();
             workbook.SaveAs(stream);
             stream.Position = 0;
             return stream;
+        }
+
+        public MemoryStream ExportMultipleToExcel(Dictionary<string, DataTable> dataTables)
+        {
+            using var workbook = new XLWorkbook();
+            foreach (var entry in dataTables)
+            {
+                workbook.Worksheets.Add(entry.Value, entry.Key);
+            }
+            var stream = new MemoryStream();
+            workbook.SaveAs(stream);
+            stream.Position = 0;
+            return stream;
+        }
+
+        public MemoryStream CreateZipWithExcelFiles(Dictionary<string, DataTable> dataTables)
+        {
+            var resultStream = new MemoryStream();
+            using (var memoryStream = new MemoryStream())
+            {
+                using (var archive = new ZipArchive(memoryStream, ZipArchiveMode.Create, true))
+                {
+                    foreach (var entry in dataTables)
+                    {
+                        using var entryStream = archive.CreateEntry($"{entry.Key}.xlsx").Open();
+                        var excelStream = ExportToExcel(entry.Value, entry.Key);
+                        excelStream.CopyTo(entryStream);
+                    }
+                }
+                memoryStream.Position = 0;
+                memoryStream.CopyTo(resultStream);
+            }
+            resultStream.Position = 0;
+            return resultStream;
         }
     }
 }

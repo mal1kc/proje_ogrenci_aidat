@@ -1,3 +1,4 @@
+using Bogus.Extensions.UnitedKingdom;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -257,6 +258,41 @@ namespace OgrenciAidatSistemi.Tests
                     .FirstOrDefaultAsync(p => p.PaymentPeriod == paymentPeriod);
 
                 Assert.Null(savedPayment);
+            }
+        }
+
+        [Fact]
+        public async Task MakePayment_ValidPayment_ReceiptGenerated()
+        {
+            foreach (var paidPayment in _paidSeedData)
+            {
+                var nonPaidPayment =
+                    _unPaidPayments.FirstOrDefault(p =>
+                        p.PaymentPeriod == paidPayment.PaymentPeriod
+                    ) ?? throw new Exception("non-paid payment not found");
+
+                // Save the non-paid payment to the DB for this test case
+                _dbContext.Payments.Add(nonPaidPayment);
+                _dbContext.SaveChanges();
+
+                bool result = await _paymentService.MakePayment(nonPaidPayment, paidPayment);
+                Assert.True(result);
+
+                var savedPayment = await _dbContext
+                    .Payments.OrderByDescending(p => p.PaymentDate)
+                    .Where(p => p.Status == PaymentStatus.Paid && p.Receipt != null)
+                    .FirstOrDefaultAsync(p => p.PaymentPeriod == paidPayment.PaymentPeriod);
+
+                Assert.NotNull(savedPayment);
+
+                var receipt = await _dbContext.Receipts.FirstOrDefaultAsync(r =>
+                    r.Payment == savedPayment
+                );
+                Assert.NotNull(receipt);
+                Assert.True(receipt.ContentType == "text/plain"); // This is a generated file
+
+                var receiptContent = await _fileService.DownloadFileAsync(receipt);
+                Assert.NotNull(receiptContent);
             }
         }
 

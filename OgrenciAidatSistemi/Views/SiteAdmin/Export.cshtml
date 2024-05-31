@@ -1,0 +1,91 @@
+@model ExportRequestModel
+@{
+    ViewData["Title"] = "Export Request";
+    var schoolSortList = School.SearchConfig.AllowedFieldsForSort?.ToList();
+    var studentSortList = Student.SearchConfig.AllowedFieldsForSort?.ToList();
+}
+
+
+
+<h2>@ViewData["Title"]</h2>
+
+<div class="mb-3">
+    <label for="exportType" class="form-label">Export Type</label>
+    <select id="exportType" class="form-select">
+        <option value="students">Export Students</option>
+        <option value="schools">Export Schools</option>
+    </select>
+</div>
+
+<div id="studentsForm" style="display: none;">
+    <form method="get" asp-action="ExportStudents" asp-controller="ExportImport">
+        @Html.AntiForgeryToken()
+        <h3>Export Students</h3>
+        <div class="mb-3">
+            <label asp-for="MaxCount" class="form-label">Max Count:</label>
+            <input type="number" asp-for="MaxCount" class="form-control">
+        </div>
+        <div class="mb-3">
+            <label asp-for="StartDate" class="form-label">Start Date:</label>
+            <input type="date" asp-for="StartDate" class="form-control">
+        </div>
+        <div class="mb-3">
+            <label asp-for="EndDate" class="form-label">End Date:</label>
+            <input type="date" asp-for="EndDate" class="form-control">
+        </div>
+        <div class="mb-3">
+            <label asp-for="SortOrder" class="form-label">Order By:</label>
+            <select asp-for="SortOrder" asp-items="new SelectList(studentSortList ?? new List<string>())" class="form-select">
+            </select>
+        </div>
+        <div class="mb-3 form-check">
+            <input type="checkbox" asp-for="IncludeRelative" class="form-check-input">
+            <label asp-for="IncludeRelative" class="form-check-label">Include Relative:</label>
+        </div>
+        <button type="submit" class="btn btn-primary">Export Students</button>
+    </form>
+</div>
+
+<div id="schoolsForm" style="display: none;">
+    <form method="get" asp-action="ExportSchools" asp-controller="ExportImport">
+        @Html.AntiForgeryToken()
+        <h3>Export Schools</h3>
+        <div class="mb-3">
+            <label asp-for="MaxCount" class="form-label">Max Count:</label>
+            <input type="number" asp-for="MaxCount" class="form-control">
+        </div>
+        <div class="mb-3">
+            <label asp-for="StartDate" class="form-label">Start Date:</label>
+            <input type="date" asp-for="StartDate" class="form-control">
+        </div>
+        <div class="mb-3">
+            <label asp-for="EndDate" class="form-label">End Date:</label>
+            <input type="date" asp-for="EndDate" class="form-control">
+        </div>
+        <div class="mb-3">
+            <label asp-for="SortOrder" class="form-label">Order By:</label>
+            <select asp-for="SortOrder" asp-items="new SelectList(schoolSortList ?? new List<string>())" class="form-select">
+            </select>
+        </div>
+        <div class="mb-3 form-check">
+            <input type="checkbox" asp-for="IncludeRelative" class="form-check-input">
+            <label asp-for="IncludeRelative" class="form-check-label">Include Relative:</label>
+        </div>
+        <button type="submit" class="btn btn-primary">Export Schools</button>
+    </form>
+</div>
+
+@section Scripts {
+    <script>
+        document.getElementById('exportType').addEventListener('change', function () {
+            document.getElementById('studentsForm').style.display = 'none';
+            document.getElementById('schoolsForm').style.display = 'none';
+
+            var selectedType = this.value;
+            document.getElementById(selectedType + 'Form').style.display = 'block';
+        });
+
+        // Trigger the change event to show the correct form initially
+        document.getElementById('exportType').dispatchEvent(new Event('change'));
+    </script>
+}
