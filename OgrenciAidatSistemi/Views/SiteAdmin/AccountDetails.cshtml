@@ -1,0 +1,11 @@
+@model SiteAdminView
+
+@{
+    ViewData["Title"] = "Account Detail";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.AspController = "SiteAdmin";
+}
+
+<div class="container mt-5">
+    <partial name="_AccountDetails" model="@UserUpdateView.FromUserView(Model)" />
+</div>

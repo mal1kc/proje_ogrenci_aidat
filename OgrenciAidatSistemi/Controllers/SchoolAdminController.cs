@@ -385,5 +385,89 @@ namespace OgrenciAidatSistemi.Controllers
                 return NotFound();
             return View(siteAdmin.ToView());
         }
+
+        // GET: SchoolAdmin/AccountDetails
+        //  only accessible by school admin
+
+        [Authorize(Roles = Configurations.Constants.userRoles.SchoolAdmin)]
+        public async Task<IActionResult> AccountDetails()
+        {
+            var signed_user = await _userService.GetCurrentUserAsync();
+            if (signed_user == null)
+                return RedirectToAction("SignIn");
+
+            var schoolAdmin = await _dbContext
+                .SchoolAdmins.Include(sa => sa.ContactInfo)
+                .Where(sa => sa.Id == signed_user.Id)
+                .FirstOrDefaultAsync();
+            if (schoolAdmin == null)
+                return RedirectToAction("SignIn");
+
+            return View(schoolAdmin.ToView());
+        }
+
+        // Post : SchoolAdmin/AccountDetails
+        //  only accessible by school admin
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [Authorize(Roles = Configurations.Constants.userRoles.SchoolAdmin)]
+        public async Task<IActionResult> AccountDetails(UserUpdateView userUpdateView)
+        {
+            var signed_user = await _userService.GetCurrentUserAsync();
+            if (signed_user == null)
+                return RedirectToAction("SignIn");
+
+            var schoolAdmin = await _dbContext
+                .SchoolAdmins.Include(sa => sa.ContactInfo)
+                .Where(sa => sa.Id == signed_user.Id)
+                .FirstOrDefaultAsync();
+            if (schoolAdmin == null)
+                return RedirectToAction("SignIn");
+
+            if (!ModelState.IsValid)
+            {
+                return View(schoolAdmin.ToView());
+            }
+
+            bool isChanged = false;
+
+            if (
+                userUpdateView.FirstName != null
+                && userUpdateView.FirstName != schoolAdmin.FirstName
+            )
+            {
+                schoolAdmin.FirstName = userUpdateView.FirstName;
+                isChanged = true;
+            }
+            if (userUpdateView.LastName != null && userUpdateView.LastName != schoolAdmin.LastName)
+            {
+                schoolAdmin.LastName = userUpdateView.LastName;
+                isChanged = true;
+            }
+            if (userUpdateView.Email != null && userUpdateView.Email != schoolAdmin.EmailAddress)
+            {
+                schoolAdmin.EmailAddress = userUpdateView.Email;
+                isChanged = true;
+            }
+            if (
+                userUpdateView.PhoneNumber != null
+                && userUpdateView.PhoneNumber != schoolAdmin.ContactInfo.PhoneNumber
+            )
+            {
+                schoolAdmin.ContactInfo.PhoneNumber = userUpdateView.PhoneNumber;
+                isChanged = true;
+            }
+
+            if (isChanged)
+            {
+                _dbContext.SchoolAdmins.Update(schoolAdmin);
+                await _dbContext.SaveChangesAsync();
+                TempData["Message"] = "Account details updated";
+                ViewData["Message"] = "Account details updated";
+            }
+
+            return RedirectToAction("AccountDetails");
+        }
     }
 }

@@ -351,5 +351,73 @@ namespace OgrenciAidatSistemi.Controllers
         {
             return View();
         }
+
+        [HttpGet]
+        public IActionResult AccountDetails()
+        {
+            var current_user_id = _userService.GetCurrentUserID();
+            if (current_user_id == null)
+            {
+                return RedirectToAction("SignOut", "SiteAdmin");
+            }
+            var current_site_admin = _appDbContext.SiteAdmins.Find(current_user_id);
+            if (current_site_admin == null)
+            {
+                return RedirectToAction("SignOut", "SiteAdmin");
+            }
+            return View(current_site_admin.ToView());
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> AccountDetails(UserUpdateView userUpdateView)
+        {
+            var current_user_id = _userService.GetCurrentUserID();
+            if (current_user_id == null)
+            {
+                return RedirectToAction("SignOut", "SiteAdmin");
+            }
+            var current_site_admin = _appDbContext.SiteAdmins.Find(current_user_id);
+            if (current_site_admin == null)
+            {
+                return RedirectToAction("SignOut", "SiteAdmin");
+            }
+
+            bool isChanged = false;
+
+            if (
+                userUpdateView.FirstName != null
+                && userUpdateView.FirstName != current_site_admin.FirstName
+            )
+            {
+                current_site_admin.FirstName = userUpdateView.FirstName;
+                isChanged = true;
+            }
+            if (
+                userUpdateView.LastName != null
+                && userUpdateView.LastName != current_site_admin.LastName
+            )
+            {
+                current_site_admin.LastName = userUpdateView.LastName;
+                isChanged = true;
+            }
+            if (
+                userUpdateView.Email != null
+                && userUpdateView.Email != current_site_admin.EmailAddress
+            )
+            {
+                current_site_admin.EmailAddress = userUpdateView.Email;
+                isChanged = true;
+            }
+
+            if (isChanged)
+            {
+                _appDbContext.SiteAdmins.Update(current_site_admin);
+                await _appDbContext.SaveChangesAsync();
+                TempData["Message"] = "Account details updated";
+                ViewData["Message"] = "Account details updated";
+            }
+
+            return RedirectToAction("AccountDetails");
+        }
     }
 }

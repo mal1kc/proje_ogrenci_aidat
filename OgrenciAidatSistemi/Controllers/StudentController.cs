@@ -552,5 +552,85 @@ namespace OgrenciAidatSistemi.Controllers
         {
             return _dbContext.Students.Any(e => e.Id == id);
         }
+
+        // GET: Student/AccountDetails
+
+        [Authorize(Roles = Configurations.Constants.userRoles.Student)]
+        public async Task<IActionResult> AccountDetails()
+        {
+            var signed_user = await _userService.GetCurrentUserAsync();
+            if (signed_user == null)
+                return RedirectToAction("SignIn");
+
+            var student = await _dbContext
+                .Students.Include(s => s.ContactInfo)
+                .Where(s => s.Id == signed_user.Id)
+                .FirstOrDefaultAsync();
+
+            if (student == null)
+                return RedirectToAction("SignIn");
+
+            return View(student.ToView());
+        }
+
+        // Post : Student/AccountDetails
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [Authorize(Roles = Configurations.Constants.userRoles.Student)]
+        public async Task<IActionResult> AccountDetails(UserUpdateView userUpdateView)
+        {
+            var signed_user = await _userService.GetCurrentUserAsync();
+            if (signed_user == null)
+                return RedirectToAction("SignIn");
+
+            var student = await _dbContext
+                .Students.Include(s => s.ContactInfo)
+                .Where(s => s.Id == signed_user.Id)
+                .FirstOrDefaultAsync();
+            if (student == null)
+                return RedirectToAction("SignIn");
+
+            if (!ModelState.IsValid)
+            {
+                return View(student.ToView());
+            }
+
+            bool isChanged = false;
+
+            if (userUpdateView.FirstName != null && userUpdateView.FirstName != student.FirstName)
+            {
+                student.FirstName = userUpdateView.FirstName;
+                isChanged = true;
+            }
+            if (userUpdateView.LastName != null && userUpdateView.LastName != student.LastName)
+            {
+                student.LastName = userUpdateView.LastName;
+                isChanged = true;
+            }
+            if (userUpdateView.Email != null && userUpdateView.Email != student.EmailAddress)
+            {
+                student.EmailAddress = userUpdateView.Email;
+                isChanged = true;
+            }
+            if (
+                userUpdateView.PhoneNumber != null
+                && userUpdateView.PhoneNumber != student.ContactInfo.PhoneNumber
+            )
+            {
+                student.ContactInfo.PhoneNumber = userUpdateView.PhoneNumber;
+                isChanged = true;
+            }
+
+            if (isChanged)
+            {
+                _dbContext.Students.Update(student);
+                await _dbContext.SaveChangesAsync();
+                TempData["Message"] = "Account details updated";
+                ViewData["Message"] = "Account details updated";
+            }
+
+            return RedirectToAction("AccountDetails");
+        }
     }
 }

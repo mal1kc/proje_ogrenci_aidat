@@ -1,0 +1,11 @@
+@model StudentView
+
+@{
+    ViewData["Title"] = "Account Detail";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.AspController = "Student";
+}
+
+<div class="container mt-5">
+    <partial name="_AccountDetails" model="@UserUpdateView.FromUserView(Model)" />
+</div>

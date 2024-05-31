@@ -61,16 +61,16 @@
                 {
 
                     case UserRole.SiteAdmin:
-                        <a class="nav-link" asp-area="" asp-controller="SiteAdmin" asp-action="AccountDetail">🐼 @Model.FirstName</a>
+                        <a class="nav-link" asp-controller="SiteAdmin" asp-action="AccountDetails">🐼 @Model.FirstName</a>
                         break;
 
                     case UserRole.SchoolAdmin:
-                        <a class="nav-link" asp-area="" asp-controller="SchoolAdmin" asp-action="AccountDetail">😊
+                        <a class="nav-link" asp-controller="SchoolAdmin" asp-action="AccountDetails">😊
                             @Model.FirstName</a>
                         break;
 
                     case UserRole.Student:
-                        <a class="nav-link" asp-area="" asp-controller="Student" asp-action="AccountDetail">🎓 @Model.FirstName</a>
+                        <a class="nav-link" asp-controller="Student" asp-action="AccountDetails">🎓 @Model.FirstName</a>
                         break;
                 }
             }

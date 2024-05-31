@@ -1,0 +1,93 @@
+@model UserUpdateView
+
+@{
+    var userRole = Model.Role;
+    if (userRole == UserRole.None)
+    {
+        <script type="text/javascript">
+            window.location.href = "/";
+        </script>
+    }
+    if (ViewBag.AspController == null)
+    {
+        <script type="text/javascript">
+            window.location.href = "/";
+        </script>
+    }
+
+    var changableFields = new List<string> { "FirstName", "LastName", "Password" };
+    if (userRole == UserRole.SiteAdmin)
+    {
+        changableFields.Add("Email");
+    }
+    if (userRole == UserRole.SchoolAdmin || userRole == UserRole.Student)
+    {
+        changableFields.Add("PhoneNumber");
+    }
+}
+
+@if (ViewData["Message"] != null)
+{
+    <div class="alert alert-success" role="alert">
+        @ViewData["Message"]
+    </div>
+}
+
+<div class="card">
+    <div class="card-header">
+        <h5 class="card-title">Account Detail</h5>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <form asp-action="AccountDetails" asp-controller="@ViewBag.AspController" method="post">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="Id" value="@Model.Id" />
+                <div class="mb-3">
+                    <label asp-for="FirstName" class="form-label">First Name</label>
+                    <input asp-for="FirstName" class="form-control" value="@Model.FirstName" required>
+                </div>
+                <div class="mb-3">
+                    <label asp-for="LastName" class="form-label">Last Name</label>
+                    <input asp-for="LastName" class="form-control" value="@Model.LastName" required>
+                </div>
+                @if (changableFields.Contains("Password"))
+                {
+                    <div class="mb-3">
+                        <label asp-for="Password" class="form-label">Password</label>
+                        <input asp-for="Password" class="form-control" type="password" id="passwordField">
+                        <label asp-for="PasswordConfirm" class="form-label">Password Confirm</label>
+                        <input asp-for="PasswordConfirm" class="form-control" type="password" id="confirmPasswordField">
+                    </div>
+                }
+                @if (changableFields.Contains("Email"))
+                {
+                    <div class="mb-3">
+                        <label asp-for="Email" class="form-label">Email</label>
+                        <input asp-for="Email" class="form-control" value="@Model.Email" required>
+
+                    </div>
+                }
+                @if (changableFields.Contains("PhoneNumber"))
+                {
+                    <div class="mb-3">
+                        <label asp-for="PhoneNumber" class="form-label">Phone Number</label>
+                        <input asp-for="PhoneNumber" class="form-control" value="@Model.PhoneNumber" required>
+                    </div>
+                }
+                <div class="mb-3">
+                    <button type="submit" class="btn btn-primary">Update</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<script type="text/javascript">
+    document.getElementById('passwordField').addEventListener('input', function () {
+        var confirmPasswordField = document.getElementById('confirmPasswordField');
+        if (this.value !== '') {
+            confirmPasswordField.required = true;
+        } else {
+            confirmPasswordField.required = false;
+        }
+    });
+</script>
