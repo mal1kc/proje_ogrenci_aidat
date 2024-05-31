@@ -24,7 +24,9 @@
                 <li class="nav-item">
                     <a class="nav-link" asp-area="" asp-controller="WorkYear" asp-action="List">WorkYears</a>
                 </li>
-
+                <li class="nav-item">
+                    <a class="nav-link" asp-area="" asp-controller="Payment" asp-action="VerifyPayments">VerifyPayments</a>
+                </li>
             }
             if (@Model.Role != UserRole.None)
             {

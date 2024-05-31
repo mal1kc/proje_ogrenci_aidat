@@ -3,6 +3,7 @@
 @{
     ViewData["Title"] = "School Admin Dashboard";
     Layout = "~/Views/Shared/_Layout.cshtml";
+    var isThereAnyNewPayments = ViewBag.IsThereAnyNewPayments as bool?;
 }
 
 <div class="container mt-5">
@@ -20,8 +21,8 @@
         </div>
 
         <div class="col-lg-8 mb-4">
-            @{
-                ViewData["paymentHistoryTitle"] = "Last Payments";
+            @if(isThereAnyNewPayments == true){
+                ViewData["paymentHistoryTitle"] = "you have new payments to verify";
             }
             <partial name="_PaymentHistoryPartial" model="ViewBag.LastPayments" />
         </div>

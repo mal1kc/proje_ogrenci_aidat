@@ -1,0 +1,54 @@
+@model IEnumerable<PaymentView>
+
+<div class="container py-3">
+    <h1 class="mb-3">Verify Payments</h1>
+
+    @if (ViewData["Error"] != null)
+    {
+        <div class="alert alert-danger">
+            @ViewData["Error"]
+        </div>
+    }
+    @if (ViewData["Success"] != null)
+    {
+        <div class="alert alert-success">
+            @ViewData["Success"]
+        </div>
+    }
+
+    <div class="alert alert-info">
+        You have @Model.Count(p => p.Status == PaymentStatus.Paid) new payments to verify.
+    </div>
+
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th scope="col">Payment ID</th>
+                <th scope="col">Student</th>
+                <th scope="col">School</th>
+                <th scope="col">Status</th>
+                <th scope="col"></th> <!-- for the "Verify" button -->
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var payment in Model)
+            {
+                <tr>
+                    <td>@payment.Id</td>
+                    <td>@payment.Student?.FirstName @payment.Student?.LastName</td>
+                    <td>@payment.Student?.School?.Name</td>
+                    <td>@payment.Status</td>
+                    <td>
+                        @if (payment.Status == PaymentStatus.Paid)
+                        {
+                            <form asp-action="VerifyPayments" asp-route-id="@payment.Id" method="post">
+                                @Html.AntiForgeryToken()
+                                <button type="submit" class="btn btn-primary">Verify</button>
+                            </form>
+                        }
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

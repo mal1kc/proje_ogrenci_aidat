@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using DocumentFormat.OpenXml.Drawing;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -658,6 +659,79 @@ namespace OgrenciAidatSistemi.Controllers
                 return RedirectToAction("Details", new { id });
             }
             return View(paymentView.ToUnPaidPayment());
+        }
+
+        // verfication of payments
+        [Authorize(
+            Roles = Configurations.Constants.userRoles.SiteAdmin
+                + ","
+                + Configurations.Constants.userRoles.SchoolAdmin
+        )]
+        public IActionResult VerifyPayments()
+        {
+            var payments = _dbContext
+                .Payments.Include(p => p.Student)
+                .Include(p => p.School)
+                .Where(p => p.Status == PaymentStatus.Paid);
+
+            var (role, schoolId) = _userService.GetUserRoleAndSchoolId().Result;
+            if (role == UserRole.SchoolAdmin)
+            {
+                payments = payments.Where(p => p.School != null && p.School.Id == schoolId);
+            }
+            var paymentList = payments.ToList();
+
+            return View(paymentList.Select(p => p.ToView()));
+        }
+
+        // post method to verify payment
+        [HttpPost]
+        [Authorize(
+            Roles = Configurations.Constants.userRoles.SiteAdmin
+                + ","
+                + Configurations.Constants.userRoles.SchoolAdmin
+        )]
+        [ValidateAntiForgeryToken]
+        public IActionResult VerifyPayments(int id)
+        {
+            var payments = _dbContext.Payments.Where(p =>
+                p.Id == id && p.Status == PaymentStatus.Paid
+            );
+            var (role, schoolId) = _userService.GetUserRoleAndSchoolId().Result;
+            Payment? payment = null;
+            if (role == UserRole.SiteAdmin)
+            {
+                payment = payments.FirstOrDefault();
+            }
+            else if (role == UserRole.SchoolAdmin)
+            {
+                payment = payments.FirstOrDefault(p => p.School != null && p.School.Id == schoolId);
+            }
+
+            if (payment == null)
+            {
+                ViewData["Error"] = "Payment not found";
+                return RedirectToAction("VerifyPayments");
+            }
+            try
+            {
+                payment.Status = PaymentStatus.Verified;
+                _dbContext.Payments.Update(payment);
+                _dbContext.SaveChanges();
+
+                ViewData["Success"] =
+                    "Payment verified successfully : "
+                    + payment.Id
+                    + " "
+                    + payment.Student?.StudentId;
+                return RedirectToAction("VerifyPayments");
+            }
+            catch (Exception e)
+            {
+                ViewData["Error"] = "Error while verifying payment";
+                _logger.LogError(e, "Error while verifying payment");
+                return RedirectToAction("VerifyPayments");
+            }
         }
     }
 }

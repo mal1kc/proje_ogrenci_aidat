@@ -15,7 +15,7 @@
 
 - [X] studentId generator
 - [X] add Message tempData for all views
-- [ ] add payment verification panel for sch admin (implement)
+- [X] add payment verification panel for sch admin (implement)
 - [X] add payment panel for student (improve usability)
 - [X] add workYear management panel for sch admin (improve usability)
 - [X] add paymentPeriod management panel for sch admin ( improve usability)

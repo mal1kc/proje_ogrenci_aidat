@@ -2,7 +2,7 @@
 
 @{
     const string CardName = "paymentHistoryCard";
-    const string partialViewTitle = "Payment History";
+    string partialViewTitle = "Payment History" + (ViewData["paymentHistoryTitle"] != null ? " - " + ViewData["paymentHistoryTitle"] : "");
     var usrRole = ViewBag.UserRole;
     var isMakePaymentShow = usrRole == UserRole.Student;
 }

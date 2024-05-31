@@ -44,9 +44,8 @@ namespace OgrenciAidatSistemi.Controllers
                     p.Student != null
                     && p.Student.School != null
                     && p.Student.School.Id == schoolAdmin.School.Id
-                    && p.PaymentMethod != PaymentMethod.UnPaid
+                    && p.Status == PaymentStatus.Paid
                 )
-                .Take(5)
                 .ToListAsync();
 
             var lastStudents = await _dbContext
@@ -54,6 +53,7 @@ namespace OgrenciAidatSistemi.Controllers
                 .Where(s => s.School != null && s.School.Id == schoolAdmin.School.Id)
                 .Take(5)
                 .ToListAsync();
+            ViewBag.IsThereAnyNewPayments = lastPayments.Count > 0;
 
             ViewBag.LastPayments = lastPayments.Select(p => p.ToView()).ToList();
 
