@@ -1,7 +1,8 @@
 using Coravel;
 using Coravel.Scheduling.Schedule.Interfaces;
 using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.HttpOverrides;
+using Microsoft.EntityFrameworkCore; // required for UseSqlServer
 using NReco.Logging.File;
 using OgrenciAidatSistemi.Configurations;
 using OgrenciAidatSistemi.Data;
@@ -56,6 +57,24 @@ internal class Program
                 options.Cookie.Name = Constants.CookieName;
             });
             _ = services.AddControllers();
+            // for https
+            _ = services.Configure<ForwardedHeadersOptions>(options =>
+            {
+                options.ForwardedHeaders =
+                    ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
+            });
+            _ = services.AddCors(options =>
+            {
+                options.AddDefaultPolicy(builder =>
+                {
+                    builder.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod();
+                });
+            });
+            _ = services.AddHttpsRedirection(options =>
+            {
+                options.HttpsPort = 8989;
+            });
+            // end for https
             _ = services.AddEndpointsApiExplorer();
             _ = services.AddHttpContextAccessor();
             _ = services.AddLogging();
@@ -217,6 +236,16 @@ internal class Program
             {
                 _ = endpoints.MapControllers();
             });
+
+            // for https
+            _ = app.UseForwardedHeaders(
+                new ForwardedHeadersOptions
+                {
+                    ForwardedHeaders =
+                        ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
+                }
+            );
+            // end for https
         }
 
         WebApplicationBuilder builder = WebApplication.CreateBuilder(args);

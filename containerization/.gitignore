@@ -1,4 +1,6 @@
 *.env
 *.log
 *_temp.json
+*/*_temp.json
+*/*.json
 exports/*

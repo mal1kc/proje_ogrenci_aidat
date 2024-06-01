@@ -1,0 +1,19 @@
+[Unit]
+Description=Ogrenci Aidat Sys sch project
+Requires=quadlet-mssql.service
+After=quadlet-mssql.service
+
+[Container]
+Image=localhost/ogrenci_aidat_sys:latest
+ContainerName=oais_container
+Volume=%h/projects/sch_project/cdata/appsettings.json:/app/appsettings.json
+Volume=%h/projects/sch_project/cdata/app.log:/app/app.log
+Network=oais-quadlet.network
+PublishPort=8041:8080
+PublishPort=8960:8989
+
+[Service]
+TimeoutStartSec=15
+
+[Install]
+WantedBy=default.target

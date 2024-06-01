@@ -8,9 +8,9 @@ resetColor="\033[0m"
 cr_dir_path=$(dirname "$(readlink -f "$0")")
 startDelay=9
 appName="ogrenci_aidat_sys"
-appContainerName="oai_container"
+appContainerName="oais_container"
 dbContainerName="mssql_container"
-podName="oai_pod"
+podName="oais_pod"
 dbPort=1433
 appHttpPort="8080:8080"
 # appHttpsPort="8989:8989"
@@ -20,6 +20,7 @@ useApp=false
 usePod=false
 noPreRm=false
 rm=false
+clean_build=false
 appSettingsPath="$cr_dir_path/appsettings_mssql.json"
 tempSettingsPath="$cr_dir_path/appsettings_temp.json"
 logFilePath="$cr_dir_path/run_with_mssql_container.log"
@@ -81,6 +82,24 @@ cleanUp() {
         rmIfExistsContainer "$dbContainerName"
         rmIfExistsContainer "$appContainerName"
         echo -e "${normalColor}Pre-cleaning completed.${resetColor}" >&2
+    fi
+}
+
+cleanBuild() {
+    if [[ "$clean_build" = true ]]; then
+        noPreRm=false
+        cleanUp
+
+        if [ -f "$tempSettingsPath" ]; then
+            rm "$tempSettingsPath"
+        fi
+        if [ -f "$logFilePath" ]; then
+            rm "$tempSettingsPath"
+        fi
+        $containerTool rmi "${appName}:latest"
+        echo "${normalColor}exec:$containerTool build -t ${appName}:latest -f $dockerFile $buildCPath${resetColor}" >&2
+        $containerTool build -t "${appName}:latest" -f "$dockerFile" "$buildCPath"
+        noPreRm=true
     fi
 }
 
@@ -170,9 +189,14 @@ for arg in "$@"; do
         echo "No pre-rm option detected" >&2
         noPreRm=true
         ;;
-    --rm)
-        echo "Rm option detected" >&2
-        rm=true
+    --clean-build)
+        echo "clean_build option detected" >&2
+        echo "BE AWARE:this function changes --no-pre-rm to false" >&2
+        clean_build=true
+        ;;
+    *)
+        echo "Unknown option: $arg"
+        exit 1
         ;;
     esac
 done
@@ -181,6 +205,7 @@ done
 echo "Parse result: Cleanup=$cleanup, DB=$useDb, App=$useApp, Pod=$usePod, NoPreRm=$noPreRm, Rm=$rm" >&2
 
 checkDependencies
-checkFiles
 cleanUp
+cleanBuild
+checkFiles
 runContainers

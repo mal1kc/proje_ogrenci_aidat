@@ -1,0 +1,15 @@
+[Unit]
+Description=microsoft sql container service
+
+[Container]
+Image=mcr.microsoft.com/mssql/server
+ContainerName=mssql_container
+Network=oais-quadlet.network
+Environment=ACCEPT_EULA=Y
+Environment=SA_PASSWORD=
+
+[Service]
+TimeoutStartSec=10
+
+[Install]
+WantedBy=default.target
