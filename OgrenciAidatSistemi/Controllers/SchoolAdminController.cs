@@ -459,6 +459,17 @@ namespace OgrenciAidatSistemi.Controllers
                 isChanged = true;
             }
 
+            if (string.IsNullOrEmpty(userUpdateView.Password) == false)
+            {
+                if (userUpdateView.Password != userUpdateView.PasswordConfirm)
+                {
+                    ModelState.AddModelError("Password", "Passwords do not match");
+                    return View(schoolAdmin.ToView());
+                }
+                schoolAdmin.PasswordHash = _userService.HashPassword(userUpdateView.Password);
+                isChanged = true;
+            }
+
             if (isChanged)
             {
                 _dbContext.SchoolAdmins.Update(schoolAdmin);

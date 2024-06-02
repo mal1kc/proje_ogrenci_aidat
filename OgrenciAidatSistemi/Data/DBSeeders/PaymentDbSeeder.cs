@@ -143,8 +143,9 @@ namespace OgrenciAidatSistemi.Data.DBSeeders
             payment.Receipt = new(
                 path: null, // i will this nullability in below SeedEntityAsync()
                 name: "Receipt of " + payment.Student?.FirstName,
-                extension: ".pdf",
-                contentType: "application/pdf",
+                extension: ".txt",
+                // contentType: "application/pdf",
+                contentType: "text/plain",
                 size: 0,
                 description: "Receipt of " + payment.Student?.FirstName
             )

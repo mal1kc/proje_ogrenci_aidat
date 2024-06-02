@@ -1,4 +1,3 @@
-using Bogus.Extensions.UnitedKingdom;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -76,12 +75,15 @@ namespace OgrenciAidatSistemi.Tests
                 .ToHashSet();
 
             // Separate handling of schools and students
-            var schools = seedData.Select(pp => pp.Student.School).Distinct().ToHashSet();
+            var schools = seedData.Select(pp => pp.Student?.School).Distinct().ToHashSet();
             foreach (var school in schools)
             {
-                school.Students = null;
-                school.WorkYears?.AsParallel().ForAll(wy => wy.PaymentPeriods = null);
-                _dbContext.Schools.Add(school);
+                if (school != null)
+                {
+                    school.Students = null;
+                    school.WorkYears?.AsParallel().ForAll(wy => wy.PaymentPeriods = null);
+                    _dbContext.Schools.Add(school);
+                }
             }
 
             _dbContext.SaveChanges();
@@ -93,15 +95,21 @@ namespace OgrenciAidatSistemi.Tests
             foreach (var payment in seedData)
             {
                 var student = payment.Student;
-                var school = schools.First(s => s.Id == student.School.Id);
-                student.School = school;
-                student.StudentId = _studentService.GenerateStudentId(school);
-                student.EmailAddress = $"{student.StudentId}@mail.school.com";
-                student.ContactInfo.Email = student.EmailAddress;
+                var school = schools.First(s => s?.Id == student?.School?.Id);
+                if (student != null)
+                {
+                    student.School = school;
+                    if (school == null)
+                        continue;
+                    student.StudentId = _studentService.GenerateStudentId(school);
+                    student.EmailAddress = $"{student.StudentId}@mail.school.com";
+                    if (student.ContactInfo != null)
+                        student.ContactInfo.Email = student.EmailAddress;
+                    if (payment.PaymentPeriod != null && payment.PaymentPeriod.WorkYear != null)
+                        payment.PaymentPeriod.WorkYear.School = school;
 
-                payment.PaymentPeriod.WorkYear.School = school;
-
-                _dbContext.Students.Add(student);
+                    _dbContext.Students.Add(student);
+                }
                 // Note: Do not save payments to DB here, only handle them in tests
             }
 
@@ -112,7 +120,10 @@ namespace OgrenciAidatSistemi.Tests
                 _paidSeedData.Add(seedEntity);
             }
 
-            _paymentPeriods = seedData.Select(p => p.PaymentPeriod).ToHashSet();
+            _paymentPeriods = seedData
+                .Where(p => p.PaymentPeriod != null)
+                .Select(p => p.PaymentPeriod)
+                .ToHashSet();
 
             foreach (var paymentPeriod in _paymentPeriods)
             {
@@ -288,6 +299,7 @@ namespace OgrenciAidatSistemi.Tests
                 var receipt = await _dbContext.Receipts.FirstOrDefaultAsync(r =>
                     r.Payment == savedPayment
                 );
+                Console.WriteLine($"this receipt has ctype = {receipt?.ContentType}");
                 Assert.NotNull(receipt);
                 Assert.True(receipt.ContentType == "text/plain"); // This is a generated file
 

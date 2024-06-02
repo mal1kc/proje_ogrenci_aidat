@@ -57,23 +57,28 @@ internal class Program
                 options.Cookie.Name = Constants.CookieName;
             });
             _ = services.AddControllers();
-            // for https
+            // for https with nginx or smilar reverse proxy
             _ = services.Configure<ForwardedHeadersOptions>(options =>
             {
                 options.ForwardedHeaders =
                     ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
             });
-            _ = services.AddCors(options =>
-            {
-                options.AddDefaultPolicy(builder =>
-                {
-                    builder.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod();
-                });
-            });
-            _ = services.AddHttpsRedirection(options =>
-            {
-                options.HttpsPort = 8989;
-            });
+            // _ = services.AddCors(options =>
+            // {
+            //     options.AddDefaultPolicy(
+            //         builder =>
+            //         {
+            //             builder
+            //                 .AllowAnyOrigin()
+            //                 .AllowAnyMethod()
+            //                 .AllowAnyHeader();
+            //         }
+            //     );
+            // });
+            // _ = services.AddHttpsRedirection(options =>
+            // {
+            //     options.HttpsPort = 8989;
+            // });
             // end for https
             _ = services.AddEndpointsApiExplorer();
             _ = services.AddHttpContextAccessor();
@@ -230,12 +235,8 @@ internal class Program
                 name: "default",
                 pattern: "{controller=Home}/{action=Index}/{id?}"
             );
-            _ = app.UseCors(builder => builder.AllowAnyOrigin());
-
-            _ = app.UseEndpoints(endpoints =>
-            {
-                _ = endpoints.MapControllers();
-            });
+            // _ = app.UseCors(builder => builder.AllowAnyOrigin());
+            _ = app.UseEndpoints(endpoints => { _ = endpoints.MapControllers(); });
 
             // for https
             _ = app.UseForwardedHeaders(
@@ -246,6 +247,17 @@ internal class Program
                 }
             );
             // end for https
+
+
+
+            app.Lifetime.ApplicationStarted.Register(() =>
+            {
+                var addresses = app.Urls;
+                foreach (var address in addresses)
+                {
+                    Console.WriteLine($"Application started on {address}");
+                }
+            });
         }
 
         WebApplicationBuilder builder = WebApplication.CreateBuilder(args);

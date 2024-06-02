@@ -1,5 +1,3 @@
-using System.IO;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
@@ -9,7 +7,6 @@ using Moq;
 using OgrenciAidatSistemi.Data;
 using OgrenciAidatSistemi.Models;
 using OgrenciAidatSistemi.Services;
-using Xunit;
 
 namespace OgrenciAidatSistemi.Tests
 {

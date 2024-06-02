@@ -110,6 +110,7 @@ namespace OgrenciAidatSistemi.Services
                 var receipt = await GenerateReceipt(newPayment);
                 if (receipt != null)
                 {
+                    newPayment.Receipt = receipt;
                     _context.Receipts.Add(receipt);
                     await _context.SaveChangesAsync();
                 }
@@ -161,7 +162,7 @@ namespace OgrenciAidatSistemi.Services
 
 
             // Generate a unique file name for the receipt
-            var fileName = $"Receipt_{payment.Id}_{DateTime.Now:yyyyMMddHHmmss}.txt";
+            var fileName = $"Receipt_{payment?.Id}_{DateTime.Now:yyyyMMddHHmmss}.txt";
 
             // Write the receipt to a file
             try

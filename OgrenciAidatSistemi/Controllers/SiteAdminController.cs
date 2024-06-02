@@ -392,6 +392,7 @@ namespace OgrenciAidatSistemi.Controllers
                 current_site_admin.FirstName = userUpdateView.FirstName;
                 isChanged = true;
             }
+
             if (
                 userUpdateView.LastName != null
                 && userUpdateView.LastName != current_site_admin.LastName
@@ -406,6 +407,18 @@ namespace OgrenciAidatSistemi.Controllers
             )
             {
                 current_site_admin.EmailAddress = userUpdateView.Email;
+                isChanged = true;
+            }
+
+            if (userUpdateView.Password != null && userUpdateView.Password.Length > 0)
+            {
+                if (userUpdateView.Password != userUpdateView.PasswordConfirm)
+                {
+                    TempData["Message"] = "Passwords do not match";
+                    ViewData["Message"] = "Passwords do not match";
+                    return RedirectToAction("AccountDetails");
+                }
+                current_site_admin.PasswordHash = SiteAdmin.ComputeHash(userUpdateView.Password);
                 isChanged = true;
             }
 

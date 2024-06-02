@@ -1,4 +1,13 @@
 @model UserView
+
+@{
+var AccountDetailsController = @Model.Role switch {
+                UserRole.SiteAdmin => "SiteAdmin",
+                UserRole.SchoolAdmin => "SchoolAdmin",
+                UserRole.Student => "Student",
+                _ => "#",
+            };
+}
 <div class="navbar-collapse collapse" id="collapseNavbar">
     <ul class="navbar-nav">
         @{
@@ -81,7 +90,7 @@
         </button>
         <ul class="dropdown-menu dropdown-menu-start">
 
-            <li><a class="dropdown-item" href="#">AccountDetail</a></li>
+            <li><a class="dropdown-item" asp-action="AccountDetails" --asp-controller="@AccountDetailsController">Account Details</a>
             <li>
                 <hr class="dropdown-divider">
             </li>
