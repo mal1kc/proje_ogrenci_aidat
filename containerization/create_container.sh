@@ -3,7 +3,7 @@
 set -e
 
 CR_SCRIPT_DIR=$(dirname "$0")
-APP_NAME="ogrenci_adiat_sys"
+APP_NAME="ogrenci_aidiat_sys"
 DOCKERFILE_PATH="$CR_SCRIPT_DIR/Dockerfile"
 BUILD_DIR="$CR_SCRIPT_DIR/.."
 DRY_RUN=0
@@ -80,7 +80,4 @@ else
         mkdir -p "$EXPORT_DIR"
         $ACTIVE_CONT_RUNTIME_CMD save "$APP_NAME:$COMMIT_HASH" | gzip >"$EXPORT_DIR/$APP_NAME-$COMMIT_HASH.tar.gz"
     fi
-
-    echo "Running cleanup."
-    cleanup
 fi
