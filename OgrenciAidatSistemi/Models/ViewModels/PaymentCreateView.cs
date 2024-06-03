@@ -124,6 +124,8 @@ namespace OgrenciAidatSistemi.Models.ViewModels
                 PaymentMethod.Bank
                     => new BankPayment
                     {
+                        Id = Id,
+                        Amount = Amount,
                         BankName = BankName,
                         AccountNumber = AccountNumber,
                         BranchCode = BranchCode,
@@ -132,6 +134,8 @@ namespace OgrenciAidatSistemi.Models.ViewModels
                 PaymentMethod.Check
                     => new CheckPayment
                     {
+                        Id = Id,
+                        Amount = Amount,
                         BranchCode = BranchCode,
                         CheckNumber = CheckNumber,
                         BankName = BankName,
@@ -139,6 +143,8 @@ namespace OgrenciAidatSistemi.Models.ViewModels
                 PaymentMethod.CreditCard
                     => new CreditCardPayment
                     {
+                        Id = Id,
+                        Amount = Amount,
                         CardNumber = CardNumber,
                         CardHolderName = CardHolderName,
                         ExpiryDate = ExpiryDate,
@@ -147,6 +153,8 @@ namespace OgrenciAidatSistemi.Models.ViewModels
                 PaymentMethod.Cash
                     => new CashPayment
                     {
+                        Id = Id,
+                        Amount = Amount,
                         CashierName = CashierName,
                         ReceiptNumber = ReceiptNumber,
                         ReceiptDate = DateTime.Parse(ReceiptDate),

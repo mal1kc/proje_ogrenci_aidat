@@ -138,7 +138,7 @@
 
 ## fix done at v0.9.2
 
-- [ ] fix makePayment to make payments
+- [x] fix makePayment to make payments
 
 ## other
 

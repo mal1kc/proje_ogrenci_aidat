@@ -608,27 +608,35 @@ namespace OgrenciAidatSistemi.Controllers
             if (ModelState.IsValid)
             {
                 UnPaidPayment? payment = (UnPaidPayment?)
-                    _dbContext.Payments.FirstOrDefault(p =>
-                        p.Id == id && p.PaymentMethod == PaymentMethod.UnPaid
-                    );
+                    _dbContext
+                        .Payments.Include(p => p.Receipt)
+                        .Include(p => p.Student)
+                        .Include(p => p.School)
+                        .Include(p => p.PaymentPeriod)
+                        .FirstOrDefault(p => p.Id == id && p.PaymentMethod == PaymentMethod.UnPaid);
                 if (payment == null)
                 {
                     TempData["Error"] = "Payment not found or already paid";
                     return NotFound();
                 }
 
-
                 try
                 {
-
                     var new_payment = paymentView.ToAppropriatePayment();
 
-                    if (PaymentCreateView.RequiredFields[paymentView.PaymentMethod].Contains("Receipt"))
+                    if (
+                        PaymentCreateView
+                            .RequiredFields[paymentView.PaymentMethod]
+                            .Contains("Receipt")
+                    )
                     {
                         FilePath? receipt_file = null;
                         try
                         {
-                            receipt_file = await _fileService.UploadFileAsync(paymentView.Receipt, usr);
+                            receipt_file = await _fileService.UploadFileAsync(
+                                paymentView.Receipt,
+                                usr
+                            );
                         }
                         catch (Exception e)
                         {
@@ -646,6 +654,11 @@ namespace OgrenciAidatSistemi.Controllers
                     {
                         TempData["Error"] = "Error while making payment";
                         return RedirectToAction("MakePayment", new { id });
+                    }
+                    else
+                    {
+                        TempData["Message"] = "Payment made successfully";
+                        return RedirectToAction("List");
                     }
                 }
                 catch (ValidationException e)
