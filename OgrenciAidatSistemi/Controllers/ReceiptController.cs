@@ -3,11 +3,13 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using OgrenciAidatSistemi.Data;
 using OgrenciAidatSistemi.Helpers;
+using OgrenciAidatSistemi.Helpers.Controller;
 using OgrenciAidatSistemi.Models;
 using OgrenciAidatSistemi.Services;
 
 namespace OgrenciAidatSistemi.Controllers
 {
+    [Authorize]
     public class ReceiptController : Controller
     {
         private readonly ILogger<ReceiptController> _logger;
@@ -30,12 +32,14 @@ namespace OgrenciAidatSistemi.Controllers
 
         [HttpGet]
         [HttpGet]
+        [DebugOnly]
         public IActionResult Upload()
         {
             return View();
         }
 
         [HttpPost]
+        [DebugOnly]
         public async Task<IActionResult> Upload(IFormFile file, Payment payment)
         {
             try
@@ -197,7 +201,6 @@ namespace OgrenciAidatSistemi.Controllers
         }
 
         [HttpGet]
-        [Authorize]
         public async Task<IActionResult> Details(int id)
         {
             try

@@ -111,14 +111,14 @@ namespace OgrenciAidatSistemi.Models.ViewModels
 
         public PaidPayment ToAppropriatePayment()
         {
-            if (Receipt == null)
+            foreach (var field in RequiredFields[PaymentMethod])
             {
-                throw new ValidationException("Receipt is required");
+                if (GetType().GetProperty(field)?.GetValue(this) == null)
+                {
+                    throw new ValidationException($"Required fields are not set {field}");
+                }
             }
-            if (IsValid())
-            {
-                throw new ValidationException("Payment is not valid");
-            }
+
             return PaymentMethod switch
             {
                 PaymentMethod.Bank

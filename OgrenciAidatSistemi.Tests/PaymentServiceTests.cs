@@ -55,6 +55,7 @@ namespace OgrenciAidatSistemi.Tests
                 context: _dbContext,
                 configuration: Helpers.CreateConfiguration(),
                 logger: Helpers.CreateLogger<PaymentDBSeeder>(),
+                paymentService: _paymentService,
                 studentService: _studentService,
                 randomSeed: true
             );

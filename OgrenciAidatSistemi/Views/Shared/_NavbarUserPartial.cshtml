@@ -14,45 +14,42 @@ var AccountDetailsController = @Model.Role switch {
             if (@Model.Role == UserRole.SiteAdmin)
             {
                 <li class="nav-item">
-                    <a class="nav-link" asp-area="" asp-controller="SiteAdmin" asp-action="List">SiteAdmins</a>
+                    <a class="nav-link"  asp-controller="SiteAdmin" asp-action="List">SiteAdmins</a>
                 </li>
 
                 <li class="nav-item">
-                    <a class="nav-link" asp-area="" asp-controller="School" asp-action="List">Schools</a>
+                    <a class="nav-link"  asp-controller="School" asp-action="List">Schools</a>
                 </li>
 
             }
             @if (@Model.Role == UserRole.SiteAdmin || @Model.Role == UserRole.SchoolAdmin)
             {
                 <li class="nav-item">
-                    <a class="nav-link" asp-area="" asp-controller="SchoolAdmin" asp-action="List">SchoolAdmins</a>
+                    <a class="nav-link"  asp-controller="SchoolAdmin" asp-action="List">SchoolAdmins</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" asp-area="" asp-controller="Student" asp-action="List">Students</a>
+                    <a class="nav-link"  asp-controller="Student" asp-action="List">Students</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" asp-area="" asp-controller="WorkYear" asp-action="List">WorkYears</a>
+                    <a class="nav-link"  asp-controller="WorkYear" asp-action="List">WorkYears</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" asp-area="" asp-controller="Payment" asp-action="VerifyPayments">VerifyPayments</a>
+                    <a class="nav-link"  asp-controller="Payment" asp-action="VerifyPayments">VerifyPayments</a>
                 </li>
             }
             if (@Model.Role != UserRole.None)
             {
                 <li class="nav-item">
-                    <a class="nav-link" asp-area="" asp-controller="Payment" asp-action="List">Payments</a>
+                    <a class="nav-link"  asp-controller="Payment" asp-action="List">Payments</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" asp-area="" asp-controller="Payment" asp-action="PeriodList">PaymentPeriods</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" asp-action="List" asp-controller="Receipt">Receipts</a>
+                    <a class="nav-link"  asp-controller="Payment" asp-action="PeriodList">PaymentPeriods</a>
                 </li>
             }
             if (@Model.Role == UserRole.Student)
             {
                 <li class="nav-item">
-                    <a class="nav-link" asp-area="" asp-controller="Receipt" asp-action="List">Receipts</a>
+                    <a class="nav-link"  asp-controller="Receipt" asp-action="List">Receipts</a>
                 </li>
             }
         }
@@ -107,7 +104,7 @@ var AccountDetailsController = @Model.Role switch {
                 <hr class="dropdown-divider">
             </li>
             <li>
-                <a class="dropdown-item" asp-area="" asp-controller="UserCommon" asp-action="SignOutUser">SignOut</a>
+                <a class="dropdown-item"  asp-controller="UserCommon" asp-action="SignOutUser">SignOut</a>
             </li>
         </ul>
     </div>

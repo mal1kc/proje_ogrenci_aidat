@@ -84,7 +84,7 @@ namespace OgrenciAidatSistemi.Controllers
                 if (schoolView.Name == null)
                 {
                     _logger.LogError("SchoolView.Name is null");
-                    ViewData["Error"] = "School name cannot be empty";
+                    TempData["Error"] = "School name cannot be empty";
                     return RedirectToAction("Create");
                 }
 

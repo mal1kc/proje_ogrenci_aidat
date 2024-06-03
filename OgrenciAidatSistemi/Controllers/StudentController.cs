@@ -219,7 +219,7 @@ namespace OgrenciAidatSistemi.Controllers
 
                     if (!schools.Any())
                     {
-                        ViewData["Error"] = "School not found";
+                        TempData["Error"] = "School not found";
                         _logger.LogError("School not found in db,sch id: {0}", schId);
                         return RedirectToAction("SignOutUser", "UserCommon");
                     }
@@ -230,7 +230,7 @@ namespace OgrenciAidatSistemi.Controllers
                 return View();
             }
 
-            ViewData["Error"] = "You are not authorized to this page";
+            TempData["Error"] = "You are not authorized to this page";
             return RedirectToAction("Login", "Home");
         }
 

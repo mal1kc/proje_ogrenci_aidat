@@ -45,16 +45,30 @@ window.onload = function () {
     // Get all date elements
     var dateElements = document.getElementsByClassName('date');
 
+    // exammple date 
+    // 2024-06-02T22:02:01.8149071 if this we add 'Z' to the end to indicate UTC time
+    // 2024-06-02T22:02:01.8149071Z this is UTC time
+
+
     // Counter for conversions
     var conversionCount = 0;
 
     // Convert the dates to the user's local timezone
     for (var i = 0; i < dateElements.length; i++) {
-        var dateElement = dateElements[i];
+        // trim() removes whitespace from both ends of a string
+        var dateElement =  dateElements[i];
+        dateElement.textContent = dateElement.textContent.trim();
         if (!dateElement.textContent || dateElement.textContent === '' || dateElement.textContent === 'Unknown') {
             continue;
         }
-        var originalDate = dateElement.textContent + 'Z'; // Add 'Z' to indicate UTC time
+        if (!dateElement.textContent.endsWith('Z')) {
+            // The date is already in UTC format
+            var originalDate = dateElement.textContent + 'Z'; // Add 'Z' to indicate UTC time
+        }
+        else {
+            // The date is in local time
+            var originalDate = dateElement.textContent;
+        }
         var date = new Date(originalDate);
 
         // Format the date

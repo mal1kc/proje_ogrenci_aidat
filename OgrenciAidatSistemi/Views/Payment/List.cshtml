@@ -12,6 +12,7 @@
     var showStudentIdColumn = (usrRole != UserRole.Student && usrRole != UserRole.None);
     var showIsVerifiedColumn = (usrRole != UserRole.None);
     var showSchoolIdColumn = (usrRole == UserRole.SiteAdmin);
+    var isMakePaymentShow = (usrRole == UserRole.Student);
 }
 @section CreateNewWithTitle
 {
@@ -125,16 +126,18 @@
                     }
                     <td>
                     <div class="d-flex d-md-inline-block justify-content-center">
-                        <a asp-action="Edit" asp-route-id="@item.Id"
-                        class="btn btn-sm btn-primary "
-                          title="Edit">
-                            &#9998;
-                            </a>
                         <a asp-action="Details" asp-route-id="@item.Id"
                         class="btn btn-sm btn-info "
                          title="Details">
                             &#8505;
                         </a>
+
+                        @if (isMakePaymentShow && item.Status == PaymentStatus.Unpaid)
+    {
+        <p class="mt-5">
+            <a asp-action="MakePayment" asp-controller="Payment" asp-route-id="@item.Id" class="btn btn-primary">Make Payment</a>
+        </p>
+    }
 
                         @if (ViewBag.IsDebug == true)
                         {

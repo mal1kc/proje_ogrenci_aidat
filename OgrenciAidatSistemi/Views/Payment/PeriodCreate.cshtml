@@ -1,7 +1,7 @@
 @model PaymentPeriodView
 @{
 
-    ViewData["Title"] = "Dönem Oluştur";
+    ViewData["Title"] = "Create Payment Period For Student";
 
 
     var errors = TempData["MultipleErros"] as List<string>;
@@ -19,13 +19,13 @@
     if (ViewBag.Students == null)
     {
 
-        errors.Add("Öğrenci bulunamadı. Lütfen öğrenci ekleyin.");
+        errors.Add("can't find any student. Please add student.");
         TempData["MultipleErros"] = errors;
     }
 
     if (ViewBag.WorkYears == null)
     {
-        errors.Add("Çalışma yılı bulunamadı. Lütfen çalışma yılı ekleyin.");
+        errors.Add("can't find any work year. Please add work year.");
         TempData["MultipleErros"] = errors;
     }
 
@@ -45,14 +45,14 @@
 
 }
 <partial name="_MultiErrorMsgBox" />
-<h2 class="mb-4">Dönem Oluştur</h2>
+<h2 class="mb-4">@ViewData["Title"]</h2>
 <div class="row">
     <div class="card p-4">
         <form asp-action="PeriodCreate" method="post">
             <div class="form-group">
                 <label asp-for="WorkYearId" class="form-label"></label>
                 <select asp-for="WorkYearId" class="form-select" id="WorkYearId" name="WorkYearId" required>
-                    <option value="">Çalışma Yılı Seçiniz</option>
+                    <option value="">Select Work Year</option>
                     @foreach (var WorkYear in ViewBag.WorkYears)
                     {
                         <option value="@WorkYear.Id"> id: @WorkYear.Id - @WorkYear.StartDate.Month / @WorkYear.StartDate.Year - @WorkYear.EndDate.Month / @WorkYear.EndDate.Year
@@ -71,7 +71,7 @@
             <div class="form-group">
                 <label asp-for="StudentId" class="form-label"></label>
                 <select asp-for="StudentId" class="form-select" id="StudentId" name="StudentId" required>
-                    <option value="">Öğrenci Seçiniz</option>
+                    <option value="">Select Student</option>
                     @foreach (var Student in ViewBag.Students)
                     {
                         <option value="@Student.Id"> @Student.StudentId : @Student.FirstName @Student.LastName
@@ -111,6 +111,8 @@
             </div>
             <div class="form-group">
                 <input type="submit" value="Oluştur" class="btn btn-primary mt-3" />
+                <a asp-action="PeriodList" class="btn btn-secondary mt-3">See All Payment Periods For All Students</a>
+                <a class="btn btn-secondary mt-3" href='javascript:history.go(-1)'>Return to previous page</a>
             </div>
         </form>
     </div>

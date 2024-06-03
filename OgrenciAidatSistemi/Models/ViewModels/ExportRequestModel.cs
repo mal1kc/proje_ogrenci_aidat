@@ -14,8 +14,8 @@ namespace OgrenciAidatSistemi.Models.ViewModels
             MaxCount = 100;
             SortOrder = "id_desc";
             IncludeRelative = false;
-            StartDate = DateOnly.FromDateTime(DateTime.Now.AddDays(-7));
-            EndDate = DateOnly.FromDateTime(DateTime.Now);
+            StartDate = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(-7));
+            EndDate = DateOnly.FromDateTime(DateTime.UtcNow);
         }
     }
 }

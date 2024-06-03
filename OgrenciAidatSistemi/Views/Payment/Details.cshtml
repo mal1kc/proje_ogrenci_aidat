@@ -29,6 +29,7 @@
 
                 <dd class="col-sm-10 date">
                     @Html.DisplayFor(model => model.PaymentDate)
+    using Bogus.DataSets;
                 </dd>
 
                 <dt class="col-sm-2 text-nowrap">
@@ -73,19 +74,26 @@
                                 {
                                     @if (value != null)
                                     {
-                                        <text>@DateTime.Parse(value.ToString()).ToString("MM/yyyy")</text>
+                                        // need like that 
+                                        // 2024-06-02T22:02:01.8149071Z this is UTC time
+                                        <text>@DateTime.Parse(value.ToString()).ToLocalTime().ToString("yyyy-MM-dd")</text>
                                     }
                                 }
                                 else if (field == "CardNumber")
                                 {
+                                    // replace all but not last 4 digits with *
+                                    var cardNumber = value.ToString();
+                                    var last4Digits = cardNumber.Substring(cardNumber.Length - 4);
+                                    var masked = new string('*', cardNumber.Length - 4);
+
+                                    <text>@masked@last4Digits</text>
                                     // we will show only last 4 digits
-                                    <text>**** **** **** @value.ToString().Substring(value.ToString().Length - 4)</text>
+
                                 }
                                 else
                                 {
                                     @Html.Display(field)
                                 }
-                                @Html.Display(field)
                             </dd>
                         }
                         else
@@ -142,5 +150,6 @@
 
     <p class="mt-5">
         <a asp-action="List" asp-controller="Payment" class="btn btn-primary">Show All Payments</a>
+        <a class="btn btn-secondary" href='javascript:history.go(-1)'>Return to previous page</a>
     </p>
 </div>

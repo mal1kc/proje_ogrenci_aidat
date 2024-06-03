@@ -81,6 +81,7 @@
 </dl>
 <form asp-action="DeleteConfirmed" asp-route-id="@Model.Id" method="post">
     <input type="submit" value="Delete" class="btn btn-danger" />
-    <a asp-action="List" class="btn btn-secondary">Back to List</a>
+    <a asp-action="List" class="btn btn-secondary">Show All Schools</a>
+    <a class="btn btn-secondary" href='javascript:history.go(-1)'>Return to previous page</a>
 </form>
 </div>

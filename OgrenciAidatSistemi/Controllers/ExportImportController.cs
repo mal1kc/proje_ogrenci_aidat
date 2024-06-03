@@ -32,8 +32,9 @@ namespace OgrenciAidatSistemi.Controllers
                 model.EndDate ??= default_model.EndDate;
 
                 var maxCount = model.MaxCount ?? 100;
-                var startDate = model.StartDate ?? DateOnly.FromDateTime(DateTime.Now.AddDays(-7));
-                var endDate = model.EndDate ?? DateOnly.FromDateTime(DateTime.Now);
+                var startDate =
+                    model.StartDate ?? DateOnly.FromDateTime(DateTime.UtcNow.AddDays(-7));
+                var endDate = model.EndDate ?? DateOnly.FromDateTime(DateTime.UtcNow);
 
                 var query = _context.Schools.AsQueryable();
 
@@ -107,8 +108,9 @@ namespace OgrenciAidatSistemi.Controllers
                 model.EndDate ??= default_model.EndDate;
 
                 var maxCount = model.MaxCount ?? 100;
-                var startDate = model.StartDate ?? DateOnly.FromDateTime(DateTime.Now.AddDays(-7));
-                var endDate = model.EndDate ?? DateOnly.FromDateTime(DateTime.Now);
+                var startDate =
+                    model.StartDate ?? DateOnly.FromDateTime(DateTime.UtcNow.AddDays(-7));
+                var endDate = model.EndDate ?? DateOnly.FromDateTime(DateTime.UtcNow);
 
                 var query = _context.Students.AsQueryable();
 

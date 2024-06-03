@@ -74,7 +74,7 @@ namespace OgrenciAidatSistemi.Controllers
                     }
                     else
                     {
-                        ViewData["Error"] = "School Id is not valid of the current user";
+                        TempData["Error"] = "School Id is not valid of the current user";
                         return RedirectToAction("SignIn", "Home");
                     }
                     break;
@@ -563,7 +563,7 @@ namespace OgrenciAidatSistemi.Controllers
 
             if (unpaid == null || unpaid.PaymentMethod != PaymentMethod.UnPaid)
             {
-                ViewData["Error"] = "Payment not found or already paid";
+                TempData["Error"] = "Payment not found or already paid";
                 return NotFound();
             }
             try
@@ -582,7 +582,7 @@ namespace OgrenciAidatSistemi.Controllers
             }
             catch (Exception e)
             {
-                ViewData["Error"] = "Error while access payment data";
+                TempData["Error"] = "Error while access payment data";
                 _logger.LogError(e, "Error while creating create view from unpaid payment");
                 return NotFound();
             }
@@ -601,7 +601,7 @@ namespace OgrenciAidatSistemi.Controllers
             var usr = _dbContext.Students.FirstOrDefault(s => s.Id == usrId);
             if (usr == null)
             {
-                ViewData["Error"] = "User not found";
+                TempData["Error"] = "User not found";
                 return RedirectToAction("SignIn");
             }
 
@@ -613,52 +613,51 @@ namespace OgrenciAidatSistemi.Controllers
                     );
                 if (payment == null)
                 {
-                    ViewData["Error"] = "Payment not found or already paid";
+                    TempData["Error"] = "Payment not found or already paid";
                     return NotFound();
                 }
+
+
                 try
                 {
-                    FilePath? receipt_file = null;
-                    try
-                    {
-                        receipt_file = await _fileService.UploadFileAsync(paymentView.Receipt, usr);
-                    }
-                    catch (Exception e)
-                    {
-                        ViewData["Error"] = "Error while uploading receipt";
-                        _logger.LogError(e, "Error while uploading receipt");
-                        return RedirectToAction("MakePayment", new { id });
-                    }
-                    Receipt receipt = Receipt.FromFilePath(receipt_file);
 
                     var new_payment = paymentView.ToAppropriatePayment();
-                    new_payment.Receipt = receipt;
-                    receipt.Payment = new_payment;
+
+                    if (PaymentCreateView.RequiredFields[paymentView.PaymentMethod].Contains("Receipt"))
+                    {
+                        FilePath? receipt_file = null;
+                        try
+                        {
+                            receipt_file = await _fileService.UploadFileAsync(paymentView.Receipt, usr);
+                        }
+                        catch (Exception e)
+                        {
+                            TempData["Error"] = "Error while uploading receipt";
+                            _logger.LogError(e, "Error while uploading receipt");
+                            return RedirectToAction("MakePayment", new { id });
+                        }
+                        Receipt receipt = Receipt.FromFilePath(receipt_file);
+                        new_payment.Receipt = receipt;
+                        receipt.Payment = new_payment;
+                    }
+
                     bool result = await _paymentService.MakePayment(payment, new_payment);
                     if (!result)
                     {
-                        return NotFound();
+                        TempData["Error"] = "Error while making payment";
+                        return RedirectToAction("MakePayment", new { id });
                     }
                 }
                 catch (ValidationException e)
                 {
-                    _logger.LogError(e, "Error while creating payment");
-                    return NotFound();
+                    TempData["Error"] = "Error while making payment";
+                    _logger.LogError(e, "Error while making payment");
+                    return RedirectToAction("MakePayment", new { id });
                 }
 
-                // payment.PaymentMethod = paymentView.PaymentMethod;
-                // payment.PaymentDate = DateTime.UtcNow;
-                // payment.Amount = paymentView.Amount;
-                // payment.Receipt = paymentView.Receipt;
-                // payment.Student = _dbContext.Students.FirstOrDefault(s => s.Id == _userService.GetCurrentUserID());
-                // payment.School = payment.Student?.School;
-                // _dbContext.Payments.Update(payment);
-                // _dbContext.SaveChanges();
-
-
-                return RedirectToAction("Details", new { id });
+                return RedirectToAction("List");
             }
-            return View(paymentView.ToUnPaidPayment());
+            return RedirectToAction("MakePayment", new { id });
         }
 
         // verfication of payments
@@ -710,7 +709,7 @@ namespace OgrenciAidatSistemi.Controllers
 
             if (payment == null)
             {
-                ViewData["Error"] = "Payment not found";
+                TempData["Error"] = "Payment not found";
                 return RedirectToAction("VerifyPayments");
             }
             try
@@ -728,7 +727,7 @@ namespace OgrenciAidatSistemi.Controllers
             }
             catch (Exception e)
             {
-                ViewData["Error"] = "Error while verifying payment";
+                TempData["Error"] = "Error while verifying payment";
                 _logger.LogError(e, "Error while verifying payment");
                 return RedirectToAction("VerifyPayments");
             }

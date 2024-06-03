@@ -3,7 +3,7 @@ namespace OgrenciAidatSistemi.Configurations
     public static class Constants
     {
         public const String AppName = "OgrenciAidatSistemi";
-        public const String AppVersion = "pre-release 0.9.0";
+        public const String AppVersion = "pre-release 0.9.1";
         public const String PasswdSalt = "as1235*02xp_19545s";
         public const short MaxUserNameLength = 124;
         public const short MinUserNameLength = 5;

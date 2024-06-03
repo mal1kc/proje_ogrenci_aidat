@@ -13,8 +13,8 @@ namespace OgrenciAidatSistemi.Models.ViewModels
 
         public WorkYearView? CurrentWorkYear =>
             School?.WorkYears?.FirstOrDefault(static wy =>
-                wy.StartDate <= DateOnly.FromDateTime(DateTime.Now)
-                && wy.EndDate >= DateOnly.FromDateTime(DateTime.Now)
+                wy.StartDate <= DateOnly.FromDateTime(DateTime.UtcNow)
+                && wy.EndDate >= DateOnly.FromDateTime(DateTime.UtcNow)
             );
 
         public override bool CheckUserExists(AppDbContext dbctx)

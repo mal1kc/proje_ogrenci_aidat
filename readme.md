@@ -127,6 +127,23 @@
     - in this condition, user related panels but navbar is not shown , logged status is not shown ( not easily detectable)
 - [X] list view links does not carry search parameters or sort parameters to next page (prob easy fix)
 
+## fix done at v0.9.1
+
+- `[X]` done fixed
+- `-`  not reproduced
+
+- [X] add return button to every page to return previous page 
+- [-] fix as siteadmin when you click download at detail from last payment it will give error (expected) when you click return it gives error about authorization (not expected)
+- [X] fix payment db seeder to seed receipts with proper files (that exist)
+
+## fix done at v0.9.2
+
+- [ ] fix makePayment to make payments
+
+## other
+
+- [ ] may may be add edit actions (not something i want)
+
 <!--
 def ad:fmYQiGi4wKESK5YeIO89
 def st:oQsgMTEwcDN7Wm7KGma6

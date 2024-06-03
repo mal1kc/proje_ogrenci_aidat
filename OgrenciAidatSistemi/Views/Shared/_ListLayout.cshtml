@@ -11,7 +11,6 @@
         ViewBag.queryDict = ViewHelpers.GenListQuery(ViewData);
     } *@
 
-    int currentPageIndex = (int)(ViewData["CurrentPageIndex"] ?? 1);
     int totalPages = (int)(ViewData["TotalPages"] ?? 1);
     int totalItems = (int)(ViewData["TotalItems"] ?? 0);
 
@@ -19,6 +18,9 @@
 }
 
 @RenderSection("CreateNewWithTitle", required: false)
+
+<partial name="_MultiErrorMsgBox" />
+<partial name="_Pagination"/>
 
 <form asp-action="@ViewBag.AspAction" asp-controller="@ViewBag.AspController" method="get">
     <div class="row">
@@ -71,50 +73,7 @@ else{
 </div>
 }
 
-<nav aria-label="Page navigation" class="pagination-margin">
-    <ul class="pagination justify-content-center">
-        @if (ViewData["CurrentPageIndex"] != null)
-        {
-
-
-            <li class="page-item @(currentPageIndex <= 1 ? "disabled" : "")">
-                <list-page-link-item asp-action="@ViewBag.AspAction"
-                                     asp-controller="@ViewBag.AspController"
-                                     page-index="1"
-                                     text="First"></list-page-link-item>
-            </li>
-            <li class="page-item @(currentPageIndex <= 1 ? "disabled" : "")">
-                <list-page-link-item asp-action="@ViewBag.AspAction"
-                                     asp-controller="@ViewBag.AspController"
-                                     page-index="@(currentPageIndex - 1)"
-                                     text="Previous"></list-page-link-item>
-            </li>
-
-            @for (int i = 1; i <= totalPages; i++)
-            {
-                <li class="page-item @(i == currentPageIndex ? "active" : "")">
-                    <list-page-link-item asp-action="@ViewBag.AspAction"
-                                         asp-controller="@ViewBag.AspController"
-                                         page-index="@i"
-                                         text="@i"></list-page-link-item>
-                </li>
-            }
-
-            <li class="page-item @(currentPageIndex >= totalPages ? "disabled" : "")">
-                <list-page-link-item asp-action="@ViewBag.AspAction"
-                                     asp-controller="@ViewBag.AspController"
-                                     page-index="@(currentPageIndex + 1)"
-                                     text="Next"></list-page-link-item>
-            </li>
-            <li class="page-item @(currentPageIndex >= totalPages ? "disabled" : "")">
-                <list-page-link-item asp-action="@ViewBag.AspAction"
-                                     asp-controller="@ViewBag.AspController"
-                                     page-index="@totalPages"
-                                     text="Last"></list-page-link-item>
-            </li>
-        }
-    </ul>
-</nav>
+<partial name="_Pagination"/>
 
 @{
     stopwatch.Stop();

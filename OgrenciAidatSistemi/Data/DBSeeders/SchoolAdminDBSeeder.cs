@@ -48,6 +48,12 @@ namespace OgrenciAidatSistemi.Data
             var schoolAdmins = GetSeedData();
             foreach (var schoolAdmin in schoolAdmins)
             {
+                if (
+                    await _context.SchoolAdmins.AnyAsync(a =>
+                        a.EmailAddress == schoolAdmin.EmailAddress
+                    )
+                )
+                    continue;
                 _logger.LogInformation(
                     $"Generated SchoolAdmin: EmailAddress: {schoolAdmin.EmailAddress}, Password: {"RandomPassword_" + schoolAdmin.EmailAddress.Split('@')[0]}"
                 );

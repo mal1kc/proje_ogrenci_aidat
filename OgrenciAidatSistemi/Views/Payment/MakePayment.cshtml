@@ -16,11 +16,6 @@
     </div>
 
     <div class="mb-3">
-        <label for="receipt" class="form-label">Receipt</label>
-        <input type="file" id="receipt" name="Receipt" class="form-control" />
-    </div>
-
-    <div class="mb-3">
         <label for="amount" class="form-label">Amount</label>
         <input readonly type="number" id="amount" name="Amount" value="@Model.Amount" class="form-control" />
     </div>
@@ -34,15 +29,26 @@
                 {
                     continue;
                 }
+                if (field == "Receipt")
+                {
+            <div id="receiptField" class="mb-3">
+                <label for="receipt" class="form-label">Receipt</label>
+                <input type="file" id="receipt" name="Receipt" class="form-control" />
+            </div>
+                    continue;
+                }
 
                 <div class="mb-3">
                     <label for="@field" class="form-label">@field</label>
                     <input type="text" id="@field" name="@field" class="form-control" />
                 </div>
             }
+
         </div>
     }
     <button type="submit" class="btn btn-primary">Make Payment</button>
+    <a asp-action="List" class="btn btn-secondary">Show All Payments</a>
+    <a class="btn btn-secondary" href='javascript:history.go(-1)'>Return to previous page</a>
 </form>
 
 <script>

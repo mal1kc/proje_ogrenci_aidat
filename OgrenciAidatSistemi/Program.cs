@@ -185,6 +185,7 @@ internal class Program
                             configuration: configuration,
                             logger: logger,
                             studentService: studentService,
+                            paymentService: services.GetRequiredService<PaymentService>(),
                             randomSeed: true
                         )
                     ];
@@ -236,7 +237,10 @@ internal class Program
                 pattern: "{controller=Home}/{action=Index}/{id?}"
             );
             // _ = app.UseCors(builder => builder.AllowAnyOrigin());
-            _ = app.UseEndpoints(endpoints => { _ = endpoints.MapControllers(); });
+            _ = app.UseEndpoints(endpoints =>
+            {
+                _ = endpoints.MapControllers();
+            });
 
             // for https
             _ = app.UseForwardedHeaders(

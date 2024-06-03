@@ -39,13 +39,13 @@ namespace OgrenciAidatSistemi.Services
                 var existingPayment = paymentPeriod.Payments?.FirstOrDefault(p =>
                     (
                         paymentPeriod.Occurrence == Occurrence.Monthly
-                            && p.PaymentDate.Month == DateTime.Now.Month
+                            && p.PaymentDate.Month == DateTime.UtcNow.Month
                         || paymentPeriod.Occurrence == Occurrence.Daily
-                            && p.PaymentDate.Date == DateTime.Now.Date
+                            && p.PaymentDate.Date == DateTime.UtcNow.Date
                         || paymentPeriod.Occurrence == Occurrence.Weekly
-                            && p.PaymentDate.GetWeekOfYear() == DateTime.Now.GetWeekOfYear()
+                            && p.PaymentDate.GetWeekOfYear() == DateTime.UtcNow.GetWeekOfYear()
                         || paymentPeriod.Occurrence == Occurrence.Yearly
-                            && p.PaymentDate.Year == DateTime.Now.Year
+                            && p.PaymentDate.Year == DateTime.UtcNow.Year
                     )
                 );
                 if (existingPayment == null)
@@ -162,7 +162,7 @@ namespace OgrenciAidatSistemi.Services
 
 
             // Generate a unique file name for the receipt
-            var fileName = $"Receipt_{payment?.Id}_{DateTime.Now:yyyyMMddHHmmss}.txt";
+            var fileName = $"Receipt_{payment?.Id}_{DateTime.UtcNow:yyyyMMddHHmmss}.txt";
 
             // Write the receipt to a file
             try

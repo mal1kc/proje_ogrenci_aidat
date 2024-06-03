@@ -12,11 +12,14 @@ namespace OgrenciAidatSistemi.Data.DBSeeders
         IConfiguration configuration,
         ILogger logger,
         StudentService studentService,
+        PaymentService paymentService,
         int maxSeedCount = 100,
         bool randomSeed = true
     ) : DbSeeder<AppDbContext, Payment>(context, configuration, logger, maxSeedCount, randomSeed)
     {
         private readonly StudentService _studentService = studentService;
+
+        private readonly PaymentService _payment_service = paymentService;
 
         private readonly Faker faker = new("tr");
 
@@ -310,21 +313,12 @@ namespace OgrenciAidatSistemi.Data.DBSeeders
             entity.PaymentPeriod.UpdatedAt = DateTime.UtcNow;
             if (entity.Receipt.Path == null)
             {
-                _context.Receipts ??= _context.Set<Receipt>();
-                while (true)
-                {
-                    var path = faker.Random.Number(1000, 9999).ToString() + ".pdf";
-                    if (
-                        await _context.Receipts.Where(fp => fp.Path == path).FirstOrDefaultAsync()
-                        == null
-                    )
-                    {
-                        entity.Receipt.Path = path;
-                        break;
-                    }
-                }
+                entity.Receipt = null;
             }
-            entity.Receipt.CreatedBy = entity.Student;
+            else
+            {
+                entity.Receipt.CreatedBy = entity.Student;
+            }
             entity.School = entity.Student.School;
 
             School? possible_school = _context
@@ -349,6 +343,42 @@ namespace OgrenciAidatSistemi.Data.DBSeeders
             try
             {
                 _context.Payments.Add(entity);
+                if (_verboseLogging)
+                    _logger.LogInformation(
+                        $"PaymentDBSeeder: SeedEntityAsync added {entity.Student?.StudentId} {entity.Amount} {entity.PaymentMethod}"
+                    );
+
+                // if is paid add receipt file with
+                if (
+                    entity.Status == PaymentStatus.Paid
+                    && entity.Receipt != null
+                    && entity as PaidPayment != null
+                )
+                {
+                    await _context.SaveChangesAsync();
+                    var receiptFilePath = await _payment_service.GenerateReceipt(
+                        entity as PaidPayment
+                    );
+                    if (receiptFilePath != null && entity.Student != null)
+                    {
+                        receiptFilePath.CreatedBy = entity.Student;
+                        var receipt = Receipt.FromFilePath(receiptFilePath);
+                        receipt.Payment = entity;
+                        entity.Receipt = receipt;
+                        receipt.CreatedBy = entity.Student;
+                        if (entity.Id != 0 && entity.Id != null)
+                        {
+                            entity.Receipt = receipt;
+                            receipt.PaymentId = entity.Id;
+                            receipt.FileHash = receipt.ComputeHash();
+                            await _context.SaveChangesAsync();
+                        }
+                    }
+                    else
+                    {
+                        _logger.LogError("Error while generating receipt");
+                    }
+                }
             }
             catch (Exception e)
             {

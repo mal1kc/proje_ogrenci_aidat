@@ -7,8 +7,7 @@
 <div class="error-container">
   <h1 class="error-title">@ViewBag.Title ?? "Error"</h1>
   <p class="error-message">@ViewBag.Message ?? "An error occurred while processing your request."</p>
-  <a href="/" class="error-link">Go back to Home</a>
-
+  <a href="javascript:history.back()" class="error-link">Go back</a>
 @if (Model.ShowRequestId)
 
 {

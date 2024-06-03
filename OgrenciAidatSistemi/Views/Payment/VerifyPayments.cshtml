@@ -3,10 +3,10 @@
 <div class="container py-3">
     <h1 class="mb-3">Verify Payments</h1>
 
-    @if (ViewData["Error"] != null)
+    @if (TempData["Error"] != null)
     {
         <div class="alert alert-danger">
-            @ViewData["Error"]
+            @TempData["Error"]
         </div>
     }
     @if (ViewData["Success"] != null)
@@ -19,6 +19,8 @@
     <div class="alert alert-info">
         You have @Model.Count(p => p.Status == PaymentStatus.Paid) new payments to verify.
     </div>
+
+    <a class="btn btn-secondary" href='javascript:history.go(-1)'>Return to previous page</a>   
 
     <table class="table table-striped">
         <thead>

@@ -9,7 +9,7 @@
     <h1 class="mb-4">Welcome, @Model.FirstName!</h1>
 
     <div class="row">
-        if (IsThereAnyUnpaidPayment)
+        @if (IsThereAnyUnpaidPayment)
         {
             <div class="alert alert-danger" role="alert">
                 You have unpaid payments. Please pay your debts.

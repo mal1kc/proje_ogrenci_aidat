@@ -91,6 +91,7 @@
 
     <p class="mt-5">
         <a asp-action="PeriodList" asp-controller="Payment" class="btn btn-primary">Show All Periods</a>
+        <a class="btn btn-secondary" href='javascript:history.go(-1)'>Return to previous page</a>
         <form asp-action="PeriodDeleteConfirmed" asp-route-id="@Model.Id" method="post" onsubmit="return confirm('Are you sure you want to delete this item?');">
             <input type="submit" value="Delete" class="btn btn-danger" />
         </form>

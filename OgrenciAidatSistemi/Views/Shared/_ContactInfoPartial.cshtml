@@ -42,10 +42,18 @@
                             }
                         </li>
                         <li class="list-group-item">
-                            <strong>Created At:</strong> @Model.CreatedAt.ToString("g")
+                            <strong>Created At:</strong>
+                            <p class="date">@Html.DisplayFor(model => model.CreatedAt)</p>
                         </li>
                         <li class="list-group-item">
-                            <strong>Updated At:</strong> @Model.UpdatedAt.ToString("g")
+                            <strong>Updated At:</strong> 
+                            @*  g format: MM/dd/yyyy HH:mm
+                                u format: yyyy-MM-dd HH:mm:ssZ
+                                s format: yyyy-MM-ddTHH:mm:ss
+                                o format: yyyy-MM-ddTHH:mm:ss.fffffffK
+                                r format: ddd, dd MMM yyyy HH:mm:ss GMT
+                            *@
+                            <p class="date">@Html.DisplayFor(model => model.UpdatedAt)</p>
                         </li>
                     </ul>
                 </div>
