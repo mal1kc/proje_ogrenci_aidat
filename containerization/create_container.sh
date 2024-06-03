@@ -3,11 +3,12 @@
 set -e
 
 CR_SCRIPT_DIR=$(dirname "$0")
-APP_NAME="ogrenci_aidiat_sys"
+APP_NAME="ogrenci_aidat_sys"
 DOCKERFILE_PATH="$CR_SCRIPT_DIR/Dockerfile"
 BUILD_DIR="$CR_SCRIPT_DIR/.."
 DRY_RUN=0
 EXPORT=0
+LATEST_TAG=0
 CLEAN_BUILD=0
 EXPORT_DIR="$CR_SCRIPT_DIR/exports"
 
@@ -40,6 +41,9 @@ for arg in "$@"; do
     --clean-build)
         CLEAN_BUILD=1
         ;;
+    --latest)
+        LATEST_TAG=1
+        ;;
     *)
         echo "Unknown option: $arg"
         exit 1
@@ -52,6 +56,9 @@ if [ $DRY_RUN -eq 1 ]; then
     echo "Would remove existing image: $APP_NAME:$COMMIT_HASH"
     echo "Would build new image: $APP_NAME:$COMMIT_HASH from $DOCKERFILE_PATH"
     echo "Would tag image: $APP_NAME:$TAG"
+    if [ $LATEST_TAG -eq 1 ]; then
+        echo "Would tag image: $APP_NAME:latest"
+    fi
     if [ $EXPORT -eq 1 ]; then
         echo "Would export image to $EXPORT_DIR/$APP_NAME-$COMMIT_HASH.tar.gz"
     fi
@@ -73,11 +80,18 @@ else
     if $ACTIVE_CONT_RUNTIME_CMD build -t "$APP_NAME:$COMMIT_HASH" -f "$DOCKERFILE_PATH" "$BUILD_DIR"; then
         echo "Tagging image: $APP_NAME:$TAG"
         $ACTIVE_CONT_RUNTIME_CMD tag "$APP_NAME:$COMMIT_HASH" "$APP_NAME:$TAG"
+        if [ $LATEST_TAG -eq 1 ]; then
+            echo "Tagging image: $APP_NAME:latest"
+            $ACTIVE_CONT_RUNTIME_CMD tag "$APP_NAME:$COMMIT_HASH" "$APP_NAME:latest"
+        fi
     fi
 
     if [ $EXPORT -eq 1 ]; then
         echo "Exporting image to $EXPORT_DIR/$APP_NAME-$COMMIT_HASH.tar.gz"
         mkdir -p "$EXPORT_DIR"
         $ACTIVE_CONT_RUNTIME_CMD save "$APP_NAME:$COMMIT_HASH" | gzip >"$EXPORT_DIR/$APP_NAME-$COMMIT_HASH.tar.gz"
+        if [ $LATEST_TAG -eq 1 ]; then
+            $ACTIVE_CONT_RUNTIME_CMD save "$APP_NAME:latest" >"$EXPORT_DIR/$APP_NAME-latest.tar"
+        fi
     fi
 fi

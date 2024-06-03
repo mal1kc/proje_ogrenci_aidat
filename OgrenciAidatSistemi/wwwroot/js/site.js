@@ -45,7 +45,7 @@ window.onload = function () {
     // Get all date elements
     var dateElements = document.getElementsByClassName('date');
 
-    // exammple date 
+    // exammple date
     // 2024-06-02T22:02:01.8149071 if this we add 'Z' to the end to indicate UTC time
     // 2024-06-02T22:02:01.8149071Z this is UTC time
 
