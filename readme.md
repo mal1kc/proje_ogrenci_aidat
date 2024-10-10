@@ -1,5 +1,10 @@
 # öğrenci aidat sistemi projesi 2024
 
+bu proje benim 2023-2024 bahar dönemi proje dersimin projesidir
+> this project is my 2023-2024 spring `project` lecture  project
+
+sadece arşivleme amacıyla github ve benzeri konumlarda bulunabilir
+
 ## özellikler
 
 - admin paneli
